@@ -1,6 +1,6 @@
 import React from "react";
 import { useEffect, useRef, useState } from "react";
-import { fetchRevenueByPeriod } from "../api/statistics/statisticsApi";
+import { fetchRevenueByPeriod } from "../API/statistics/statisticsAPI";
 function niceNumber(value) {
   const exponent = Math.floor(Math.log10(value));
   const fraction = value / Math.pow(10, exponent);

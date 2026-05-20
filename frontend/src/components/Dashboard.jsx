@@ -10,7 +10,7 @@ import {
   fetchAllOrders,
   fetchAllStock,
   fetchAllCustomers,
-} from "../api/statistics/statisticsApi";
+} from "../API/statistics/statisticsAPI";
 
 // Common Components
 import Card from './common/Card';

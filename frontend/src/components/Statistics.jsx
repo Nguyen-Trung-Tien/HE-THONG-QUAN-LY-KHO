@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { fetchTotalRevenue } from "../api/statistics/statisticsApi";
+import { fetchTotalRevenue } from "../API/statistics/statisticsAPI";
 function Statistics() {
   const [timeRange, setTimeRange] = useState("month");
   const [activeTab, setActiveTab] = useState("sales");

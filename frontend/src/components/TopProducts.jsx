@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { fetchTopSellingProducts } from "../api/statistics/statisticsApi";
+import { fetchTopSellingProducts } from "../API/statistics/statisticsAPI";
 
 function TopProducts() {
   const [products, setProducts] = useState([]);
