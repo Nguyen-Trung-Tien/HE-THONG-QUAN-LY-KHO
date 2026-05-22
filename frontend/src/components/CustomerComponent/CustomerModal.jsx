@@ -1,8 +1,11 @@
-import React, { useState } from "react";
-import { FiSave } from "react-icons/fi";
+import React from "react";
 import AddressAutocomplete from "../AddressAutocomplete";
+import Modal from "../common/Modal";
+import Input from "../common/Input";
+import Button from "../common/Button";
 
 export default function CustomerModal({
+  isOpen,
   isEditing,
   form,
   onChange,
@@ -23,80 +26,71 @@ export default function CustomerModal({
     }
   };
 
+  if (!isOpen) return null;
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-      <div className="max-w-lg w-full bg-white p-6 rounded-lg shadow-lg relative">
-        <button
-          type="button"
-          onClick={onClose}
-          className="absolute top-2 right-2 text-xl text-gray-400 hover:text-red-500 transition"
-        >
-          ×
-        </button>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={isEditing ? "Cập nhật khách hàng" : "Thêm khách hàng mới"}
+      size="md"
+      footer={
+        <div className="flex justify-end gap-3 w-full">
+          <Button variant="ghost" onClick={onClose} className="h-11 px-6">Hủy</Button>
+          <Button 
+            variant="primary" 
+            onClick={() => onSubmit({ ...form })}
+            className="h-11 px-8 shadow-primary/30"
+          >
+            {isEditing ? "Lưu thay đổi" : "Thêm khách hàng"}
+          </Button>
+        </div>
+      }
+    >
+      <form
+        className="space-y-6"
+        onSubmit={(e) => {
+          e.preventDefault();
+          onSubmit({
+            ...form,
+            lat: form.lat,
+            lng: form.lng,
+          });
+        }}
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <Input
+            label="Tên khách hàng"
+            name="name"
+            placeholder="Ví dụ: Công ty ABC"
+            value={form.name}
+            onChange={onChange}
+            required
+            containerClassName="col-span-2"
+          />
 
-        <h2 className="text-xl font-bold mb-4 text-center">
-          {isEditing ? "Cập nhật khách hàng" : "Thêm khách hàng"}
-        </h2>
+          <Input
+            label="Email liên hệ"
+            type="email"
+            name="email"
+            placeholder="example@gmail.com"
+            value={form.email}
+            onChange={onChange}
+            required
+          />
 
-        <form
-          className="space-y-4"
-          onSubmit={(e) => {
-            e.preventDefault();
-            onSubmit({
-              ...form,
-              lat: form.lat,
-              lng: form.lng,
-            });
-          }}
-        >
-          <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">
-              Tên khách hàng
-            </label>
-            <input
-              type="text"
-              name="name"
-              placeholder="Tên khách hàng"
-              value={form.name}
-              onChange={onChange}
-              required
-              className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-            />
-          </div>
+          <Input
+            label="Số điện thoại"
+            name="phoneNumber"
+            placeholder="09xx xxx xxx"
+            value={form.phoneNumber}
+            onChange={onChange}
+          />
 
-          {/* Email */}
-          <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">
-              Email
-            </label>
-            <input
-              type="email"
-              name="email"
-              placeholder="Email"
-              value={form.email}
-              onChange={onChange}
-              required
-              className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">
-              Số điện thoại
-            </label>
-            <input
-              type="text"
-              name="phoneNumber"
-              placeholder="Số điện thoại"
-              value={form.phoneNumber}
-              onChange={onChange}
-              className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">
-              Địa chỉ
+          <div className="col-span-2 space-y-2">
+            <label className="text-[10px] font-black text-text-tertiary ml-2 uppercase tracking-widest flex items-center space-x-1.5">
+              <span>Địa chỉ trụ sở</span>
+              <div className="w-1 h-1 rounded-full bg-primary/40" />
             </label>
             <AddressAutocomplete
               value={form.address}
@@ -106,25 +100,8 @@ export default function CustomerModal({
               onSelect={handleSelect}
             />
           </div>
-
-          <div className="flex justify-end gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-5 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
-            >
-              Hủy
-            </button>
-            <button
-              type="submit"
-              className="flex items-center gap-2 px-6 py-2 rounded-lg gradient-bg text-white font-semibold hover:opacity-90 transition-all"
-            >
-              <FiSave size={18} />
-              {isEditing ? "Cập nhật" : "Thêm"}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        </div>
+      </form>
+    </Modal>
   );
 }

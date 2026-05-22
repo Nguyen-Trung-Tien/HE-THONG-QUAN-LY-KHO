@@ -8,8 +8,8 @@ const {
 const { verifyToken, checkRole } = require('../middleware/middleware')
 
 router.get('/', productController.getAllProducts)
-router.post('/create', verifyToken, checkRole(['admin', 'manager']), upload, productController.createProduct)
-router.put('/edit/:id', verifyToken, checkRole(['admin', 'manager']), upload, productController.editProduct)
-router.delete('/delete/:id', verifyToken, checkRole(['admin']), productController.deleteProduct)
+router.post('/create', verifyToken, checkRole(['admin', 'dev']), upload, productController.createProduct)
+router.put('/edit/:id', verifyToken, checkRole(['admin', 'dev']), upload, productController.editProduct)
+router.delete('/delete/:id', verifyToken, checkRole(['admin', 'dev']), productController.deleteProduct)
 
 module.exports = router

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { getInventoryLogs } from "../../API/inventory/inventoryAPI";
 
 function AuditLogs() {
@@ -6,11 +6,7 @@ function AuditLogs() {
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState("");
 
-  useEffect(() => {
-    fetchLogs();
-  }, [filterType]);
-
-  const fetchLogs = async () => {
+  const fetchLogs = useCallback(async () => {
     setLoading(true);
     try {
       const data = await getInventoryLogs(filterType ? { type: filterType } : {});
@@ -20,7 +16,11 @@ function AuditLogs() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filterType]);
+
+  useEffect(() => {
+    fetchLogs();
+  }, [fetchLogs]);
 
   const getTypeLabel = (type) => {
     switch (type) {

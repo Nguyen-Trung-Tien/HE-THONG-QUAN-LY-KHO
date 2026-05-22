@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { toast } from "react-toastify";
 import {
   deleteImportDetail,
@@ -26,7 +26,7 @@ export default function ImportDetails() {
   const [searchQuery, setSearchQuery] = useState("");
   const itemsPerPage = 10;
 
-  const fetchData = async (page = currentPage, search = searchQuery) => {
+  const fetchData = useCallback(async (page = currentPage, search = searchQuery) => {
     try {
       setLoading(true);
       const res = await getAllImportDetails({
@@ -42,28 +42,26 @@ export default function ImportDetails() {
         setDetails([]);
         toast.error("Không lấy được dữ liệu");
       }
-    } catch (err) {
+    } catch {
       toast.error("Lỗi kết nối server");
       setDetails([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, searchQuery, itemsPerPage]);
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [fetchData]);
 
   const handleSearchChange = (e) => {
     const value = e.target.value;
     setSearchQuery(value);
     setCurrentPage(1);
-    fetchData(1, value);
   };
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
-    fetchData(page, searchQuery);
   };
 
   const handleDelete = async () => {
@@ -71,7 +69,7 @@ export default function ImportDetails() {
       await deleteImportDetail(selectedId);
       toast.success("Xóa thành công");
       fetchData();
-    } catch (err) {
+    } catch {
       toast.error("Xóa thất bại");
     } finally {
       setIsDeleteModalOpen(false);
@@ -79,7 +77,7 @@ export default function ImportDetails() {
     }
   };
 
-  const columns = [
+  const columns = useMemo(() => [
     {
       title: 'Mã phiếu',
       key: 'importId',
@@ -110,9 +108,9 @@ export default function ImportDetails() {
       key: 'actions',
       className: 'text-right',
       render: (_, item) => (
-        <div className="flex justify-end space-x-1">
+        <div className="flex justify-end space-x-1 scale-90 origin-right">
           <Button 
-            variant="ghost" size="sm" className="text-rose-600 hover:bg-rose-50 transition-colors"
+            variant="ghost" size="icon" className="text-error hover:bg-error/10"
             onClick={() => {
               if (currentUser.role !== "admin") {
                 toast.warning("Chỉ Admin mới có quyền xóa!");
@@ -121,19 +119,20 @@ export default function ImportDetails() {
               setSelectedId(item.id);
               setIsDeleteModalOpen(true);
             }}
+            title="Xóa"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+            <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
           </Button>
         </div>
       )
     }
-  ];
+  ], [currentUser, setSelectedId, setIsDeleteModalOpen]);
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-textPrimary uppercase tracking-wide">
+          <h2 className="text-xl font-black text-text-primary tracking-tighter uppercase">
             Chi tiết các lần nhập hàng
           </h2>
         </div>
@@ -142,7 +141,7 @@ export default function ImportDetails() {
             placeholder="Tìm kiếm theo tên sản phẩm..."
             value={searchQuery}
             onChange={handleSearchChange}
-            icon={<svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>}
+            leftIcon={<svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>}
           />
         </div>
       </div>

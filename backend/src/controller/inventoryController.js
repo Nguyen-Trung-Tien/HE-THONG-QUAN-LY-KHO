@@ -13,12 +13,12 @@ module.exports = {
       if (!stock) {
         stock = await db.Stock.create({
           productId,
-          quantity: 0,
-          location: location || null,
+          stock: 0,
+          warehouseAddress: location || null,
         });
       }
 
-      const oldQuantity = stock.quantity;
+      const oldQuantity = stock.stock;
       const newQuantity = oldQuantity + quantity;
 
       if (quantity < 0 && newQuantity < 0) {
@@ -27,7 +27,7 @@ module.exports = {
           .json({ message: "Số lượng tồn không đủ để xuất" });
       }
 
-      await stock.update({ quantity: newQuantity, location });
+      await stock.update({ stock: newQuantity, warehouseAddress: location });
 
       await db.InventoryLog.create({
         stockId: stock.id,
@@ -59,8 +59,8 @@ module.exports = {
       if (!stock)
         return res.status(404).json({ message: "Không tìm thấy stock" });
 
-      const oldQuantity = stock.quantity;
-      await stock.update({ quantity: newQuantity });
+      const oldQuantity = stock.stock;
+      await stock.update({ stock: newQuantity });
 
       await db.InventoryLog.create({
         stockId: stock.id,
@@ -84,20 +84,21 @@ module.exports = {
   },
 
   getLogs: async (req, res) => {
-    const { productId, type, from, to } = req.query;
-    const where = {};
-    if (type) where.change_type = type;
-    if (from && to)
-      where.createdAt = { [Op.between]: [new Date(from), new Date(to)] };
-
     try {
+      const { productId, type, from, to, userId } = req.query;
+      const where = {};
+      if (type) where.change_type = type;
+      if (userId) where.userId = userId;
+      if (from && to)
+        where.createdAt = { [Op.between]: [new Date(from), new Date(to)] };
+
       const logs = await db.InventoryLog.findAll({
         where,
         include: [
           {
             model: db.Stock,
             as: "stock",
-            attributes: ["id", "quantity", "productId"],
+            attributes: ["id", "stock", "productId"],
             include: [
               { model: db.Product, as: "product", attributes: ["id", "name"] },
             ],
@@ -112,9 +113,10 @@ module.exports = {
 
       return res.json(result);
     } catch (err) {
+      console.error("Error in getLogs:", err);
       return res
         .status(500)
-        .json({ message: "Lỗi server", error: err.message });
+        .json({ message: "Lỗi server khi lấy lịch sử hoạt động", error: err.message });
     }
   },
 

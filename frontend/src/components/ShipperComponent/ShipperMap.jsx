@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
@@ -98,7 +98,7 @@ function ShipperMap({ shippers = [], focusId }) {
           <h3 className="text-lg font-semibold text-textPrimary">
             Vị trí Shipper
           </h3>
-          <div className="flex space-x-2">
+          <div className="flex gap-x-2">
             <button
               onClick={() => setFilter("all")}
               className={`px-3 py-1 text-sm rounded-md ${
@@ -164,15 +164,15 @@ function ShipperMap({ shippers = [], focusId }) {
           </MapContainer>
         </div>
 
-        <div className="bg-white rounded-md p-2 shadow-sm flex justify-center space-x-6">
-          <div className="flex items-center space-x-2">
-            <div className="w-3 h-3 bg-primary rounded-full"></div>
+        <div className="bg-white rounded-md p-2 shadow-sm flex justify-center gap-x-6">
+          <div className="flex items-center gap-x-2">
+            <div className="size-3 bg-primary rounded-full"></div>
             <span className="text-xs text-textSecondary">
               Sẵn sàng ({availableCount})
             </span>
           </div>
-          <div className="flex items-center space-x-2">
-            <div className="w-3 h-3 bg-accent rounded-full"></div>
+          <div className="flex items-center gap-x-2">
+            <div className="size-3 bg-accent rounded-full"></div>
             <span className="text-xs text-textSecondary">
               Đang giao ({deliveringCount})
             </span>

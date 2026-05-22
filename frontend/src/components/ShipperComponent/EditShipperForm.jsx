@@ -1,13 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { toast } from "react-toastify";
+import AddressAutocomplete from "../AddressAutocomplete";
+import Modal from "../common/Modal";
+import Input from "../common/Input";
+import Button from "../common/Button";
 
-function EditShipperForm({ shipper, onClose, onSubmit }) {
+export default function EditShipperForm({ shipper, onSubmit, onClose }) {
   const [formData, setFormData] = useState({
     name: "",
     phoneNumber: "",
     status: "available",
     address: "",
+    lat: null,
+    lng: null,
   });
+
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -17,6 +23,8 @@ function EditShipperForm({ shipper, onClose, onSubmit }) {
         phoneNumber: shipper.phoneNumber || "",
         status: shipper.status || "available",
         address: shipper.address || "",
+        lat: shipper.lat,
+        lng: shipper.lng,
       });
     }
   }, [shipper]);
@@ -26,118 +34,103 @@ function EditShipperForm({ shipper, onClose, onSubmit }) {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleSelect = (suggest) => {
+    if (suggest?.lat && suggest?.lon) {
+      setFormData((prev) => ({
+        ...prev,
+        address: suggest.display_name,
+        lat: parseFloat(suggest.lat),
+        lng: parseFloat(suggest.lon),
+      }));
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const phoneRegex = /^(0|\+84)[0-9]{9}$/;
-
-    if (!formData.name.trim()) {
-      toast.error("Vui lòng nhập tên shipper");
-      return;
-    }
-
-    if (!formData.phoneNumber.trim()) {
-      toast.error("Vui lòng nhập số điện thoại");
-      return;
-    }
-
-    if (!phoneRegex.test(formData.phoneNumber)) {
-      toast.error(
-        "Số điện thoại không hợp lệ. Vui lòng nhập 10 số, bắt đầu bằng 0 hoặc +84."
-      );
-      return;
-    }
-
     setLoading(true);
     try {
-      const payload = {
-        id: shipper.id,
-        name: formData.name,
-        phoneNumber: formData.phoneNumber,
-        status: formData.status,
-      };
-
       if (onSubmit) {
-        await onSubmit(payload);
+        await onSubmit(formData);
       }
     } catch (err) {
-      console.error("Lỗi khi submit form:", err);
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-30 z-50 flex justify-center items-center">
-      <div className="max-w-md mx-auto bg-white p-6 rounded-lg shadow-lg relative w-full">
-        <button
-          type="button"
-          className="absolute top-2 right-2 text-xl text-gray-400 hover:text-red-500"
-          onClick={onClose}
-        >
-          ×
-        </button>
-        <h2 className="text-xl font-bold mb-4">Cập nhật Shipper</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <input
-              type="text"
-              name="name"
-              placeholder="Tên shipper"
-              value={formData.name}
-              onChange={handleChange}
-              required
-              className="w-full border p-2 rounded "
-            />
-          </div>
+    <Modal
+      isOpen={true}
+      onClose={onClose}
+      title="Cập nhật thông tin Shipper"
+      size="md"
+      footer={
+        <div className="flex justify-end gap-3 w-full">
+          <Button variant="ghost" onClick={onClose} className="h-11 px-6">Hủy</Button>
+          <Button 
+            variant="primary" 
+            onClick={handleSubmit}
+            isLoading={loading}
+            className="h-11 px-8 shadow-primary/30"
+          >
+            Lưu thay đổi
+          </Button>
+        </div>
+      }
+    >
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <Input
+            label="Tên nhân viên giao hàng"
+            name="name"
+            placeholder="Họ và tên"
+            value={formData.name}
+            onChange={handleChange}
+            required
+            containerClassName="col-span-2"
+          />
 
-          <div>
-            <input
-              type="text"
-              name="phoneNumber"
-              placeholder="Số điện thoại"
-              value={formData.phoneNumber}
-              onChange={handleChange}
-              required
-              className="w-full border p-2 rounded "
-            />
-          </div>
+          <Input
+            label="Số điện thoại liên hệ"
+            name="phoneNumber"
+            placeholder="09xx xxx xxx"
+            value={formData.phoneNumber}
+            onChange={handleChange}
+            required
+          />
 
-          <div>
-            <input
-              type="text"
-              name="address"
-              value={formData.address}
-              disabled
-              className="w-full border p-2 rounded bg-gray-100 cursor-not-allowed"
-              placeholder="Địa chỉ"
-            />
-          </div>
-
-          <div>
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-black text-text-tertiary ml-2 uppercase tracking-widest flex items-center space-x-1">
+              <span>Trạng thái</span>
+              <div className="w-1 h-1 rounded-full bg-primary/40" />
+            </label>
             <select
               name="status"
               value={formData.status}
               onChange={handleChange}
-              disabled
-              className="w-full border p-2 rounded bg-gray-100 cursor-not-allowed"
+              className="w-full bg-bg-subtle/30 border border-border/50 text-text-primary text-xs rounded-xl h-11 px-4 outline-none focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold shadow-inner-sm transition-all duration-300"
             >
               <option value="available">Sẵn sàng</option>
-              <option value="delivering">Đang giao</option>
+              <option value="delivering">Đang giao hàng</option>
             </select>
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full px-4 py-2.5 gradient-bg rounded-lg text-sm font-semibold text-white hover:opacity-90 transition-opacity disabled:opacity-50"
-          >
-            {loading ? "Đang cập nhật..." : "Cập nhật shipper"}
-          </button>
-        </form>
-      </div>
-    </div>
+          <div className="col-span-2 space-y-2">
+            <label className="text-[10px] font-black text-text-tertiary ml-2 uppercase tracking-widest flex items-center space-x-1.5">
+              <span>Địa chỉ cư trú hiện tại</span>
+              <div className="w-1 h-1 rounded-full bg-primary/40" />
+            </label>
+            <AddressAutocomplete
+              value={formData.address}
+              onChange={(value) =>
+                setFormData((prev) => ({ ...prev, address: value }))
+              }
+              onSelect={handleSelect}
+            />
+          </div>
+        </div>
+      </form>
+    </Modal>
   );
 }
-
-export default EditShipperForm;

@@ -1,7 +1,9 @@
-import React, { useState, useRef, useEffect } from "react";
-import axios from "axios";
+import React, { useState } from "react";
 import { toast } from "react-toastify";
 import AddressAutocomplete from "../AddressAutocomplete";
+import Modal from "../common/Modal";
+import Input from "../common/Input";
+import Button from "../common/Button";
 
 export default function AddShipperForm({ onSubmit, onClose }) {
   const [formData, setFormData] = useState({
@@ -71,40 +73,67 @@ export default function AddShipperForm({ onSubmit, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-30 z-50 flex justify-center items-center">
-      <div className="max-w-md mx-auto bg-white p-6 rounded-lg shadow-lg relative w-full">
-        <button
-          type="button"
-          className="absolute top-2 right-2 text-xl text-gray-400 hover:text-red-500"
-          onClick={onClose}
-        >
-          ×
-        </button>
-        <h2 className="text-xl font-bold mb-4">Thêm Shipper mới</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <input
-              type="text"
-              name="name"
-              placeholder="Tên shipper"
-              value={formData.name}
+    <Modal
+      isOpen={true}
+      onClose={onClose}
+      title="Thêm Shipper mới"
+      size="md"
+      footer={
+        <div className="flex justify-end gap-3 w-full">
+          <Button variant="ghost" onClick={onClose} className="h-11 px-6">Hủy</Button>
+          <Button 
+            variant="primary" 
+            onClick={handleSubmit}
+            isLoading={loading}
+            className="h-11 px-8 shadow-primary/30"
+          >
+            Thêm shipper
+          </Button>
+        </div>
+      }
+    >
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <Input
+            label="Tên nhân viên giao hàng"
+            name="name"
+            placeholder="Họ và tên"
+            value={formData.name}
+            onChange={handleChange}
+            required
+            containerClassName="col-span-2"
+          />
+
+          <Input
+            label="Số điện thoại liên hệ"
+            name="phoneNumber"
+            placeholder="09xx xxx xxx"
+            value={formData.phoneNumber}
+            onChange={handleChange}
+            required
+          />
+
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-black text-text-tertiary ml-2 uppercase tracking-widest flex items-center space-x-1">
+              <span>Trạng thái</span>
+              <div className="w-1 h-1 rounded-full bg-primary/40" />
+            </label>
+            <select
+              name="status"
+              value={formData.status}
               onChange={handleChange}
-              className="w-full px-3 py-2 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-            />
+              className="w-full bg-bg-subtle/30 border border-border/50 text-text-primary text-xs rounded-xl h-11 px-4 outline-none focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold shadow-inner-sm transition-all duration-300"
+            >
+              <option value="available">Sẵn sàng</option>
+              <option value="delivering">Đang giao hàng</option>
+            </select>
           </div>
 
-          <div>
-            <input
-              type="text"
-              name="phoneNumber"
-              placeholder="Số điện thoại"
-              value={formData.phoneNumber}
-              onChange={handleChange}
-              className="w-full px-3 py-2 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-            />
-          </div>
-
-          <div>
+          <div className="col-span-2 space-y-2">
+            <label className="text-[10px] font-black text-text-tertiary ml-2 uppercase tracking-widest flex items-center space-x-1.5">
+              <span>Địa chỉ thường trú</span>
+              <div className="w-1 h-1 rounded-full bg-primary/40" />
+            </label>
             <AddressAutocomplete
               value={formData.address}
               onChange={(value) =>
@@ -113,28 +142,8 @@ export default function AddShipperForm({ onSubmit, onClose }) {
               onSelect={handleSelect}
             />
           </div>
-
-          <div>
-            <select
-              name="status"
-              value={formData.status}
-              onChange={handleChange}
-              className="w-full px-3 py-2 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-            >
-              <option value="available">Sẵn sàng</option>
-              <option value="delivering">Đang giao</option>
-            </select>
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full px-4 py-2.5 gradient-bg rounded-lg text-sm font-semibold text-white hover:opacity-90 transition-opacity disabled:opacity-50"
-          >
-            {loading ? "Đang thêm..." : "Thêm shipper"}
-          </button>
-        </form>
-      </div>
-    </div>
+        </div>
+      </form>
+    </Modal>
   );
 }

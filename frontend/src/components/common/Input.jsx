@@ -1,41 +1,58 @@
 import React from 'react';
+import { cn } from '../../utils/cn';
 
 const Input = ({ 
-  label, 
-  error, 
-  icon, 
-  className = '', 
-  wrapperClassName = '', 
+  className, 
+  type = 'text', 
+  label,
+  error,
+  leftIcon,
+  rightIcon,
+  containerClassName,
+  ref,
   ...props 
 }) => {
   return (
-    <div className={`flex flex-col space-y-1 ${wrapperClassName}`}>
+    <div className={cn("w-full flex flex-col gap-y-2", containerClassName)}>
       {label && (
-        <label className="text-sm font-semibold text-textPrimary">
-          {label}
+        <label className="text-[10px] font-black text-text-tertiary ml-2 uppercase tracking-[0.15em] flex items-center gap-x-1.5">
+          <span>{label}</span>
+          <div className="size-1 rounded-full bg-primary/40" />
         </label>
       )}
-      <div className="relative">
-        {icon && (
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-textSecondary">
-            {icon}
+      <div className="relative group">
+        {leftIcon && (
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-text-tertiary transition-all duration-300 group-focus-within:text-primary scale-90 group-focus-within:scale-100">
+            {leftIcon}
           </div>
         )}
         <input
-          className={`
-            w-full rounded-lg border border-border bg-white py-2 transition-all duration-200
-            focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary
-            disabled:bg-gray-50 disabled:cursor-not-allowed
-            ${icon ? 'pl-10 pr-4' : 'px-4'}
-            ${error ? 'border-red-500 focus:ring-red-500/30 focus:border-red-500' : ''}
-            ${className}
-          `}
+          type={type}
+          ref={ref}
+          className={cn(
+            'w-full bg-bg-subtle/30 border border-border/50 text-text-primary text-xs rounded-2xl py-3.5 px-5 outline-none transition-all duration-300 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 placeholder:text-text-tertiary/60 font-bold disabled:bg-bg-subtle disabled:opacity-50 disabled:cursor-not-allowed shadow-inner-sm hover:border-border',
+            leftIcon && 'pl-12',
+            rightIcon && 'pr-12',
+            error && 'border-error/50 focus:border-error focus:ring-error/5 bg-error/[0.02]',
+            className
+          )}
           {...props}
         />
+        {rightIcon && (
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 text-text-tertiary transition-all duration-300 group-focus-within:text-primary scale-90 group-focus-within:scale-100">
+            {rightIcon}
+          </div>
+        )}
       </div>
-      {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
+      {error && (
+        <p className="text-[10px] font-black text-error ml-2 animate-in fade-in slide-in-from-top-1 duration-300 uppercase tracking-tight">
+          {error}
+        </p>
+      )}
     </div>
   );
 };
+
+Input.displayName = 'Input';
 
 export default Input;

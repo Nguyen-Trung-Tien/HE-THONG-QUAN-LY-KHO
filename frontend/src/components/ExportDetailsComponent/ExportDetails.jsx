@@ -1,14 +1,22 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import {
   createExportDetail,
   deleteExportDetail,
   fetchExportDetails,
   updateExportDetail,
 } from "../../API/exportDetailsApi/exportDetailsApi";
-import { FiPlus, FiTrash2, FiSearch } from "react-icons/fi";
+import { FiPlus, FiTrash2 } from "react-icons/fi";
 import { toast } from "react-toastify";
 import ConfirmModal from "../common/ConfirmModal";
 import Pagination from "../common/Pagination";
+
+// Common Components
+import Button from '../common/Button';
+import Input from '../common/Input';
+import Card from '../common/Card';
+import Table from '../common/Table';
+import Badge from '../common/Badge';
+import Modal from '../common/Modal';
 
 export default function ExportDetails() {
   const [data, setData] = useState([]);
@@ -28,7 +36,7 @@ export default function ExportDetails() {
   const [totalPages, setTotalPages] = useState(1);
   const itemsPerPage = 10;
 
-  const loadData = async (page = currentPage, searchQuery = search) => {
+  const loadData = useCallback(async (page = currentPage, searchQuery = search) => {
     setLoading(true);
     try {
       const res = await fetchExportDetails({
@@ -41,33 +49,30 @@ export default function ExportDetails() {
         setTotalPages(res.data.totalPages || 1);
         setCurrentPage(res.data.currentPage || 1);
       }
-    } catch (error) {
-      console.error("Lỗi khi lấy dữ liệu:", error);
+    } catch {
       toast.error("Lỗi Server 500");
       setData([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, search, itemsPerPage]);
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
 
   const handleSearchChange = (e) => {
     const value = e.target.value;
     setSearch(value);
     setCurrentPage(1);
-    loadData(1, value);
   };
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
-    loadData(page, search);
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     try {
       const payload = {
         exportId: Number(form.exportId),
@@ -107,268 +112,191 @@ export default function ExportDetails() {
     0
   );
 
+  const columns = useMemo(() => [
+    {
+      title: 'Phiếu xuất',
+      key: 'exportId',
+      render: (id, row) => (
+        <div className="flex flex-col">
+          <span className="font-bold text-primary">ID: {id}</span>
+          <span className="text-[10px] text-text-tertiary font-bold">
+            {row.exportReceiptData?.export_date ? new Date(row.exportReceiptData.export_date).toLocaleDateString("vi-VN") : ""}
+          </span>
+        </div>
+      )
+    },
+    {
+      title: 'Sản phẩm',
+      key: 'StockProductData',
+      render: (prod) => (
+        <div className="flex flex-col">
+          <span className="font-semibold text-textPrimary">{prod?.name || "—"}</span>
+          <span className="text-[10px] text-text-secondary uppercase font-bold tracking-tight">
+            {prod?.type} | {prod?.category}
+          </span>
+        </div>
+      )
+    },
+    {
+      title: 'Số lượng',
+      key: 'quantity',
+      render: (qty, row) => (
+        <span className="font-bold text-text-primary">
+          {qty} <span className="text-[10px] text-text-tertiary font-medium uppercase">{row.StockProductData?.unit}</span>
+        </span>
+      )
+    },
+    {
+      title: 'Thành tiền',
+      key: 'total',
+      render: (_, row) => (
+        <span className="font-black text-primary">
+          {(row.quantity * (row.StockProductData?.price || 0)).toLocaleString("vi-VN")}đ
+        </span>
+      )
+    },
+    {
+      title: 'Thao tác',
+      key: 'actions',
+      className: 'text-right',
+      render: (_, r) => (
+        <div className="flex justify-end space-x-1 scale-90 origin-right">
+          <Button 
+            variant="ghost" size="icon" className="text-primary hover:bg-primary/10"
+            onClick={() => handleEdit(r)}
+            title="Chỉnh sửa"
+          >
+             <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+          </Button>
+          <Button 
+            variant="ghost" size="icon" className="text-error hover:bg-error/10"
+            onClick={() => {
+              setSelectedDetailId(r.id);
+              setIsDeleteModalOpen(true);
+            }}
+            title="Xóa"
+          >
+            <FiTrash2 className="size-4" />
+          </Button>
+        </div>
+      )
+    }
+  ], []);
+
   return (
-    <div className="p-6 bg-blue-50 min-h-screen">
-      <div className="flex flex-col md:flex-row justify-between items-center mb-4 gap-3">
-        <h1 className="text-2xl font-bold text-textPrimary mb-6">
-          Chi tiết phiếu xuất
-        </h1>
-        <div className="flex gap-2 w-full md:w-auto">
-          <div className="relative flex-1 w-full sm:w-80">
-            <FiSearch className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input
-              type="text"
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+        <div>
+          <h2 className="text-xl font-black text-text-primary tracking-tighter">
+            CHI TIẾT PHIẾU XUẤT
+          </h2>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+          <div className="w-full sm:w-80">
+            <Input
               placeholder="Tìm sản phẩm..."
               value={search}
               onChange={handleSearchChange}
-              className="w-full border border-gray-300 rounded-lg px-8 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              leftIcon={<svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>}
             />
           </div>
-          <button
+          <Button
             onClick={() => {
               setForm({ exportId: "", productId: "", quantity: "" });
               setIsEditing(false);
               setShowModal(true);
             }}
-            className="flex items-center gap-2 px-5 py-2 rounded-lg text-white bg-gradient-to-r from-[#00BFFF] to-[#87CEFA] hover:scale-105 transition-transform duration-200"
+            variant="primary"
+            leftIcon={<FiPlus />}
           >
-            <FiPlus className="w-4 h-4" /> Thêm mới
-          </button>
+            Thêm mới
+          </Button>
         </div>
       </div>
-      <div className="bg-white rounded-xl shadow-lg p-6">
-        <div className="mb-4 flex flex-col gap-2">
-          <span className="font-semibold bg-gradient-to-r from-green-400 to-green-600 bg-clip-text text-transparent">
-            Số lượng trang này: {totalQuantity.toLocaleString()} sản phẩm
-          </span>
-          <span className="font-semibold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
-            Doanh thu trang này: {totalRevenue.toLocaleString()} ₫
-          </span>
-        </div>
 
-        <div className="overflow-x-auto rounded-lg border border-gray-200 mb-4">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  ID
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Phiếu xuất
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Sản phẩm
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Số lượng
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Hành động
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {loading ? (
-                <tr>
-                  <td colSpan="5" className="text-center py-6 text-gray-500">
-                    Đang tải...
-                  </td>
-                </tr>
-              ) : data.length === 0 ? (
-                <tr>
-                  <td colSpan="5" className="text-center py-6 text-gray-500">
-                    Không có dữ liệu
-                  </td>
-                </tr>
-              ) : (
-                data.map((item) => (
-                  <tr
-                    key={item.id}
-                    className="hover:bg-gray-50 transition-colors duration-200"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">
-                      {item.id}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
-                      <div className="font-medium text-gray-900">
-                        ID: {item.exportReceiptData?.id || "—"}
-                      </div>
-                      <div className="text-gray-600 text-sm">
-                        Ngày:{" "}
-                        {item.exportReceiptData?.export_date
-                          ? new Date(
-                              item.exportReceiptData.export_date
-                            ).toLocaleDateString("vi-VN")
-                          : "—"}
-                      </div>
-                      <div className="text-gray-600 text-sm">
-                        Lý do: {item.exportReceiptData?.reason || "—"}
-                      </div>
-                      <div className="text-gray-500 text-xs">
-                        Ghi chú: {item.exportReceiptData?.note || "—"}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                      <div className="flex flex-col">
-                        <span className="font-semibold text-gray-900">
-                          {item.StockProductData?.name || "—"}
-                        </span>
-                        <span className="text-gray-600 text-sm">
-                          Loại: {item.StockProductData?.type || "—"} | Giá:{" "}
-                          {Number(
-                            item.StockProductData?.price || 0
-                          ).toLocaleString()}
-                          ₫/{item.StockProductData?.unit || "—"}
-                        </span>
-                        <span className="text-gray-500 text-xs">
-                          Tồn kho: {item.StockProductData?.stock || 0} | Kho:{" "}
-                          {item.StockProductData?.warehouseAddress || "—"}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                      {item.quantity}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                      <div className="flex justify-center space-x-3">
-                        <button
-                          onClick={() => handleEdit(item)}
-                          className="p-1.5 text-blue-600 hover:text-blue-700 transition-all rounded-lg hover:bg-blue-100/50 active:scale-90"
-                          title="Sửa chi tiết"
-                        >
-                          <svg
-                            className="w-5 h-5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                            />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={() => {
-                            setSelectedDetailId(item.id);
-                            setIsDeleteModalOpen(true);
-                          }}
-                          className="p-1 text-rose-600 hover:text-rose-800 transition-colors rounded hover:bg-rose-50"
-                          title="Xóa chi tiết"
-                        >
-                          <FiTrash2 className="w-5 h-5" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+      <div className="flex flex-wrap gap-4 mb-2">
+        <Badge variant="success" className="px-4 py-1.5 shadow-sm">
+          Tổng số lượng: {totalQuantity.toLocaleString()}
+        </Badge>
+        <Badge variant="accent" className="px-4 py-1.5 shadow-sm">
+          Tổng giá trị: {totalRevenue.toLocaleString()}đ
+        </Badge>
+      </div>
 
-        <div className="mt-6 flex justify-center">
+      <Card noPadding>
+        <Table 
+          columns={columns} 
+          data={data} 
+          loading={loading} 
+          emptyMessage="Không có dữ liệu chi tiết xuất"
+        />
+        <div className="px-6 py-4 flex justify-center">
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
             onPageChange={handlePageChange}
           />
         </div>
+      </Card>
 
-        <ConfirmModal
-          isOpen={isDeleteModalOpen}
-          onClose={() => setIsDeleteModalOpen(false)}
-          onConfirm={async () => {
-            try {
-              await deleteExportDetail(selectedDetailId);
-              toast.success("Xóa đơn thành công!");
-              loadData();
-            } catch (error) {
-              console.error("Lỗi khi xóa:", error);
-              toast.error("Xóa không thành công!");
-            }
-          }}
-          title="Xác nhận xóa chi tiết"
-          message="Bạn có chắc chắn muốn xóa chi tiết xuất này? Hành động này không thể hoàn tác."
-        />
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={async () => {
+          try {
+            await deleteExportDetail(selectedDetailId);
+            toast.success("Xóa thành công!");
+            loadData();
+          } catch {
+            toast.error("Xóa không thành công!");
+          }
+          setIsDeleteModalOpen(false);
+        }}
+        title="Xác nhận xóa chi tiết"
+        message="Bạn có chắc chắn muốn xóa chi tiết xuất này? Hành động này không thể hoàn tác."
+      />
 
-        {showModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
-            <div className="bg-white p-6 rounded-2xl shadow-2xl w-96 border border-gray-100">
-              <h3 className="text-xl font-bold text-center text-sky-700 mb-5">
-                {isEditing
-                  ? "Cập nhật chi tiết xuất"
-                  : "Thêm mới chi tiết xuất"}
-              </h3>
-
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="flex flex-col gap-1">
-                  <label className="font-medium text-gray-700">
-                    Mã phiếu xuất
-                  </label>
-                  <input
-                    type="number"
-                    placeholder="Nhập ID phiếu xuất"
-                    value={form.exportId}
-                    onChange={(e) =>
-                      setForm({ ...form, exportId: e.target.value })
-                    }
-                    required
-                    className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-sky-400 transition shadow-sm hover:shadow-md"
-                  />
-                </div>
-
-                <div className="flex flex-col gap-1">
-                  <label className="font-medium text-gray-700">
-                    Mã sản phẩm
-                  </label>
-                  <input
-                    type="number"
-                    placeholder="Nhập ID sản phẩm"
-                    value={form.productId}
-                    onChange={(e) =>
-                      setForm({ ...form, productId: e.target.value })
-                    }
-                    required
-                    className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-sky-400 transition shadow-sm hover:shadow-md"
-                  />
-                </div>
-
-                <div className="flex flex-col gap-1">
-                  <label className="font-medium text-gray-700">Số lượng</label>
-                  <input
-                    type="number"
-                    placeholder="Nhập số lượng"
-                    value={form.quantity}
-                    onChange={(e) =>
-                      setForm({ ...form, quantity: e.target.value })
-                    }
-                    required
-                    className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-sky-400 transition shadow-sm hover:shadow-md"
-                  />
-                </div>
-                <div className="flex justify-end gap-3 mt-4">
-                  <button
-                    type="button"
-                    onClick={() => setShowModal(false)}
-                    className="px-4 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 transition font-medium"
-                  >
-                    Hủy
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#00BFFF] to-[#87CEFA] hover:from-[#009acd] hover:to-[#6cb6ff] text-white font-medium shadow-md transition"
-                  >
-                    {isEditing ? "Cập nhật" : "Thêm mới"}
-                  </button>
-                </div>
-              </form>
-            </div>
+      <Modal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        title={isEditing ? "Cập nhật chi tiết xuất" : "Thêm mới chi tiết xuất"}
+        size="md"
+        footer={
+          <div className="flex justify-end gap-3">
+            <Button variant="ghost" onClick={() => setShowModal(false)}>Hủy</Button>
+            <Button variant="primary" onClick={handleSubmit}>
+              {isEditing ? "Cập nhật" : "Thêm mới"}
+            </Button>
           </div>
-        )}
-      </div>
+        }
+      >
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <Input
+            label="Mã phiếu xuất"
+            type="number"
+            placeholder="Nhập ID phiếu xuất"
+            value={form.exportId}
+            onChange={(e) => setForm({ ...form, exportId: e.target.value })}
+            required
+          />
+          <Input
+            label="Mã sản phẩm"
+            type="number"
+            placeholder="Nhập ID sản phẩm"
+            value={form.productId}
+            onChange={(e) => setForm({ ...form, productId: e.target.value })}
+            required
+          />
+          <Input
+            label="Số lượng"
+            type="number"
+            placeholder="Nhập số lượng"
+            value={form.quantity}
+            onChange={(e) => setForm({ ...form, quantity: e.target.value })}
+            required
+          />
+        </form>
+      </Modal>
     </div>
   );
 }

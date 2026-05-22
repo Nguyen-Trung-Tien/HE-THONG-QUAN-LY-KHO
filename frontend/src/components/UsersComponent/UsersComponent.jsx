@@ -64,10 +64,10 @@ export default function UsersComponent() {
   useEffect(() => loadUsers(), []);
 
   const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
+    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
   const handleFilterChange = (e) => {
-    setFilters({ ...filters, [e.target.name]: e.target.value });
+    setFilters(prev => ({ ...prev, [e.target.name]: e.target.value }));
     setCurrentPage(1);
   };
 
@@ -147,7 +147,7 @@ export default function UsersComponent() {
       key: 'name',
       render: (_, u) => (
         <div className="flex items-center">
-          <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold mr-3">
+          <div className="size-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold mr-3">
             {u.firstName?.[0]}{u.lastName?.[0]}
           </div>
           <div>
@@ -166,18 +166,19 @@ export default function UsersComponent() {
       title: 'Vai trò',
       key: 'role',
       render: (role) => (
-        <Badge variant={role === 'admin' ? 'red' : 'green'}>{role}</Badge>
+        <Badge variant={role === 'admin' ? 'error' : 'success'} size="sm">{role}</Badge>
       )
     },
     {
       title: 'Giới tính',
       key: 'gender',
+      className: 'text-[11px]'
     },
     {
       title: 'Trạng thái',
       key: 'status',
       render: (status) => (
-        <Badge variant={status === 'Hoạt động' ? 'green' : 'red'}>{status}</Badge>
+        <Badge variant={status === 'Hoạt động' ? 'success' : 'error'} size="sm">{status}</Badge>
       )
     },
     {
@@ -185,14 +186,14 @@ export default function UsersComponent() {
       key: 'actions',
       className: 'text-right',
       render: (_, u) => (
-        <div className="flex justify-end space-x-1">
+        <div className="flex justify-end gap-x-0.5 scale-90 origin-right">
           <Button 
-            variant="ghost" size="sm" className="text-blue-600 hover:bg-blue-100/50 hover:text-blue-700 transition-all rounded-lg active:scale-90"
+            variant="ghost" size="icon" className="text-primary hover:bg-primary/10 transition-all"
             onClick={() => handleEdit(u)}
             title="Chỉnh sửa"
           >
             <svg
-              className="w-5 h-5"
+              className="size-4"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -207,13 +208,13 @@ export default function UsersComponent() {
           </Button>
           {u.role !== "admin" && (
             <Button 
-              variant="ghost" size="sm" className="text-rose-600 hover:bg-rose-50 transition-colors"
+              variant="ghost" size="icon" className="text-error hover:bg-error/10 transition-colors"
               onClick={() => {
                 setSelectedUser(u);
                 setIsDeleteModalOpen(true);
               }}
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+              <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
             </Button>
           )}
         </div>
@@ -222,18 +223,19 @@ export default function UsersComponent() {
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+    <div className="flex flex-col gap-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
+      <div className="flex flex-col md:flex-row justify-between items-end gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-textPrimary tracking-tight">
+          <Badge variant="primary" className="mb-1">Nhân sự</Badge>
+          <h1 className="text-xl font-semibold text-text-primary tracking-tighter">
             Quản Lý Nhân Viên
           </h1>
-          <p className="text-textSecondary mt-1">Quản lý tài khoản và phân quyền người dùng trong hệ thống</p>
+          <p className="text-[10px] text-text-secondary font-semibold">Tài khoản và phân quyền người dùng</p>
         </div>
 
         <Button
-          variant="gradient"
-          size="lg"
+          variant="primary"
+          size="md"
           onClick={() => {
             setForm({
               firstName: "", lastName: "", email: "", password: "",
@@ -243,21 +245,21 @@ export default function UsersComponent() {
             setIsEditing(false);
             setIsModalOpen(true);
           }}
-          leftIcon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>}
+          leftIcon={<svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>}
         >
-          Thêm nhân viên mới
+          Thêm nhân viên
         </Button>
       </div>
 
-      <Card>
-        <div className="flex flex-col md:flex-row gap-3 mb-6">
+      <Card className="shadow-soft-xl border-border/50" noPadding>
+        <div className="p-4 flex flex-col md:flex-row gap-3 border-b border-border/40">
           <div className="flex-1">
             <Input
               name="search"
-              placeholder="Tìm kiếm theo tên hoặc email..."
+              placeholder="Tìm kiếm theo tên hoặc email…"
               value={filters.search}
               onChange={handleFilterChange}
-              icon={<svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>}
+              leftIcon={<svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>}
             />
           </div>
           <div className="flex gap-2">
@@ -265,7 +267,7 @@ export default function UsersComponent() {
               name="role"
               value={filters.role}
               onChange={handleFilterChange}
-              className="p-2 border border-border rounded-lg bg-white text-sm focus:ring-2 focus:ring-primary/30 outline-none"
+              className="px-3 py-1.5 border border-border rounded-xl bg-white text-[11px] font-bold focus:ring-2 focus:ring-primary/10 outline-none transition-all"
             >
               <option value="All">Tất cả vai trò</option>
               <option value="admin">Quản lý</option>
@@ -276,7 +278,7 @@ export default function UsersComponent() {
               name="status"
               value={filters.status}
               onChange={handleFilterChange}
-              className="p-2 border border-border rounded-lg bg-white text-sm focus:ring-2 focus:ring-primary/30 outline-none"
+              className="px-3 py-1.5 border border-border rounded-xl bg-white text-[11px] font-bold focus:ring-2 focus:ring-primary/10 outline-none transition-all"
             >
               <option value="All">Tất cả trạng thái</option>
               <option value="Hoạt động">Hoạt động</option>
@@ -285,74 +287,89 @@ export default function UsersComponent() {
           </div>
         </div>
 
-        <Table 
-          columns={columns} 
-          data={currentUsers} 
-          loading={loading} 
-        />
+        <div className="overflow-hidden">
+          <Table 
+            columns={columns} 
+            data={currentUsers} 
+            loading={loading} 
+          />
+        </div>
 
-        <Pagination 
-          currentPage={currentPage} 
-          totalPages={totalPages} 
-          onPageChange={setCurrentPage} 
-        />
+        <div className="p-4 border-t border-border/40 flex justify-center">
+          <Pagination 
+            currentPage={currentPage} 
+            totalPages={totalPages} 
+            onPageChange={setCurrentPage} 
+          />
+        </div>
       </Card>
 
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         title={isEditing ? "Cập nhật nhân viên" : "Thêm nhân viên mới"}
-        size="lg"
+        size="md"
         footer={
-          <div className="flex justify-end gap-3">
-            <Button variant="ghost" onClick={() => setIsModalOpen(false)}>Hủy</Button>
-            <Button variant="gradient" onClick={handleSubmit}>
-              {isEditing ? "Cập nhật" : "Tạo tài khoản"}
+          <div className="flex justify-end gap-3 w-full">
+            <Button variant="ghost" onClick={() => setIsModalOpen(false)} className="h-11 px-6">Hủy</Button>
+            <Button variant="primary" onClick={handleSubmit} className="h-11 px-8 shadow-primary/30">
+              {isEditing ? "Lưu thay đổi" : "Tạo tài khoản"}
             </Button>
           </div>
         }
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-y-6">
           <div className="grid grid-cols-2 gap-4">
-            <Input label="Họ" name="firstName" value={form.firstName} onChange={handleChange} required />
-            <Input label="Tên" name="lastName" value={form.lastName} onChange={handleChange} required />
+            <Input label="Họ" name="firstName" value={form.firstName} onChange={handleChange} required className="h-10" />
+            <Input label="Tên" name="lastName" value={form.lastName} onChange={handleChange} required className="h-10" />
           </div>
           
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {!isEditing && (
-              <Input label="Email" type="email" name="email" value={form.email} onChange={handleChange} required />
+              <Input label="Email" type="email" name="email" value={form.email} onChange={handleChange} required className="h-10" />
             )}
             <Input 
-              label={isEditing ? "Mật khẩu mới (để trống nếu không đổi)" : "Mật khẩu"} 
+              label={isEditing ? "Mật khẩu (để trống nếu không đổi)" : "Mật khẩu"} 
               type="password" name="password" value={form.password} onChange={handleChange} required={!isEditing} 
+              className="h-10"
+              containerClassName={isEditing ? "col-span-2" : ""}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <Input label="Địa chỉ" name="address" value={form.address} onChange={handleChange} />
-            <Input label="Số điện thoại" name="phoneNumber" value={form.phoneNumber} onChange={handleChange} />
+            <Input label="Địa chỉ" name="address" value={form.address} onChange={handleChange} className="h-10" />
+            <Input label="Số điện thoại" name="phoneNumber" value={form.phoneNumber} onChange={handleChange} className="h-10" />
           </div>
 
           <div className="grid grid-cols-3 gap-4">
-            <div className="flex flex-col space-y-1">
-              <label className="text-sm font-semibold text-textPrimary">Vai trò</label>
-              <select name="role" value={form.role} onChange={handleChange} className="w-full p-2 border border-border rounded-lg bg-white outline-none focus:ring-2 focus:ring-primary/30">
+            <div className="flex flex-col gap-y-1.5">
+              <label htmlFor="form-role" className="text-[10px] font-black text-text-tertiary ml-2 uppercase tracking-widest flex items-center gap-x-1">
+                <span>Vai trò</span>
+                <div className="size-1 rounded-full bg-primary/40" />
+              </label>
+              <select id="form-role" name="role" value={form.role} onChange={handleChange} className="w-full bg-bg-subtle/30 border border-border/50 text-text-primary text-xs rounded-xl h-10 px-4 outline-none focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold shadow-inner-sm transition-all duration-300">
                 <option value="admin">Quản lý</option>
                 <option value="Kế toán">Kế toán</option>
                 <option value="Nhân viên">Nhân viên</option>
               </select>
             </div>
-            <div className="flex flex-col space-y-1">
-              <label className="text-sm font-semibold text-textPrimary">Giới tính</label>
-              <select name="gender" value={form.gender} onChange={handleChange} className="w-full p-2 border border-border rounded-lg bg-white outline-none focus:ring-2 focus:ring-primary/30">
+            <div className="flex flex-col gap-y-1.5">
+              <label htmlFor="form-gender" className="text-[10px] font-black text-text-tertiary ml-2 uppercase tracking-widest flex items-center gap-x-1">
+                <span>Giới tính</span>
+                <div className="size-1 rounded-full bg-primary/40" />
+              </label>
+              <select id="form-gender" name="gender" value={form.gender} onChange={handleChange} className="w-full bg-bg-subtle/30 border border-border/50 text-text-primary text-xs rounded-xl h-10 px-4 outline-none focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold shadow-inner-sm transition-all duration-300">
                 <option value="Nam">Nam</option>
                 <option value="Nữ">Nữ</option>
                 <option value="Khác">Khác</option>
               </select>
             </div>
-            <div className="flex flex-col space-y-1">
-              <label className="text-sm font-semibold text-textPrimary">Trạng thái</label>
-              <select name="status" value={form.status} onChange={handleChange} className="w-full p-2 border border-border rounded-lg bg-white outline-none focus:ring-2 focus:ring-primary/30">
+            <div className="flex flex-col gap-y-1.5">
+              <label htmlFor="form-status" className="text-[10px] font-black text-text-tertiary ml-2 uppercase tracking-widest flex items-center gap-x-1">
+                <span>Trạng thái</span>
+                <div className="size-1 rounded-full bg-primary/40" />
+              </label>
+              <select id="form-status" name="status" value={form.status} onChange={handleChange} className="w-full bg-bg-subtle/30 border border-border/50 text-text-primary text-xs rounded-xl h-10 px-4 outline-none focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold shadow-inner-sm transition-all duration-300">
                 <option value="Hoạt động">Hoạt động</option>
                 <option value="Bị khóa">Bị khóa</option>
               </select>

@@ -9,6 +9,12 @@ import OrderDetail from "./OrderDetail";
 import { toast } from "react-toastify";
 import ConfirmModal from "../common/ConfirmModal";
 
+// Common Components
+import Button from '../common/Button';
+import Card from '../common/Card';
+import Badge from '../common/Badge';
+import { cn } from '../../utils/cn';
+
 const WAREHOUSE_LAT = 10.8657;
 const WAREHOUSE_LNG = 106.619;
 
@@ -16,22 +22,22 @@ const STATUS_FLOW = ["pending", "finding_shipper", "shipping", "delivered"];
 
 const ORDER_STATUS = {
   pending: {
-    class: "bg-accent/20 text-accent",
+    variant: "warning",
     text: "Chờ xác nhận",
-    description: "Đơn hàng  đã được tiếp nhận",
+    description: "Đơn hàng đã được tiếp nhận",
   },
   finding_shipper: {
-    class: "bg-purple-100 text-purple-800",
-    text: "Đang tìm shipper...",
-    description: "Hệ thống đang tìm shipper phù hợp",
+    variant: "info",
+    text: "Tìm shipper...",
+    description: "Hệ thống đang tìm shipper",
   },
   shipping: {
-    class: "bg-yellow-100 text-yellow-800",
+    variant: "accent",
     text: "Đang giao",
     description: "Đơn hàng đang trên đường giao",
   },
   delivered: {
-    class: "bg-green-100 text-green-800",
+    variant: "success",
     text: "Đã giao hàng",
     description: "Đã giao thành công",
   },
@@ -57,8 +63,7 @@ const OrderStatus = ({ orders, loading, onOrderChanged }) => {
       await deleteOrder(orderToCancel.id);
       if (onOrderChanged) onOrderChanged();
       toast.success("Đã hủy đơn hàng #" + orderToCancel.orderNumber);
-    } catch (error) {
-      console.error("Error cancelling order:", error);
+    } catch {
       toast.error("Có lỗi khi hủy đơn hàng");
     } finally {
       setIsDeleteModalOpen(false);
@@ -68,17 +73,10 @@ const OrderStatus = ({ orders, loading, onOrderChanged }) => {
 
   const handleFindShipper = async (order) => {
     try {
-      //setLoading(true);
       toast.info("Đang tìm shipper cho đơn #" + order.orderNumber);
-
       await new Promise((resolve) => setTimeout(resolve, 2500));
-
       await updateOrder(order.id, { status: "finding_shipper" });
-
-      const nearestShipper = await findNearestShipper(
-        WAREHOUSE_LAT,
-        WAREHOUSE_LNG
-      );
+      const nearestShipper = await findNearestShipper(WAREHOUSE_LAT, WAREHOUSE_LNG);
 
       if (nearestShipper) {
         await Promise.all([
@@ -95,74 +93,48 @@ const OrderStatus = ({ orders, loading, onOrderChanged }) => {
             lng: WAREHOUSE_LNG,
           }),
         ]);
-
-        toast.success(
-          `Đã gán shipper ${nearestShipper.name} cho đơn hàng #${order.orderNumber}`
-        );
+        toast.success(`Đã gán shipper ${nearestShipper.name} cho đơn #${order.orderNumber}`);
         if (onOrderChanged) onOrderChanged();
       } else {
         await updateOrder(order.id, { status: "pending" });
-        toast.warning(
-          "Không tìm thấy shipper nào sẵn sàng, đơn hàng quay lại hàng chờ."
-        );
+        toast.warning("Không tìm thấy shipper nào sẵn sàng.");
         if (onOrderChanged) onOrderChanged();
       }
-    } catch (error) {
-      console.error("Error finding shipper:", error);
+    } catch {
       toast.error("Có lỗi khi tìm shipper");
       await updateOrder(order.id, { status: "pending" });
       if (onOrderChanged) onOrderChanged();
-    } finally {
-      // setLoading(false);
     }
   };
 
   const handleConfirmDelivery = async (order) => {
     try {
       await Promise.all([
-        updateOrder(order.id, {
-          status: "delivered",
-          deliveredAt: new Date().toISOString(),
+        updateOrder(order.id, { status: "delivered", deliveredAt: new Date().toISOString() }),
+        order.shipperId && updateShipperStatus(order.shipperId, {
+          status: "available",
+          currentOrderId: null,
+          address: order.shippingAddress,
+          lat: order.shippingLat,
+          lng: order.shippingLng,
         }),
-        order.shipperId &&
-          updateShipperStatus(order.shipperId, {
-            status: "available",
-            currentOrderId: null,
-            address: order.shippingAddress,
-            lat: order.shippingLat,
-            lng: order.shippingLng,
-          }),
       ]);
-      toast.success(
-        `Đã xác nhận giao hàng thành công cho đơn #${order.orderNumber}`
-      );
+      toast.success(`Đã giao hàng thành công đơn #${order.orderNumber}`);
       if (onOrderChanged) onOrderChanged();
-    } catch (error) {
-      console.error("Error confirming delivery:", error);
-      toast.error("Có lỗi xảy ra khi xác nhận giao hàng");
+    } catch {
+      toast.error("Lỗi xác nhận giao hàng");
     }
   };
 
   const renderShipperInfo = (order) => {
     if (!order.shipperId || !order.shipper) return null;
     return (
-      <div className="mt-2">
-        <div className="flex items-center">
-          <span className="text-sm text-textSecondary mr-2">Shipper:</span>
-          <span className="font-medium">{order.shipper.name}</span>
-          <span className="mx-2">•</span>
-          <span className="text-sm">{order.shipper.phoneNumber}</span>
+      <div className="mt-2 p-2 bg-bg-subtle rounded-lg border border-border/40">
+        <div className="flex items-center text-[11px] font-bold">
+          <span className="text-text-tertiary mr-2 uppercase tracking-tighter">Shipper:</span>
+          <span className="text-primary mr-2">{order.shipper.name}</span>
+          <span className="text-text-secondary">{order.shipper.phoneNumber}</span>
         </div>
-        {order.shippedAt && (
-          <p className="text-sm text-textSecondary mt-1">
-            Nhận lúc: {new Date(order.shippedAt).toLocaleString("vi-VN")}
-          </p>
-        )}
-        {order.deliveredAt && (
-          <p className="text-sm text-green-600 mt-1">
-            Giao lúc: {new Date(order.deliveredAt).toLocaleString("vi-VN")}
-          </p>
-        )}
       </div>
     );
   };
@@ -172,31 +144,13 @@ const OrderStatus = ({ orders, loading, onOrderChanged }) => {
     return (
       <>
         {order.status === "pending" && (
-          <button
-            onClick={() => handleFindShipper(order)}
-            className="px-4 py-1.5 bg-blue-600 rounded-lg text-sm font-semibold text-white hover:bg-blue-700 transition-colors"
-          >
-            Tìm shipper
-          </button>
+          <Button size="sm" onClick={() => handleFindShipper(order)} className="text-[11px]">Tìm shipper</Button>
         )}
         {order.status === "shipping" && (
-          <button
-            onClick={() => handleConfirmDelivery(order)}
-            className="px-4 py-1.5 bg-green-600 rounded-lg text-sm font-semibold text-white hover:bg-green-700 transition-colors"
-          >
-            Xác nhận giao hàng
-          </button>
+          <Button size="sm" variant="success" onClick={() => handleConfirmDelivery(order)} className="text-[11px]">Xác nhận giao</Button>
         )}
         {canCancel && (
-          <button
-            onClick={() => {
-              setOrderToCancel(order);
-              setIsDeleteModalOpen(true);
-            }}
-            className="px-4 py-1.5 bg-rose-600 rounded-lg text-sm font-semibold text-white hover:bg-rose-700 transition-colors"
-          >
-            Hủy đơn
-          </button>
+          <Button size="sm" variant="danger" onClick={() => { setOrderToCancel(order); setIsDeleteModalOpen(true); }} className="text-[11px]">Hủy đơn</Button>
         )}
       </>
     );
@@ -206,45 +160,31 @@ const OrderStatus = ({ orders, loading, onOrderChanged }) => {
     const steps = ["pending", "finding_shipper", "shipping", "delivered"];
     const currentIndex = steps.indexOf(order.status);
     return (
-      <div className="relative">
-        <div className="flex mb-4">
-          <div className="flex flex-col items-center mr-4">
+      <div className="relative mt-4 mb-2">
+        <div className="flex items-start">
+          <div className="flex flex-col items-center mr-3 pt-1">
             {steps.map((step, index) => {
               const isCompleted = index <= currentIndex;
               return (
                 <React.Fragment key={step}>
-                  <div
-                    className={`w-4 h-4 rounded-full ${
-                      isCompleted ? "bg-accent" : "bg-gray-200"
-                    }`}
-                  ></div>
+                  <div className={cn("w-3 h-3 rounded-full border-2", isCompleted ? "bg-primary border-primary" : "bg-white border-border")}></div>
                   {index < steps.length - 1 && (
-                    <div
-                      className={`w-1 h-12 ${
-                        isCompleted ? "bg-accent" : "bg-gray-200"
-                      } my-1`}
-                    ></div>
+                    <div className={cn("w-0.5 h-8 my-0.5", isCompleted ? "bg-primary" : "bg-border")}></div>
                   )}
                 </React.Fragment>
               );
             })}
           </div>
-          <div className="flex-1">
+          <div className="flex-1 space-y-4">
             {steps.map((step) => {
               const stepInfo = ORDER_STATUS[step] || {};
               const isActive = steps.indexOf(step) <= currentIndex;
               return (
-                <div key={step} className="mb-6 last:mb-0">
-                  <h5
-                    className={`font-semibold ${
-                      isActive ? "text-accent" : "text-textSecondary"
-                    }`}
-                  >
+                <div key={step} className="h-8 flex flex-col justify-center">
+                  <h5 className={cn("text-[11px] font-black leading-tight tracking-tight", isActive ? "text-primary" : "text-text-tertiary")}>
                     {stepInfo.text || step}
                   </h5>
-                  <p className="text-sm text-textSecondary">
-                    {stepInfo.description}
-                  </p>
+                  <p className="text-[10px] text-text-tertiary truncate">{stepInfo.description}</p>
                 </div>
               );
             })}
@@ -256,102 +196,61 @@ const OrderStatus = ({ orders, loading, onOrderChanged }) => {
 
   const filteredOrders =
     filter === "all"
-      ? orders.filter(
-          (order) =>
-            order.status !== "delivered" && order.status !== "cancelled"
-        )
-      : orders.filter(
-          (order) =>
-            order.status === filter &&
-            order.status !== "delivered" &&
-            order.status !== "cancelled"
-        );
+      ? orders.filter((o) => o.status !== "delivered" && o.status !== "cancelled")
+      : orders.filter((o) => o.status === filter && o.status !== "delivered" && o.status !== "cancelled");
 
   return (
-    <div className="bg-card shadow-card rounded-lg overflow-hidden">
-      <div className="p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-lg font-semibold text-textPrimary">
-            Quản lý đơn hàng
-          </h3>
-          <div className="flex space-x-2">
+    <Card 
+      title="Tiến trình đơn hàng"
+      noPadding
+      className="shadow-soft-xl border-border/50"
+      extra={
+        <div className="flex bg-bg-subtle p-0.5 rounded-lg border border-border/50 scale-90">
             {["all", ...STATUS_FLOW].map((status) => (
               <button
                 key={status}
                 onClick={() => setFilter(status)}
-                className={`px-3 py-1 text-sm rounded-md ${
-                  filter === status
-                    ? "gradient-bg text-white"
-                    : "bg-gray-100 text-textSecondary"
-                } hover:opacity-90 transition-opacity`}
+                className={cn(
+                  "px-3 py-1 text-[10px] font-black rounded-md transition-all whitespace-nowrap",
+                  filter === status ? "bg-white text-primary shadow-sm" : "text-text-secondary hover:text-text-primary"
+                )}
               >
-                {status === "all"
-                  ? "Tất cả"
-                  : ORDER_STATUS[status]?.text || status}
+                {status === "all" ? "Tất cả" : ORDER_STATUS[status]?.text || status}
               </button>
             ))}
-          </div>
         </div>
-
+      }
+    >
+      <div className="p-5">
         {loading ? (
-          <div className="text-center py-8 text-gray-400">
-            Đang tải đơn hàng...
-          </div>
+          <div className="text-center py-8 text-[11px] font-bold text-text-tertiary uppercase tracking-widest animate-pulse">Đang tải dữ liệu...</div>
         ) : filteredOrders.length === 0 ? (
-          <div className="text-center py-8 text-gray-400">
-            Không có đơn hàng nào
-          </div>
+          <div className="text-center py-8 text-[11px] font-bold text-text-tertiary uppercase tracking-widest">Không có đơn hàng xử lý</div>
         ) : (
-          <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {filteredOrders.map((order) => {
-              const statusInfo = ORDER_STATUS[order.status] || {
-                class: "bg-gray-100 text-gray-800",
-                text: "Không xác định",
-                description: "",
-              };
-
+              const statusInfo = ORDER_STATUS[order.status] || { variant: "neutral", text: "Không xác định", description: "" };
               return (
-                <div
-                  key={order.id}
-                  className="bg-white rounded-lg border border-border p-4 shadow-sm"
-                >
-                  <div className="flex flex-col md:flex-row justify-between mb-4">
+                <div key={order.id} className="bg-white rounded-xl border border-border/50 p-4 hover:shadow-lg transition-all duration-300">
+                  <div className="flex justify-between items-start mb-3">
                     <div>
                       <div className="flex items-center space-x-2">
-                        <h4 className="font-semibold text-textPrimary">
-                          #{order.orderNumber}
-                        </h4>
-                        <span
-                          className={`px-2 py-1 text-xs rounded-full ${statusInfo.class} font-medium`}
-                        >
-                          {statusInfo.text}
-                        </span>
+                        <h4 className="text-xs font-black text-text-primary tracking-tighter">#{order.orderNumber}</h4>
+                        <Badge variant={statusInfo.variant} size="sm">{statusInfo.text}</Badge>
                       </div>
-                      <p className="text-sm text-textSecondary">
-                        Đặt ngày{" "}
-                        {new Date(order.createdAt).toLocaleDateString("vi-VN")}
-                      </p>
-                      {renderShipperInfo(order)}
+                      <p className="text-[10px] text-text-tertiary font-bold mt-1 uppercase">{new Date(order.createdAt).toLocaleDateString("vi-VN")}</p>
                     </div>
-                    <div className="text-right mt-2 md:mt-0">
-                      <p className="font-semibold text-primary">
-                        {order.total?.toLocaleString()}đ
-                      </p>
-                      <p className="text-sm text-textSecondary">
-                        {order.items?.length || 0} sản phẩm
-                      </p>
+                    <div className="text-right">
+                      <p className="text-xs font-black text-primary">{order.total?.toLocaleString()}đ</p>
+                      <p className="text-[10px] text-text-tertiary font-medium">{order.items?.length || 0} món</p>
                     </div>
                   </div>
-
-                  {renderTimeline(order)}
-
-                  <div className="flex justify-end space-x-3 mt-4 pt-4 border-t border-border">
-                    <button
-                      className="px-4 py-1.5 border border-blue-600 rounded-lg text-sm text-blue-600 hover:bg-blue-50 transition-colors"
-                      onClick={() => setSelectedOrder(order)}
-                    >
-                      Xem chi tiết
-                    </button>
+                  <div className="bg-bg-subtle/50 rounded-lg p-3 border border-border/30">
+                     {renderTimeline(order)}
+                     {renderShipperInfo(order)}
+                  </div>
+                  <div className="flex justify-end space-x-2 mt-4 pt-3 border-t border-border/30">
+                    <Button variant="ghost" size="sm" className="text-[11px]" onClick={() => setSelectedOrder(order)}>Chi tiết</Button>
                     {renderActionButtons(order)}
                   </div>
                 </div>
@@ -359,23 +258,21 @@ const OrderStatus = ({ orders, loading, onOrderChanged }) => {
             })}
           </div>
         )}
-        {selectedOrder && (
-          <OrderDetail
-            order={selectedOrder}
-            onClose={() => setSelectedOrder(null)}
-          />
-        )}
       </div>
+
+      {selectedOrder && (
+        <OrderDetail order={selectedOrder} onClose={() => setSelectedOrder(null)} />
+      )}
 
       <ConfirmModal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleCancelOrder}
-        title="Xác nhận hủy đơn hàng"
-        message={`Bạn có chắc chắn muốn hủy đơn hàng #${orderToCancel?.orderNumber}?`}
+        title="Xác nhận hủy"
+        message={`Hủy đơn #${orderToCancel?.orderNumber}?`}
         confirmText="Hủy đơn"
       />
-    </div>
+    </Card>
   );
 };
 export default OrderStatus;

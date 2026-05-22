@@ -1,8 +1,9 @@
-import React, { useRef, useState, useCallback,useEffect } from "react";
+import React, { useState, useCallback,useEffect } from "react";
 import { getAllOrders } from "../../API/orders/ordersApi";
 import OrderTable from "./OrderTable";
 import OrderStatus from "./OrderStatus";
 import OrderWizard from "./OrderWizard";
+import Badge from "../common/Badge";
 
 function Orders() {
   const [orders, setOrders] = useState([]);
@@ -28,12 +29,13 @@ function Orders() {
   };
 
   return (
-    <div className='space-y-6'>
+    <div className='space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500'>
       <div>
-        <h1 className='text-3xl font-bold text-textPrimary tracking-tight'>
+        <Badge variant="primary" className="mb-1">Giao dịch</Badge>
+        <h1 className='text-xl font-black text-text-primary tracking-tighter'>
           Quản lý đơn hàng
         </h1>
-        <p className="text-textSecondary mt-1">Theo dõi và xử lý các đơn hàng trong hệ thống</p>
+        <p className="text-[10px] text-text-secondary font-semibold">Theo dõi và xử lý các đơn hàng</p>
       </div>
 
       {!showWizard && (

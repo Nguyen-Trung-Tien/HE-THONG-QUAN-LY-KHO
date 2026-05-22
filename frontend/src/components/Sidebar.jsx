@@ -1,133 +1,260 @@
-import { NavLink } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { NavLink } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { useTranslation } from "../i18n/useTranslation";
 
-function Sidebar() {
-	const currentUser = useSelector((state) => state.user.currentUser);
-	const menuItems = [
-		{
-			id: 'dashboard',
-			path: '/',
-			name: 'Tổng quan',
-			icon: (
-				<svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-					<path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'></path>
-				</svg>
-			),
-		},
-		currentUser?.role === 'admin' && {
-			id: 'users',
-			path: '/users',
-			name: 'Nhân viên',
-			icon: (
-				<svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-					<path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' />
-				</svg>
-			),
-		},
-		{
-			id: 'products',
-			path: '/products',
-			name: 'Sản phẩm',
-			icon: (
-				<svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-					<path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'></path>
-				</svg>
-			),
-		},
-		{
-			id: 'inventory',
-			path: '/inventory',
-			name: 'Tồn kho',
-			icon: (
-				<svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-					<path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2'></path>
-				</svg>
-			),
-		},
-		{
-			id: 'customer',
-			path: '/customer',
-			name: 'Khách hàng',
-			icon: (
-				<svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-					<path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z'></path>
-				</svg>
-			),
-		},
-		{
-			id: 'suppliers',
-			path: '/suppliers',
-			name: 'Nhà cung cấp',
-			icon: (
-				<svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-					<path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' />
-				</svg>
-			),
-		},
-		{
-			id: 'orders',
-			path: '/orders',
-			name: 'Đơn hàng',
-			icon: (
-				<svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-					<path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z'></path>
-				</svg>
-			),
-		},
-		{
-			id: 'shippers',
-			path: '/shippers',
-			name: 'Shipper',
-			icon: (
-				<svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-					<path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M13 10V3L4 14h7v7l9-11h-7z'></path>
-				</svg>
-			),
-		},
-		{
-			id: 'WarehouseManagement',
-			path: '/WarehouseManagement',
-			name: 'Nhập hóa đơn',
-			icon: (
-				<svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-					<path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' />
-				</svg>
-			),
-		},
-	].filter(Boolean);
+function Sidebar({ onClose }) {
+  const { t } = useTranslation();
+  const currentUser = useSelector((state) => state.user.currentUser);
+  const menuItems = [
+    {
+      id: "dashboard",
+      path: "/",
+      name: t('dashboard'),
+      icon: (
+        <svg
+          className="size-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+          ></path>
+        </svg>
+      ),
+    },
+    (currentUser?.role === "admin" || currentUser?.role === "dev") && {
+      id: "stats",
+      path: "/stats",
+      name: t('statistics'),
+      icon: (
+        <svg
+          className="size-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+          />
+        </svg>
+      ),
+    },
+    (currentUser?.role === "admin" || currentUser?.role === "dev") && {
+      id: "users",
+      path: "/users",
+      name: t('users'),
+      icon: (
+        <svg
+          className="size-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+          />
+        </svg>
+      ),
+    },
+    {
+      id: "products",
+      path: "/products",
+      name: t('products'),
+      icon: (
+        <svg
+          className="size-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+          ></path>
+        </svg>
+      ),
+    },
+    {
+      id: "inventory",
+      path: "/inventory",
+      name: t('inventory'),
+      icon: (
+        <svg
+          className="size-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+          ></path>
+        </svg>
+      ),
+    },
+    {
+      id: "customer",
+      path: "/customer",
+      name: t('customers'),
+      icon: (
+        <svg
+          className="size-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
+          ></path>
+        </svg>
+      ),
+    },
+    {
+      id: "suppliers",
+      path: "/suppliers",
+      name: t('suppliers'),
+      icon: (
+        <svg
+          className="size-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+          />
+        </svg>
+      ),
+    },
+    {
+      id: "orders",
+      path: "/orders",
+      name: t('orders'),
+      icon: (
+        <svg
+          className="size-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+          ></path>
+        </svg>
+      ),
+    },
+    {
+      id: "shippers",
+      path: "/shippers",
+      name: t('shippers'),
+      icon: (
+        <svg
+          className="size-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M13 10V3L4 14h7v7l9-11h-7z"
+          ></path>
+        </svg>
+      ),
+    },
+    {
+      id: "WarehouseManagement",
+      path: "/WarehouseManagement",
+      name: t('import_receipt'),
+      icon: (
+        <svg
+          className="size-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+          />
+        </svg>
+      ),
+    },
+  ].filter(Boolean);
 
-	return (
-		<div className='flex flex-col h-full w-full py-4'>
-			<nav className='flex-1 px-3 space-y-1 overflow-y-auto custom-scrollbar'>
-				{menuItems.map((item) => (
-					<NavLink
-						key={item.id}
-						to={item.path}
-						className={({ isActive }) =>
-							`flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 group ${
-								isActive 
-									? 'bg-primary text-white shadow-lg shadow-primary/30' 
-									: 'text-textSecondary hover:bg-primaryLight/10 hover:text-primary'
-							}`
-						}
-					>
-						<span className='mr-3 transition-transform duration-200 group-hover:scale-110'>
-							{item.icon}
-						</span>
-						<span>{item.name}</span>
-					</NavLink>
-				))}
-			</nav>
-      
-      <div className="mt-auto px-4 pt-4 border-t border-border">
-        <div className="bg-primaryLight/5 rounded-2xl p-4 flex flex-col items-center text-center">
-          <p className="text-xs text-textSecondary mb-2">Version 2.0</p>
-          <div className="w-8 h-1 bg-primary rounded-full mb-1"></div>
-          <p className="text-[10px] text-textSecondary italic">Quản lý hiệu quả hơn</p>
+  return (
+    <div className="flex flex-col size-full py-5 bg-gradient-to-b from-white dark:from-dark-card to-bg-subtle/20 dark:to-dark-bg/20">
+      <div className="px-5 mb-6 flex items-center gap-x-2">
+        <div className="w-1 h-3.5 bg-primary rounded-full" />
+        <h2 className="text-[9px] font-semibold text-text-tertiary dark:text-dark-text-tertiary uppercase tracking-[0.2em]">
+          Danh mục
+        </h2>
+      </div>
+      <nav className="flex-1 px-3 flex flex-col gap-y-1 overflow-y-auto custom-scrollbar scroll-smooth">
+        {menuItems.map((item) => (
+          <NavLink
+            key={item.id}
+            to={item.path}
+            onClick={() => window.innerWidth < 1024 && onClose?.()}
+            className={({ isActive }) =>
+              `flex items-center px-3.5 py-2.5 text-[11px] font-black rounded-xl transition-all duration-300 group relative ${
+                isActive
+                  ? "bg-primary text-white shadow-lg shadow-primary/30 scale-[1.02] z-10 active"
+                  : "text-text-tertiary dark:text-dark-text-tertiary hover:bg-white dark:hover:bg-dark-card hover:text-primary hover:shadow-sm hover:translate-x-0.5"
+              }`
+            }
+          >
+            <span className="mr-3 transition-all duration-300 group-hover:scale-110 scale-90">
+              {item.icon}
+            </span>
+            <span className="tracking-tight uppercase">{item.name}</span>
+            {/* Active Indicator Dot */}
+            <div className="absolute right-3 size-1 rounded-full bg-white opacity-0 transition-opacity duration-300 group-[.active]:opacity-100 shadow-sm" />
+          </NavLink>
+        ))}
+      </nav>
+
+      <div className="mt-auto px-3 pt-5 border-t border-border/40 dark:border-white/5">
+        <div className="bg-white/50 dark:bg-dark-card/50 backdrop-blur-sm rounded-2xl p-4 border border-border/50 dark:border-white/5 relative overflow-hidden group hover:shadow-md transition-all duration-500">
+          <p className="text-[8px] font-black text-primary uppercase tracking-[0.2em] mb-1 relative z-10 truncate">
+            {currentUser?.systemName || "Smart WMS"}
+          </p>
+          <div className="flex items-center justify-between relative z-10">
+            <span className="text-[9px] font-black text-text-tertiary dark:text-dark-text-tertiary tracking-widest">
+              V3.0.0
+            </span>
+            <div className="size-1.5 rounded-full bg-success animate-pulse shadow-sm shadow-success/20"></div>
+          </div>
         </div>
       </div>
-		</div>
-	);
+    </div>
+  );
 }
 
 export default Sidebar;

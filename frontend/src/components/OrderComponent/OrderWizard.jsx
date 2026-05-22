@@ -146,7 +146,7 @@ function OrderWizard({ onOrderCreated }) {
       payment: "cash",
     });
   if (onOrderCreated) onOrderCreated();
-  } catch (_err) {
+  } catch {
   toast.error("Tạo đơn hàng thất bại!");
   }
   };

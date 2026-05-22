@@ -1,4 +1,5 @@
 import React from 'react';
+import { cn } from '../../utils/cn';
 
 const Pagination = ({ 
   currentPage, 
@@ -47,44 +48,57 @@ const Pagination = ({
   const pages = paginationRange();
 
   return (
-    <div className={`flex items-center justify-center space-x-2 mt-6 ${className}`}>
+    <div className={cn("flex items-center justify-center space-x-1 sm:space-x-1.5 mt-4", className)}>
       <button
-        onClick={() => onPageChange(currentPage - 1)}
+        onClick={(e) => {
+          e.preventDefault();
+          onPageChange(currentPage - 1);
+        }}
         disabled={currentPage === 1}
-        className="p-2 rounded-lg border border-border bg-white text-textSecondary hover:bg-primaryLight/10 hover:text-primary disabled:opacity-50 disabled:hover:bg-white disabled:hover:text-textSecondary transition-all"
+        className="p-1.5 sm:p-2 rounded-lg border border-border/60 bg-white text-text-tertiary hover:bg-primary/5 hover:text-primary hover:border-primary/30 disabled:opacity-30 disabled:hover:bg-white disabled:hover:text-text-tertiary transition-all duration-300 active:scale-90"
       >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+        <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M15 19l-7-7 7-7" />
         </svg>
       </button>
 
-      {pages.map((page, index) => (
-        <React.Fragment key={index}>
-          {page === '...' ? (
-            <span className="px-3 py-1 text-textSecondary">...</span>
-          ) : (
-            <button
-              onClick={() => onPageChange(page)}
-              className={`
-                px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200
-                ${currentPage === page 
-                  ? 'gradient-bg text-white shadow-md scale-105' 
-                  : 'bg-white border border-border text-textSecondary hover:bg-primaryLight/10 hover:text-primary'}
-              `}
-            >
-              {page}
-            </button>
-          )}
-        </React.Fragment>
-      ))}
+      <div className="flex items-center space-x-1">
+        {pages.map((page, index) => (
+          <React.Fragment key={index}>
+            {page === '...' ? (
+              <span className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-text-tertiary text-[10px] font-black">
+                •••
+              </span>
+            ) : (
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  onPageChange(page);
+                }}
+                className={cn(
+                  "w-7 h-7 sm:w-8 sm:h-8 rounded-lg text-[10px] font-black transition-all duration-300 flex items-center justify-center uppercase tracking-tighter",
+                  currentPage === page 
+                    ? "bg-primary text-white shadow-md shadow-primary/30 scale-105 z-10" 
+                    : "bg-white border border-border/60 text-text-secondary hover:bg-primary/5 hover:text-primary active:scale-90"
+                )}
+              >
+                {page}
+              </button>
+            )}
+          </React.Fragment>
+        ))}
+      </div>
 
       <button
-        onClick={() => onPageChange(currentPage + 1)}
+        onClick={(e) => {
+          e.preventDefault();
+          onPageChange(currentPage + 1);
+        }}
         disabled={currentPage === totalPages}
-        className="p-2 rounded-lg border border-border bg-white text-textSecondary hover:bg-primaryLight/10 hover:text-primary disabled:opacity-50 disabled:hover:bg-white disabled:hover:text-textSecondary transition-all"
+        className="p-1.5 sm:p-2 rounded-lg border border-border/60 bg-white text-text-tertiary hover:bg-primary/5 hover:text-primary hover:border-primary/30 disabled:opacity-30 disabled:hover:bg-white disabled:hover:text-text-tertiary transition-all duration-300 active:scale-90"
       >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+        <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7" />
         </svg>
       </button>
     </div>

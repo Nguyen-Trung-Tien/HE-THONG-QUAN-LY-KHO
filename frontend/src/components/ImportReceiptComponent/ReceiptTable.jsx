@@ -1,15 +1,21 @@
 import React from "react";
 import Table from "../common/Table";
 import Button from "../common/Button";
+import Badge from "../common/Badge";
+import { FiTrash2 } from "react-icons/fi";
 
 export default function ReceiptTable({
   receipts,
   handleEdit,
   handleDelete,
-  CURRENCY_UNIT,
   loading,
 }) {
   const columns = [
+    {
+      title: 'Mã',
+      key: 'id',
+      className: 'w-16 text-center font-bold text-primary',
+    },
     {
       title: 'Ngày nhập',
       key: 'import_date',
@@ -19,32 +25,30 @@ export default function ReceiptTable({
       title: 'Người nhập',
       key: 'userData',
       render: (user, row) => (
-        <span className="font-medium text-textPrimary">
-          {user ? `${user.firstName} ${user.lastName}`.trim() || user.email : `ID ${row.userId}`}
-        </span>
+        <div className="flex flex-col">
+          <span className="font-semibold text-textPrimary">
+            {user ? `${user.firstName} ${user.lastName}`.trim() || user.email : `ID ${row.userId}`}
+          </span>
+          <span className="text-[10px] text-text-tertiary font-bold uppercase">{user?.role}</span>
+        </div>
       )
     },
     {
       title: 'Nhà cung cấp',
       key: 'supplierData',
-      render: (sup, row) => sup?.name || `ID ${row.supplierId}`
-    },
-    {
-      title: 'Ghi chú',
-      key: 'note',
-      render: (val) => <span className="text-xs italic text-textSecondary">{val || "-"}</span>
+      render: (sup) => <span className="font-medium text-textPrimary truncate max-w-[120px] inline-block">{sup?.name || "N/A"}</span>
     },
     {
       title: 'Sản phẩm',
       key: 'importDetailData',
       render: (details) => (
-        <div className="max-h-32 overflow-y-auto space-y-1">
-          {details?.map((d, i) => (
-            <div key={i} className="text-[10px] bg-gray-50 p-1 rounded border border-gray-100">
-              <span className="font-bold text-primary">{d.StockProductData?.name}</span>
-              <span className="ml-1 text-textSecondary">x{d.quantity} {d.StockProductData?.unit}</span>
-            </div>
+        <div className="flex flex-wrap gap-1">
+          {details?.slice(0, 2).map((d, i) => (
+            <Badge key={i} variant="info" size="sm">
+              {d.StockProductData?.name} (x{d.quantity})
+            </Badge>
           ))}
+          {details?.length > 2 && <Badge variant="neutral" size="sm">+{details.length - 2}</Badge>}
         </div>
       )
     },
@@ -53,7 +57,7 @@ export default function ReceiptTable({
       key: 'total',
       render: (_, row) => {
         const total = row.importDetailData?.reduce((sum, d) => sum + d.quantity * d.price, 0) || 0;
-        return <span className="font-bold text-primary">{total.toLocaleString("vi-VN")} {CURRENCY_UNIT}</span>
+        return <span className="font-black text-primary">{total.toLocaleString("vi-VN")}đ</span>
       }
     },
     {
@@ -61,14 +65,14 @@ export default function ReceiptTable({
       key: 'actions',
       className: 'text-right',
       render: (_, r) => (
-        <div className="flex justify-end space-x-1">
+        <div className="flex justify-end space-x-1 scale-90 origin-right">
           <Button 
-            variant="ghost" size="sm" className="text-blue-600 hover:bg-blue-100/50 hover:text-blue-700 transition-all rounded-lg active:scale-90"
+            variant="ghost" size="icon" className="text-primary hover:bg-primary/10"
             onClick={() => handleEdit(r)}
             title="Chỉnh sửa"
           >
             <svg
-              className="w-5 h-5"
+              className="size-4"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -82,10 +86,11 @@ export default function ReceiptTable({
             </svg>
           </Button>
           <Button 
-            variant="ghost" size="sm" className="text-rose-600 hover:bg-rose-50 transition-colors"
+            variant="ghost" size="icon" className="text-error hover:bg-error/10"
             onClick={() => handleDelete(r.id)}
+            title="Xóa"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+            <FiTrash2 className="size-4" />
           </Button>
         </div>
       )

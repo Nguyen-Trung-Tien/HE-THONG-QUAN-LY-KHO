@@ -1,6 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const statisticsController = require('../controller/statisticsController');
+const { verifyToken, checkRole } = require('../middleware/middleware');
+
+router.use(verifyToken);
+router.use(checkRole(['admin', 'dev']));
 
 router.get('/revenue', statisticsController.getTotalRevenue);
 router.get('/general', statisticsController.getGeneralStats);

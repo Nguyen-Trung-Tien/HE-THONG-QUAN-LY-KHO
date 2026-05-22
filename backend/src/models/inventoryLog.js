@@ -39,12 +39,20 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: "SET NULL"
       },
       change_type: {
-        type: DataTypes.ENUM("create", "update", "delete", "import", "export"),
+        type: DataTypes.ENUM("CREATE", "UPDATE", "DELETE", "IMPORT", "EXPORT", "ADJUST"),
         allowNull: false
       },
       quantity: {
         type: DataTypes.INTEGER,
         allowNull: false
+      },
+      qtyBefore: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+      },
+      qtyAfter: {
+        type: DataTypes.INTEGER,
+        allowNull: true
       },
       note: {
         type: DataTypes.STRING,
@@ -54,7 +62,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       modelName: "InventoryLog",
-      tableName: "inventory_logs",
+      tableName: "InventoryLog", // Match migration table name
       timestamps: true
     }
   );

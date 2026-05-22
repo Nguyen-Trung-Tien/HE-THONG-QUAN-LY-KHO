@@ -88,24 +88,57 @@ const updateImportReceipt = async (id, data) => {
   const { details, ...receiptData } = data;
   const t = await db.sequelize.transaction();
   try {
+    // 1. Cập nhật thông tin chung của phiếu nhập
     await db.ImportReceipts.update(receiptData, {
       where: { id },
       transaction: t,
     });
 
     if (details) {
+      // 2. Lấy thông tin chi tiết cũ để hoàn tác số lượng tồn kho
+      const oldDetails = await db.ImportDetails.findAll({
+        where: { importId: id },
+        transaction: t,
+      });
+
+      for (const oldItem of oldDetails) {
+        const stock = await db.Stock.findByPk(oldItem.productId, { transaction: t });
+        if (stock) {
+          // Trừ bớt số lượng cũ đã nhập
+          await stock.decrement("stock", { by: Number(oldItem.quantity), transaction: t });
+        }
+      }
+
+      // 3. Xóa chi tiết cũ
       await db.ImportDetails.destroy({
         where: { importId: id },
         transaction: t,
       });
-      const newDetails = details.map((item) => ({ importId: id, ...item }));
-      await db.ImportDetails.bulkCreate(newDetails, { transaction: t });
+
+      // 4. Tạo chi tiết mới và cập nhật tồn kho mới
+      const detailData = details.map((item) => ({ 
+        importId: id, 
+        productId: Number(item.productId),
+        quantity: Number(item.quantity),
+        price: String(item.price)
+      }));
+      
+      await db.ImportDetails.bulkCreate(detailData, { transaction: t });
+
+      for (const newItem of details) {
+        const stock = await db.Stock.findByPk(newItem.productId, { transaction: t });
+        if (stock) {
+          // Cộng thêm số lượng mới nhập
+          await stock.increment("stock", { by: Number(newItem.quantity), transaction: t });
+        }
+      }
     }
 
     await t.commit();
     return await getImportReceiptById(id);
   } catch (err) {
     await t.rollback();
+    console.error("Update Import Receipt Error:", err);
     throw err;
   }
 };

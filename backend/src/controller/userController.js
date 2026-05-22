@@ -9,9 +9,13 @@ const handleCreateNewUser = async (req, res) => {
   return res.status(200).json(message);
 };
 
+const UAParser = require("ua-parser-js");
+
 const handleLoginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
+    const userAgent = req.headers["user-agent"];
+    const ip = req.ip || req.connection.remoteAddress;
 
     if (!email || !password) {
       return res.status(400).json({
@@ -26,6 +30,25 @@ const handleLoginUser = async (req, res) => {
       return res.status(401).json({
         errCode: userData.errCode,
         message: userData.errMessage,
+      });
+    }
+
+    // Check for 2FA or PIN
+    if (userData.user.is2FAEnabled) {
+      return res.status(200).json({
+        errCode: 0,
+        requires2FA: true,
+        email: userData.user.email,
+        message: "Yêu cầu mã xác thực 2 lớp",
+      });
+    }
+
+    if (userData.user.isPinEnabled) {
+      return res.status(200).json({
+        errCode: 0,
+        requiresPIN: true,
+        email: userData.user.email,
+        message: "Yêu cầu mã PIN bảo mật",
       });
     }
 
@@ -49,16 +72,24 @@ const handleLoginUser = async (req, res) => {
       { expiresIn: "7d" }
     );
 
-    await db.User.update(
-      { refresh_token: refresh_token },
-      { where: { id: userData.user.id } }
-    );
+    // Record session
+    const parser = new UAParser(userAgent);
+    const device = `${parser.getBrowser().name} / ${parser.getOS().name}`;
+
+    await db.Session.create({
+      userId: userData.user.id,
+      refreshToken: refresh_token,
+      device: device,
+      ipAddress: ip,
+      location: "Vietnam",
+      lastActive: new Date(),
+    });
 
     res.cookie("refresh_token", refresh_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "Strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     return res.status(200).json({
@@ -128,17 +159,19 @@ const handleRefreshToken = async (req, res) => {
       });
     }
 
-    const user = await db.User.findOne({ where: { refresh_token } });
-    if (!user) {
+    const session = await db.Session.findOne({ where: { refreshToken: refresh_token } });
+    if (!session) {
       return res.status(403).json({
         errCode: 2,
-        message: "Token không hợp lệ hoặc đã bị vô hiệu hóa"
+        message: "Phiên làm việc không hợp lệ"
       });
     }
 
     try {
       const decoded = jwt.verify(refresh_token, process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET);
-      if (user.id !== decoded.id) {
+      const user = await db.User.findByPk(decoded.id);
+
+      if (!user || user.id !== session.userId) {
         return res.status(403).json({
           errCode: 3,
           message: "Xác thực token thất bại"
@@ -156,7 +189,6 @@ const handleRefreshToken = async (req, res) => {
         { expiresIn: "15m" }
       );
 
-      // Optional: Refresh token rotation
       const newRefreshToken = jwt.sign(
         {
           id: user.id,
@@ -168,10 +200,10 @@ const handleRefreshToken = async (req, res) => {
         { expiresIn: "7d" }
       );
 
-      await db.User.update(
-        { refresh_token: newRefreshToken },
-        { where: { id: user.id } }
-      );
+      await session.update({
+        refreshToken: newRefreshToken,
+        lastActive: new Date()
+      });
 
       res.cookie("refresh_token", newRefreshToken, {
         httpOnly: true,
@@ -185,8 +217,7 @@ const handleRefreshToken = async (req, res) => {
         access_token: newAccessToken,
       });
     } catch (err) {
-      // If refresh token is expired, clear it from DB and cookie
-      await db.User.update({ refresh_token: null }, { where: { id: user.id } });
+      await db.Session.destroy({ where: { refreshToken: refresh_token } });
       res.clearCookie("refresh_token", {
         httpOnly: true,
         sameSite: "Strict",
@@ -211,10 +242,7 @@ const handleLogout = async (req, res) => {
     const refresh_token = req.cookies.refresh_token;
 
     if (refresh_token) {
-      const user = await db.User.findOne({ where: { refresh_token } });
-      if (user) {
-        await db.User.update({ refresh_token: null }, { where: { id: user.id } });
-      }
+      await db.Session.destroy({ where: { refreshToken: refresh_token } });
     }
 
     res.clearCookie("refresh_token", {
@@ -237,6 +265,96 @@ const handleLogout = async (req, res) => {
   }
 };
 
+const handleChangePassword = async (req, res) => {
+  try {
+    const data = req.body;
+    const message = await UserService.changePassword(data);
+    return res.status(200).json(message);
+  } catch (e) {
+    console.error("Error in handleChangePassword:", e);
+    return res.status(500).json({
+      errCode: -1,
+      message: "Lỗi hệ thống",
+    });
+  }
+};
+
+const getSessions = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const sessions = await db.Session.findAll({
+      where: { userId },
+      order: [["lastActive", "DESC"]],
+    });
+
+    const refresh_token = req.cookies.refresh_token;
+
+    const formattedSessions = sessions.map(s => ({
+      id: s.id,
+      device: s.device,
+      location: s.location,
+      ipAddress: s.ipAddress,
+      time: s.lastActive,
+      current: s.refreshToken === refresh_token
+    }));
+
+    return res.status(200).json({ success: true, data: formattedSessions });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: "Lỗi khi lấy danh sách phiên" });
+  }
+};
+
+const revokeSession = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    const session = await db.Session.findOne({ where: { id, userId } });
+    if (!session) {
+      return res.status(404).json({ message: "Session not found" });
+    }
+
+    await session.destroy();
+    return res.status(200).json({ success: true, message: "Đã đăng xuất thiết bị" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: "Lỗi khi đăng xuất thiết bị" });
+  }
+};
+
+const handleUpdatePreferences = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { notifEmail, notifBrowser, notifStockAlert, preferredLanguage, preferredTheme, systemName } = req.body;
+
+    const user = await db.User.findByPk(userId);
+    if (!user) {
+      return res.status(404).json({ errCode: 1, message: "User not found" });
+    }
+
+    await user.update({
+      notifEmail,
+      notifBrowser,
+      notifStockAlert,
+      preferredLanguage,
+      preferredTheme,
+      systemName,
+    });
+
+    return res.status(200).json({
+      errCode: 0,
+      message: "Cập nhật cấu hình thành công",
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      errCode: -1,
+      message: "Lỗi hệ thống",
+    });
+  }
+};
+
 module.exports = {
   handleCreateNewUser,
   handleGetAllUsers,
@@ -245,4 +363,8 @@ module.exports = {
   handleDeleteUser,
   handleRefreshToken,
   handleLogout,
+  handleChangePassword,
+  getSessions,
+  revokeSession,
+  handleUpdatePreferences,
 };

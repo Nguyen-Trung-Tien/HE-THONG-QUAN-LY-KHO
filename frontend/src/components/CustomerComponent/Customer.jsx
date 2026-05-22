@@ -7,16 +7,19 @@ import {
   deleteManyCustomer,
 } from "../../API/customer/customerApi";
 import { toast } from "react-toastify";
-import FilterBar from "./FilterBar";
-import ExportExcel from "./ImportExportCSV";
 import CustomerTable from "./CustomerTable";
+import CustomerModal from "./CustomerModal";
+import FilterBar from "./FilterBar";
 import { useSelector } from "react-redux";
 import AddressAutocomplete from "../AddressAutocomplete";
+import ExportExcel from "../common/ExportExcel";
+import ExportPDF from "../common/ExportPDF";
 
 // Common Components
 import Button from '../common/Button';
 import Input from '../common/Input';
 import Card from '../common/Card';
+import Badge from '../common/Badge';
 import Modal from '../common/Modal';
 import ConfirmModal from '../common/ConfirmModal';
 
@@ -54,9 +57,9 @@ function Customer() {
       } else {
         setError(res?.data?.errMessage || "Failed to load customers");
       }
-    } catch (e) {
-      setError("Error fetching customers: " + e.message);
-    }
+    } catch {
+          setError(null);
+        }
     setLoading(false);
   };
 
@@ -112,17 +115,6 @@ function Customer() {
     setIsModalOpen(true);
   };
 
-  const handleAddressSelect = (suggest) => {
-    if (suggest?.lat && suggest?.lon) {
-      setForm(prev => ({
-        ...prev,
-        address: suggest.display_name,
-        lat: parseFloat(suggest.lat),
-        lng: parseFloat(suggest.lon)
-      }));
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -136,7 +128,7 @@ function Customer() {
       }
       fetchCustomers();
       setIsModalOpen(false);
-    } catch (e) {
+    } catch {
       toast.error("Lỗi khi lưu khách hàng!");
     }
   };
@@ -151,7 +143,7 @@ function Customer() {
       } else {
         toast.error(res?.data?.errMessage || "Xóa thất bại!");
       }
-    } catch (e) {
+    } catch {
       toast.error("Lỗi khi xóa khách hàng!");
     } finally {
       setIsDeleteModalOpen(false);
@@ -169,7 +161,7 @@ function Customer() {
       } else {
         toast.error(res?.data?.errMessage || "Xóa thất bại!");
       }
-    } catch (e) {
+    } catch {
       toast.error("Xóa thất bại!");
     } finally {
       setIsDeleteManyModalOpen(false);
@@ -196,8 +188,8 @@ function Customer() {
 
   const toggleSelect = (id) => {
     if (selectedIds.includes(id))
-      setSelectedIds(selectedIds.filter((x) => x !== id));
-    else setSelectedIds([...selectedIds, id]);
+      setSelectedIds(prev => prev.filter((x) => x !== id));
+    else setSelectedIds(prev => [...prev, id]);
   };
 
   const toggleSelectAll = () => {
@@ -206,31 +198,58 @@ function Customer() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="flex flex-col gap-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-textPrimary tracking-tight">
+          <Badge variant="primary" className="mb-1">Đối tác</Badge>
+          <h1 className="text-xl font-semibold text-text-primary tracking-tighter">
             Quản Lý Khách Hàng
           </h1>
-          <p className="text-textSecondary mt-1">Quản lý cơ sở dữ liệu khách hàng và lịch sử giao dịch</p>
+          <p className="text-[10px] text-text-secondary font-semibold">Cơ sở dữ liệu khách hàng và giao dịch</p>
         </div>
         
         <div className="flex flex-wrap gap-2">
           {selectedIds.length > 0 && (
             <Button 
               variant="danger" 
+              size="md"
               onClick={confirmDeleteMultiple}
-              leftIcon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>}
+              leftIcon={<svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>}
             >
               Xóa {selectedIds.length} mục
             </Button>
           )}
-          <ExportExcel customers={customers} />
+          <ExportPDF
+            data={customers}
+            allData={customers}
+            fileName="Danh_sach_khach_hang"
+            title="Danh sách khách hàng"
+            columns={[
+              { key: 'id', header: 'Ma KH' },
+              { key: 'name', header: 'Ten khach hang' },
+              { key: 'email', header: 'Email' },
+              { key: 'phoneNumber', header: 'So dien thoai' },
+              { key: 'address', header: 'Dia chi' },
+            ]}
+          />
+          <ExportExcel 
+            data={customers}
+            allData={customers}
+            fileName="Danh_sach_khach_hang"
+            sheetName="KhachHang"
+            columns={[
+              { key: 'id', header: 'Mã KH' },
+              { key: 'name', header: 'Tên khách hàng' },
+              { key: 'email', header: 'Email' },
+              { key: 'phoneNumber', header: 'Số điện thoại' },
+              { key: 'address', header: 'Địa chỉ' },
+            ]}
+          />
           <Button 
-            variant="gradient" 
-            size="lg"
+            variant="primary" 
+            size="md"
             onClick={() => handleOpenModal()}
-            leftIcon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>}
+            leftIcon={<svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>}
           >
             Thêm khách hàng
           </Button>
@@ -239,7 +258,7 @@ function Customer() {
 
       {error && (
         <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl flex items-center shadow-sm">
-          <svg className="w-5 h-5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+          <svg className="size-5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
           </svg>
           {error}
@@ -266,55 +285,14 @@ function Customer() {
         onPageChange={setPage}
       />
 
-      <Modal
+      <CustomerModal
         isOpen={isModalOpen}
+        isEditing={isEditing}
+        form={form}
+        onChange={handleChange}
         onClose={() => setIsModalOpen(false)}
-        title={isEditing ? "Cập nhật khách hàng" : "Thêm khách hàng mới"}
-        size="md"
-        footer={
-          <div className="flex justify-end gap-3">
-            <Button variant="ghost" onClick={() => setIsModalOpen(false)}>Hủy</Button>
-            <Button variant="gradient" onClick={handleSubmit}>
-              {isEditing ? "Cập nhật" : "Lưu khách hàng"}
-            </Button>
-          </div>
-        }
-      >
-        <form className="space-y-4" onSubmit={handleSubmit}>
-          <Input
-            label="Tên khách hàng"
-            name="name"
-            placeholder="Nhập tên khách hàng"
-            value={form.name}
-            onChange={handleChange}
-            required
-          />
-          <Input
-            label="Email"
-            type="email"
-            name="email"
-            placeholder="example@mail.com"
-            value={form.email}
-            onChange={handleChange}
-            required
-          />
-          <Input
-            label="Số điện thoại"
-            name="phoneNumber"
-            placeholder="09xx xxx xxx"
-            value={form.phoneNumber}
-            onChange={handleChange}
-          />
-          <div className="flex flex-col space-y-1">
-            <label className="text-sm font-semibold text-textPrimary">Địa chỉ</label>
-            <AddressAutocomplete
-              value={form.address}
-              onChange={(value) => handleChange({ target: { name: "address", value } })}
-              onSelect={handleAddressSelect}
-            />
-          </div>
-        </form>
-      </Modal>
+        onSubmit={handleSubmit}
+      />
 
       <ConfirmModal
         isOpen={isDeleteModalOpen}

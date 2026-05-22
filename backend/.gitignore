@@ -27,3 +27,7 @@ log/
 
 # Ignore .env
 .env
+
+# Runtime backup artifacts
+backups/
+public/backup_*.sql

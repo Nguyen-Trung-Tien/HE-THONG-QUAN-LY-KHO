@@ -1,77 +1,76 @@
-# 🎨 Frontend Web App - XD_HTTQL
+# Frontend Smart WMS 3.0.0
 
-Giao diện quản lý hiện đại, mượt mà và trực quan, được xây dựng trên nền tảng **React 19** và **Vite**.
+Frontend là ứng dụng quản trị kho chạy bằng React, phục vụ dashboard, quản lý dữ liệu nghiệp vụ, thông báo và cài đặt hệ thống.
 
----
+## Stack
 
-## 🛠️ Công nghệ sử dụng
-- **Core:** React 19 (Hooks, Context API)
-- **Tooling:** Vite (Cực nhanh)
-- **State Management:** Redux Toolkit (@reduxjs/toolkit)
-- **Styling:** Tailwind CSS v4 (Tiện dụng & Hiệu năng)
-- **Charts:** Recharts (Biểu đồ doanh thu & thống kê)
-- **Icons:** Lucide React & React Icons
-- **Notifications:** React Toastify
-- **Data Fetching:** Axios & TanStack Query (React Query)
-- **Maps:** Leaflet & React Leaflet (Quản lý vị trí)
-- **Utilities:** Lodash, PapaParse (CSV), XLSX (Excel), QR Code
+- React 19
+- Vite
+- Redux Toolkit
+- TanStack Query
+- Tailwind CSS
+- React Router
+- Recharts
+- React Toastify
+- Leaflet
 
----
+## Cấu trúc chính
 
-## ✨ Tính năng nổi bật
-
-### 📊 Dashboard & Thống kê
-- Biểu đồ doanh thu trực quan (Revenue Charts).
-- Thống kê sản phẩm bán chạy nhất (Top Products).
-- Tổng quan tình thái đơn hàng và kho hàng theo thời gian thực.
-
-### 🛡️ Quản lý Kho thông minh
-- **Cảnh báo hàng sắp hết (Low Stock):** Tự động thông báo khi số lượng dưới mức tối thiểu.
-- **Cảnh báo hết hạn (Expiry Alert):** Theo dõi ngày hết hạn của các lô hàng.
-- **Báo cáo hàng tồn lâu (Deadstock):** Nhận diện sản phẩm không phát sinh giao dịch.
-- **Mã QR:** Tự động tạo mã QR cho từng sản phẩm để dễ dàng truy xuất thông tin.
-
-### 🧩 Giao diện người dùng (UI/UX)
-- **Responsive:** Hoạt động hoàn hảo trên Desktop, Tablet và Mobile.
-- **Layout:** Sidebar điều hướng linh hoạt, Header tích hợp thông báo.
-- **Auth:** Trang Đăng nhập/Đăng ký chuyên nghiệp, quản lý Profile cá nhân.
-- **Hiệu ứng:** Particles background tạo điểm nhấn thẩm mỹ.
-
----
-
-## 📁 Cấu trúc thư mục
 ```text
 frontend/
-├── src/
-│   ├── API/         # Cấu hình gọi API theo từng module
-│   ├── assets/      # Hình ảnh, biểu tượng tĩnh
-│   ├── auth/        # Hợp phần kiểm soát quyền truy cập (RequireAuth)
-│   ├── components/  # Các thành phần giao diện (UI Components)
-│   ├── redux/       # Cấu hình Store, Slices (Global State)
-│   ├── utils/       # Các hàm helper xử lý định dạng, tính toán
-│   ├── App.jsx      # Định nghĩa Route chính
-│   └── main.jsx     # Điểm khởi đầu ứng dụng
-├── public/          # Tài nguyên công cộng, Manifest, Service Worker
-└── tailwind.config.js # Cấu hình giao diện Tailwind
+|-- src/
+|   |-- API/
+|   |-- auth/
+|   |-- components/
+|   |-- i18n/
+|   |-- redux/
+|   `-- utils/
+|-- public/
+|-- .env.example
+`-- package.json
 ```
 
----
+## Màn hình chính
 
-## 🚀 Cài đặt & Phát triển
+- Dashboard
+- Products
+- Inventory
+- Orders
+- Shippers
+- Customers
+- Suppliers
+- Warehouse Management
+- Users
+- Notifications
+- Settings
+- Sign In / Sign Up / Profile
 
-1. Di chuyển vào thư mục: `cd frontend`
-2. Cài đặt thư viện: `npm install`
-3. Cấu hình môi trường: Tạo file `.env` và thiết lập `VITE_API_URL` (mặc định là `http://localhost:3001/api/v1`).
-4. Chạy chế độ phát triển:
-   ```bash
-   npm run dev
-   ```
-5. Xây dựng bản production:
-   ```bash
-   npm run build
-   ```
+## Tính năng nổi bật
 
----
+- Giao diện quản trị responsive.
+- Điều hướng có phân quyền bằng `RequireAuth` và `RoleGuard`.
+- Hỗ trợ theme sáng/tối và ngôn ngữ.
+- Trang cài đặt cho 2FA, PIN, mật khẩu, session và backup.
+- Dashboard biểu đồ, cảnh báo tồn kho, cảnh báo hết hạn và thông báo nội bộ.
 
-## 📱 PWA (Progressive Web App)
-Ứng dụng hỗ trợ Service Worker (`sw.js`) và Manifest, cho phép cài đặt như một ứng dụng trên màn hình điện thoại hoặc máy tính, hỗ trợ hoạt động mượt mà hơn.
+## Chạy local
+
+Tạo file `frontend/.env`:
+
+```env
+VITE_API_URL=http://localhost:3001
+```
+
+Chạy dự án:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Build production:
+
+```bash
+npm run build
+```

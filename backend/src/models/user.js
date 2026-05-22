@@ -12,6 +12,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "userId",
         as: "importReceiptData",
       });
+      User.hasMany(models.Session, {
+        foreignKey: "userId",
+        as: "sessions",
+      });
     }
   }
   User.init(
@@ -27,6 +31,40 @@ module.exports = (sequelize, DataTypes) => {
       gender: DataTypes.STRING,
       image: DataTypes.BLOB("long"),
       refresh_token: DataTypes.TEXT,
+      is2FAEnabled: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+      },
+      twoFactorSecret: DataTypes.STRING,
+      securityPin: DataTypes.STRING,
+      isPinEnabled: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+      },
+      notifEmail: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true,
+      },
+      notifBrowser: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true,
+      },
+      notifStockAlert: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true,
+      },
+      preferredLanguage: {
+        type: DataTypes.STRING,
+        defaultValue: "vi",
+      },
+      preferredTheme: {
+        type: DataTypes.STRING,
+        defaultValue: "light",
+      },
+      systemName: {
+        type: DataTypes.STRING,
+        defaultValue: "Smart WMS Pro",
+      },
     },
     {
       sequelize,

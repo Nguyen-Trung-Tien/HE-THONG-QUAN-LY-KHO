@@ -6,6 +6,10 @@ import ImportDetails from "../ImportDetailComponent/ImportDetails";
 import ExportReceipts from "../ExportReceiptsComponent/ExportReceipts";
 import ExportDetails from "../ExportDetailsComponent/ExportDetails";
 
+// Common Components
+import Badge from "../common/Badge";
+import { cn } from "../../utils/cn";
+
 export default function WarehouseManagement() {
   const location = useLocation();
   const stateTab = location.state?.tab;
@@ -25,7 +29,7 @@ export default function WarehouseManagement() {
       id: "importReceipts",
       label: "Phiếu nhập",
       icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 13V6a2 2 0 00-2-2H4a2 2 0 00-2 2v7m16 0a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4a2 2 0 012-2m16 0h-2M4 13H6m8 0v4m-4-4v4" />
         </svg>
       ),
@@ -34,43 +38,64 @@ export default function WarehouseManagement() {
       id: "importDetails",
       label: "Chi tiết nhập",
       icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
+      ),
+    },
+    {
+      id: "exportReceipts",
+      label: "Phiếu xuất",
+      icon: (
+        <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 7v10c0 2 1.5 3 3.5 3h9c2 0 3.5-1 3.5-3V7c0-2-1.5-3-3.5-3h-9C5.5 4 4 5 4 7z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6" />
+        </svg>
+      ),
+    },
+    {
+      id: "exportDetails",
+      label: "Chi tiết xuất",
+      icon: (
+        <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l4 4v12a2 2 0 01-2 2z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 11l-2 2-2-2" />
         </svg>
       ),
     },
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-textPrimary tracking-tight">
+          <Badge variant="primary" className="mb-1">Hóa đơn</Badge>
+          <h1 className="text-xl font-black text-text-primary tracking-tighter">
             Quản Lý Hóa Đơn
           </h1>
-          <p className="text-textSecondary mt-1">Quản lý nhập xuất kho và chi tiết chứng từ</p>
+          <p className="text-[10px] text-text-secondary font-semibold">Nhập xuất kho và chứng từ</p>
         </div>
         
-        <div className="flex bg-gray-100 p-1 rounded-xl shadow-inner">
+        <div className="flex bg-bg-subtle p-0.5 rounded-xl border border-border/50 shadow-sm">
           {menuItems.map((item) => (
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className={`flex items-center gap-2 px-6 py-2 rounded-lg font-semibold text-sm transition-all duration-200
-                ${
-                  activeTab === item.id
-                    ? "bg-white text-primary shadow-sm"
-                    : "text-textSecondary hover:text-textPrimary"
-                }`}
+              className={cn(
+                "flex items-center gap-1.5 px-5 py-1.5 rounded-lg font-black text-[11px] transition-all duration-300",
+                activeTab === item.id
+                  ? "bg-white text-primary shadow-sm scale-100"
+                  : "text-text-secondary hover:text-text-primary"
+              )}
             >
-              {item.icon}
+              <span className="scale-90">{item.icon}</span>
               <span>{item.label}</span>
             </button>
           ))}
         </div>
       </div>
 
-      <div className="animate-in fade-in duration-300">
+      <div className="animate-in fade-in slide-in-from-top-1 duration-400">
         {activeTab === "importReceipts" && <ImportReceipts />}
         {activeTab === "importDetails" && <ImportDetails />}
         {activeTab === "exportReceipts" && <ExportReceipts />}

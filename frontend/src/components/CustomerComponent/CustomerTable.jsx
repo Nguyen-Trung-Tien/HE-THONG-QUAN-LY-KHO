@@ -51,28 +51,29 @@ export default function CustomerTable({
     {
       title: 'Họ và tên',
       key: 'name',
-      render: (name) => <span className="font-bold text-textPrimary">{name}</span>
+      render: (name) => <span className="text-[11px] font-bold text-text-primary tracking-tight">{name}</span>
     },
     {
       title: 'Email',
       key: 'email',
+      className: 'text-[11px] text-text-secondary'
     },
     {
       title: 'Số điện thoại',
       key: 'phoneNumber',
-      render: (phone) => phone || "-"
+      render: (phone) => <span className="text-[11px]">{phone || "-"}</span>
     },
     {
       title: 'Địa chỉ',
       key: 'address',
-      render: (address) => <div className="max-w-xs truncate text-xs text-textSecondary" title={address}>{address || "-"}</div>
+      render: (address) => <div className="max-w-[150px] truncate text-[10px] text-text-tertiary font-medium" title={address}>{address || "-"}</div>
     },
     {
       title: 'Đơn hàng',
       key: 'orderCount',
       render: (count, row) => (
         <button
-          className="text-primary hover:underline font-semibold"
+          className="text-primary hover:underline text-[11px] font-black"
           onClick={() => handleShowOrderHistory(row)}
         >
           {count || 0} đơn
@@ -84,14 +85,14 @@ export default function CustomerTable({
       key: 'actions',
       className: 'text-right',
       render: (_, row) => (
-        <div className="flex justify-end space-x-1">
+        <div className="flex justify-end gap-x-0.5 scale-90 origin-right">
           <Button 
-            variant="ghost" size="sm" className="text-blue-600 hover:bg-blue-100/50 hover:text-blue-700 transition-all rounded-lg active:scale-90"
+            variant="ghost" size="icon" className="text-primary hover:bg-primary/10 transition-all"
             onClick={() => onEdit(row)}
             title="Chỉnh sửa"
           >
             <svg
-              className="w-5 h-5"
+              className="size-4"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -105,11 +106,11 @@ export default function CustomerTable({
             </svg>
           </Button>
           <Button 
-            variant="ghost" size="sm" className="text-rose-600 hover:bg-rose-50 transition-colors"
-            onClick={() => onDelete(row.id)}
+            variant="ghost" size="icon" className="text-error hover:bg-error/10 transition-colors"
+            onClick={() => onDelete(row)}
             title="Xóa"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+            <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
           </Button>
         </div>
       )
@@ -117,15 +118,17 @@ export default function CustomerTable({
   ];
 
   return (
-    <Card noPadding>
-      <Table 
-        columns={columns} 
-        data={customers} 
-        loading={loading} 
-        emptyMessage="Không tìm thấy khách hàng nào"
-      />
+    <Card noPadding className="shadow-soft-xl border-border/50">
+      <div className="overflow-hidden">
+        <Table 
+          columns={columns} 
+          data={customers} 
+          loading={loading} 
+          emptyMessage="Không tìm thấy khách hàng nào"
+        />
+      </div>
       
-      <div className="p-4 border-t border-border">
+      <div className="p-4 border-t border-border/40 flex justify-center">
         <Pagination 
           currentPage={page} 
           totalPages={totalPages} 

@@ -18,6 +18,9 @@ import Badge from '../common/Badge';
 import Card from '../common/Card';
 import Modal from '../common/Modal';
 import ConfirmModal from '../common/ConfirmModal';
+import ExportExcel from '../common/ExportExcel';
+import ExportPDF from '../common/ExportPDF';
+import { cn } from "../../utils/cn";
 
 function Inventory() {
   const [activeTab, setActiveTab] = useState("all");
@@ -46,7 +49,7 @@ function Inventory() {
         lastUpdated: stock.updatedAt,
       }));
       setInventoryItems(formatted);
-    } catch (err) {
+    } catch {
       toast.error("Lỗi khi tải dữ liệu tồn kho");
     } finally {
       setLoading(false);
@@ -62,7 +65,7 @@ function Inventory() {
       await deleteStock(selectedProduct.id);
       setInventoryItems((prev) => prev.filter((item) => item.id !== selectedProduct.id));
       toast.success("Xóa sản phẩm thành công");
-    } catch (error) {
+    } catch {
       toast.error("Xóa thất bại");
     } finally {
       setIsDeleteModalOpen(false);
@@ -126,53 +129,49 @@ function Inventory() {
       key: 'status',
       render: (_, item) => {
         const status = item.stock === 0 ? "Hết hàng" : item.stock < 10 ? "Sắp hết" : "Còn hàng";
-        const variant = status === "Hết hàng" ? "red" : status === "Sắp hết" ? "yellow" : "green";
-        return <Badge variant={variant}>{status}</Badge>;
+        const variant = status === "Hết hàng" ? "error" : status === "Sắp hết" ? "warning" : "success";
+        return <Badge variant={variant} size="sm">{status}</Badge>;
       }
     },
     {
       title: 'Giá',
       key: 'price',
-      render: (price) => <span>{price.toLocaleString()}đ</span>
+      render: (price) => <span className="text-[11px] font-black text-primary">{price.toLocaleString()}đ</span>
     },
     {
       title: 'Số lượng',
       key: 'stock',
-      render: (stock, row) => <span className="font-medium">{stock} {row.unit}</span>
-    },
-    {
-      title: 'Cập nhật',
-      key: 'lastUpdated',
-      render: (date) => <span className="text-textSecondary text-xs">{new Date(date).toLocaleDateString("vi-VN")}</span>
+      render: (stock, row) => <span className="text-[11px] font-bold text-text-primary">{stock} <span className="text-[10px] text-text-tertiary font-medium">{row.unit}</span></span>
     },
     {
       title: 'Thao tác',
       key: 'actions',
       className: 'text-right',
       render: (_, item) => (
-        <div className="flex justify-end space-x-1">
+        <div className="flex justify-end space-x-0.5 scale-90 origin-right">
           <Button 
-            variant="ghost" size="sm" className="text-blue-600 hover:bg-blue-50 transition-colors" 
+            variant="ghost" size="icon" className="text-info hover:bg-info/10" 
             onClick={() => { setSelectedProduct(item); setIsQrModalOpen(true); }}
             title="Mã QR"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
             </svg>
           </Button>
           <Button 
-            variant="ghost" size="sm" className="text-blue-600 hover:bg-blue-50 transition-colors" 
+            variant="ghost" size="icon" className="text-primary hover:bg-primary/10" 
             onClick={() => { setSelectedProduct(item); setIsDetailModalOpen(true); }}
+            title="Xem chi tiết"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
           </Button>
           <Button 
-            variant="ghost" size="sm" className="text-blue-600 hover:bg-blue-100/50 hover:text-blue-700 transition-all rounded-lg active:scale-90" 
+            variant="ghost" size="icon" className="text-primary hover:bg-primary/10" 
             onClick={() => { setSelectedProduct(item); setIsEditModalOpen(true); }}
             title="Chỉnh sửa"
           >
             <svg
-              className="w-5 h-5"
+              className="w-4 h-4"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -186,10 +185,11 @@ function Inventory() {
             </svg>
           </Button>
           <Button 
-            variant="ghost" size="sm" className="text-rose-600 hover:bg-rose-50 transition-colors" 
+            variant="ghost" size="icon" className="text-error hover:bg-error/10 transition-colors" 
             onClick={() => { setSelectedProduct(item); setIsDeleteModalOpen(true); }}
+            title="Xóa"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
           </Button>
         </div>
       )
@@ -197,62 +197,98 @@ function Inventory() {
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
+      <div className="flex flex-col md:flex-row justify-between items-end gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-textPrimary tracking-tight">
+          <Badge variant="primary" className="mb-1">Hàng hóa</Badge>
+          <h1 className="text-xl font-black text-text-primary tracking-tighter">
             Quản Lý Tồn Kho
           </h1>
-          <p className="text-textSecondary mt-1">Kiểm soát mức độ hàng hóa và vị trí lưu kho</p>
+          <p className="text-[10px] text-text-secondary font-semibold">Mức độ hàng hóa và vị trí lưu kho</p>
         </div>
         
-        <Button 
-          variant="gradient" 
-          size="lg"
-          onClick={() => setIsCreateModalOpen(true)}
-          leftIcon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>}
-        >
-          Thêm sản phẩm
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <ExportPDF
+            data={inventoryItems}
+            fileName="Bao_cao_ton_kho"
+            title="Báo cáo tồn kho hàng hóa"
+            columns={[
+              { key: 'id', header: 'Ma hang' },
+              { key: 'name', header: 'Ten san pham' },
+              { key: 'category', header: 'Danh muc' },
+              { key: 'stock', header: 'So luong' },
+              { key: 'unit', header: 'Don vi' },
+              { key: 'price', header: 'Gia' },
+              { key: 'status', header: 'Trang thai' },
+            ]}
+          />
+          <ExportExcel
+            data={inventoryItems}
+            allData={inventoryItems}
+            fileName="Danh_sach_ton_kho"
+            sheetName="TonKho"
+            columns={[
+              { key: 'id', header: 'Mã hàng' },
+              { key: 'name', header: 'Tên sản phẩm' },
+              { key: 'category', header: 'Danh mục' },
+              { key: 'stock', header: 'Số lượng' },
+              { key: 'unit', header: 'Đơn vị' },
+              { key: 'price', header: 'Giá' },
+              { key: 'status', header: 'Trạng thái' },
+              { key: 'supplierName', header: 'Nhà cung cấp' },
+            ]}
+          />
+          <Button 
+            variant="primary" 
+            size="md"
+            onClick={() => setIsCreateModalOpen(true)}
+            leftIcon={<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>}
+          >
+            Thêm sản phẩm
+          </Button>
+        </div>
       </div>
 
-      <Card>
-        <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-          <div className="flex bg-gray-100 p-1 rounded-xl w-full md:w-auto overflow-x-auto">
+      <Card className="shadow-soft-xl border-border/50" noPadding>
+        <div className="p-4 flex flex-col md:flex-row justify-between items-center gap-3 border-b border-border/40">
+          <div className="flex bg-bg-subtle p-0.5 rounded-lg w-full md:w-auto overflow-x-auto border border-border/50">
             {["all", "Còn hàng", "Hết hàng"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => { setActiveTab(tab); setPage(1); }}
-                className={`px-6 py-2 text-sm font-semibold rounded-lg transition-all whitespace-nowrap ${
+                className={cn(
+                  "px-4 py-1 text-[10px] font-black rounded-md transition-all whitespace-nowrap",
                   activeTab === tab
                     ? "bg-white text-primary shadow-sm"
-                    : "text-textSecondary hover:text-textPrimary"
-                }`}
+                    : "text-text-secondary hover:text-text-primary"
+                )}
               >
                 {tab === "all" ? "Tất cả" : tab}
               </button>
             ))}
           </div>
 
-          <div className="w-full md:w-80">
+          <div className="w-full md:w-64">
             <Input
-              placeholder="Tìm kiếm sản phẩm..."
+              placeholder="Tìm sản phẩm..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              icon={<svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>}
+              leftIcon={<svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>}
             />
           </div>
         </div>
 
-        <Table 
-          columns={columns} 
-          data={currentItems} 
-          loading={loading} 
-        />
+        <div className="overflow-hidden">
+          <Table 
+            columns={columns} 
+            data={currentItems} 
+            loading={loading} 
+          />
+        </div>
 
-        <div className="flex flex-col sm:flex-row justify-between items-center mt-6 gap-4">
-          <div className="text-sm text-textSecondary bg-gray-50 px-3 py-1 rounded-full">
-            Hiển thị <span className="font-bold text-primary">{currentItems.length}</span> / {filteredItems.length} sản phẩm
+        <div className="p-4 flex flex-col sm:flex-row justify-between items-center border-t border-border/40 gap-3">
+          <div className="text-[10px] font-bold text-text-tertiary uppercase tracking-wider bg-bg-subtle px-2.5 py-1 rounded-full">
+            Hiển thị <span className="text-primary">{currentItems.length}</span> / {filteredItems.length} sản phẩm
           </div>
           <Pagination 
             currentPage={page} 
@@ -289,7 +325,7 @@ function Inventory() {
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         title="Thêm sản phẩm mới"
-        size="lg"
+        size="md"
       >
         <CreateProduct onSuccess={() => { setIsCreateModalOpen(false); fetchInventory(); }} />
       </Modal>
@@ -298,7 +334,7 @@ function Inventory() {
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         title="Chỉnh sửa sản phẩm"
-        size="lg"
+        size="md"
       >
         <EditProduct
           productData={selectedProduct}

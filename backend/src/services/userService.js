@@ -45,6 +45,14 @@ const handleLoginUser = async (email, password) => {
         "address",
         "status",
         "gender",
+        "is2FAEnabled",
+        "isPinEnabled",
+        "notifEmail",
+        "notifBrowser",
+        "notifStockAlert",
+        "preferredLanguage",
+        "preferredTheme",
+        "systemName",
       ],
       where: { email },
       raw: true,
@@ -198,10 +206,53 @@ const DeleteUserData = (userId) => {
   });
 };
 
+const changePassword = async (data) => {
+  try {
+    if (!data.id || !data.oldPassword || !data.newPassword) {
+      return {
+        errCode: 1,
+        errMessage: "Thiếu tham số bắt buộc!",
+      };
+    }
+
+    const user = await db.User.findOne({
+      where: { id: data.id },
+      raw: false,
+    });
+
+    if (!user) {
+      return {
+        errCode: 2,
+        errMessage: "Người dùng không tồn tại!",
+      };
+    }
+
+    const isPasswordValid = await bcrypt.compare(data.oldPassword, user.password);
+    if (!isPasswordValid) {
+      return {
+        errCode: 3,
+        errMessage: "Mật khẩu cũ không chính xác!",
+      };
+    }
+
+    user.password = await hashUserPassword(data.newPassword);
+    await user.save();
+
+    return {
+      errCode: 0,
+      errMessage: "Đổi mật khẩu thành công!",
+    };
+  } catch (e) {
+    console.error("changePassword failed:", e);
+    throw e;
+  }
+};
+
 module.exports = {
   createNewUser,
   getAllUsers,
   handleLoginUser,
   UpdateUserData,
   DeleteUserData,
+  changePassword,
 };

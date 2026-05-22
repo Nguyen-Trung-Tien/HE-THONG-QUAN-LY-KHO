@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { GetDetailUser, UpdateDetailUser } from "../API/user/userApi";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { login, resetUser } from "../redux/slice/userSlice";
+import { GetDetailUser, UpdateDetailUser, UserLogout, ChangePassword } from "../API/user/userApi";
+import { getInventoryLogs } from "../API/inventory/inventoryAPI";
 import { toast } from "react-toastify";
 import {
   FiUser,
@@ -7,41 +11,42 @@ import {
   FiPhone,
   FiShield,
   FiSave,
-  FiUpload,
-  FiHome,
   FiMapPin,
   FiSettings,
   FiCamera,
+  FiLogOut,
+  FiActivity,
+  FiLock,
+  FiClock,
+  FiPackage,
+  FiArrowUpRight,
+  FiArrowDownLeft,
+  FiArrowLeft,
 } from "react-icons/fi";
 import { arrayBufferToString } from "../utils/arrayBufferToString";
-
-const InputField = ({ label, value, onChange, icon, disabled, onEnter }) => (
-  <div className="space-y-2 group">
-    <label className="text-sm font-bold text-textSecondary flex items-center group-focus-within:text-primary transition-colors">
-      <span className="mr-2 opacity-70 group-focus-within:opacity-100 transition-opacity">{icon}</span>
-      {label}
-    </label>
-    <div className={`relative flex items-center bg-white border ${disabled ? 'border-gray-100 bg-gray-50' : 'border-border group-focus-within:border-primary group-focus-within:ring-4 group-focus-within:ring-primary/10'} rounded-2xl px-4 py-3 transition-all duration-300`}>
-      <input
-        type="text"
-        className="w-full bg-transparent outline-none text-textPrimary font-medium disabled:text-textSecondary"
-        value={value}
-        onChange={onChange}
-        disabled={disabled}
-        placeholder={`Nhập ${label.toLowerCase()}...`}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" && onEnter) {
-            onEnter();
-          }
-        }}
-      />
-    </div>
-  </div>
-);
+import { cn } from "../utils/cn";
+import Input from "./common/Input";
+import Button from "./common/Button";
+import Card from "./common/Card";
+import Badge from "./common/Badge";
+import ConfirmModal from "./common/ConfirmModal";
+import Modal from "./common/Modal";
 
 const Profile = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [showActivityModal, setShowActivityModal] = useState(false);
+  const [activityLogs, setActivityLogs] = useState([]);
+  const [passwordData, setPasswordData] = useState({
+    oldPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
   const [user, setUser] = useState({
+    id: "",
     email: "",
     firstName: "",
     lastName: "",
@@ -49,40 +54,55 @@ const Profile = () => {
     address: "",
     role: "",
     avatarBase64: "",
+    status: "",
+    gender: "",
   });
   const [avatarPreview, setAvatarPreview] = useState(null);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const storedUser = JSON.parse(localStorage.getItem("user"));
-        const userId = storedUser?.id;
-        if (!userId) return;
+  const fetchUser = async () => {
+    try {
+      const storedUser = JSON.parse(localStorage.getItem("user"));
+      const userId = storedUser?.id;
+      if (!userId) return;
 
-        const res = await GetDetailUser(userId);
-        if (res.errCode === 0 && res.users.length > 0) {
-          const data = res.users[0];
-          let avatarBase64 = "";
-          if (data.image?.data?.length > 0) {
-            avatarBase64 = arrayBufferToString(data.image.data);
-          }
-          setUser({
-            email: data.email || "",
-            firstName: data.firstName || "",
-            lastName: data.lastName || "",
-            phoneNumber: data.phoneNumber || "",
-            address: data.address || "",
-            role: data.role || "",
-            avatarBase64,
-          });
-          setAvatarPreview(avatarBase64 || null);
-        } else {
-          toast.error(res.message || "Lấy thông tin người dùng thất bại!");
+      const res = await GetDetailUser(userId);
+      if (res.errCode === 0 && res.users.length > 0) {
+        const data = res.users[0];
+        let avatarBase64 = "";
+        if (data.image?.data?.length > 0) {
+          avatarBase64 = arrayBufferToString(data.image.data);
+        } else if (typeof data.image === 'string') {
+          avatarBase64 = data.image;
         }
-      } catch (err) {
-        console.error("Failed to fetch user:", err);
+
+        const userData = {
+          id: data.id,
+          email: data.email || "",
+          firstName: data.firstName || "",
+          lastName: data.lastName || "",
+          phoneNumber: data.phoneNumber || "",
+          address: data.address || "",
+          role: data.role || "",
+          avatarBase64,
+          status: data.status || "",
+          gender: data.gender || "",
+        };
+
+        setUser(userData);
+        setAvatarPreview(avatarBase64 || null);
+        
+        // Cập nhật Local Storage và Redux để đồng bộ toàn bộ app
+        const currentLocal = JSON.parse(localStorage.getItem("user"));
+        const updatedLocal = { ...currentLocal, ...userData };
+        localStorage.setItem("user", JSON.stringify(updatedLocal));
+        dispatch(login(updatedLocal));
       }
-    };
+    } catch (err) {
+      console.error("Failed to fetch user:", err);
+    }
+  };
+
+  useEffect(() => {
     fetchUser();
   }, []);
 
@@ -90,38 +110,17 @@ const Profile = () => {
     if (e) e.preventDefault();
     setLoading(true);
     try {
-      const storedUser = JSON.parse(localStorage.getItem("user"));
-      const userId = storedUser?.id;
-      if (!userId) return;
-
-      const res = await UpdateDetailUser({ id: userId, ...user });
+      // Gửi dữ liệu cập nhật lên server
+      const res = await UpdateDetailUser(user);
       if (res.errCode === 0) {
         toast.success("Cập nhật thông tin thành công!");
-        // Cập nhật lại thông tin mới nhất
-        const refreshed = await GetDetailUser(userId);
-        if (refreshed.errCode === 0 && refreshed.users.length > 0) {
-          const data = refreshed.users[0];
-          let avatarBase64 = "";
-          if (data.image?.data?.length > 0) {
-            avatarBase64 = arrayBufferToString(data.image.data);
-          }
-          setUser({
-            email: data.email || "",
-            firstName: data.firstName || "",
-            lastName: data.lastName || "",
-            phoneNumber: data.phoneNumber || "",
-            address: data.address || "",
-            role: data.role || "",
-            avatarBase64,
-          });
-          setAvatarPreview(avatarBase64 || null);
-        }
+        await fetchUser(); // Tải lại dữ liệu mới nhất
       } else {
         toast.error(res.message || "Lỗi cập nhật!");
       }
     } catch (err) {
       console.error("Update failed:", err);
-      toast.error("Lỗi cập nhật!");
+      toast.error("Lỗi cập nhật hệ thống!");
     } finally {
       setLoading(false);
     }
@@ -130,10 +129,6 @@ const Profile = () => {
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      toast.error("Vui lòng chọn file ảnh hợp lệ!");
-      return;
-    }
     const reader = new FileReader();
     reader.onloadend = () => {
       setAvatarPreview(reader.result);
@@ -142,164 +137,364 @@ const Profile = () => {
     reader.readAsDataURL(file);
   };
 
-  return (
-    <div className="bg-blue-50 min-h-screen pb-12">
-      {/* Header Background */}
-      <div className="h-48 w-full gradient-bg relative overflow-hidden shadow-lg">
-        <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-        <div className="absolute -bottom-1 left-0 right-0 h-16 bg-gradient-to-t from-blue-50 to-transparent"></div>
-      </div>
+  const handleLogout = async () => {
+    try {
+      const result = await UserLogout();
+      if (result?.errCode === 0) {
+        localStorage.removeItem("user");
+        dispatch(resetUser());
+        toast.success("Đăng xuất thành công!");
+        navigate("/sign-in");
+      }
+    } catch (error) {
+      toast.error("Lỗi khi đăng xuất");
+    } finally {
+      setShowLogoutModal(false);
+    }
+  };
 
-      <div className="max-w-4xl mx-auto px-4 -mt-24 relative z-10">
-        <div className="bg-white rounded-[2.5rem] shadow-2xl border border-white p-6 md:p-10">
-          <div className="flex flex-col md:flex-row md:items-start gap-8">
-            {/* Avatar Section */}
-            <div className="flex flex-col items-center space-y-4">
-              <div className="relative group">
-                <div className="w-40 h-40 rounded-[2rem] overflow-hidden border-4 border-white shadow-2xl ring-4 ring-primary/20 bg-blue-50 relative">
-                  {avatarPreview ? (
-                    <img
-                      src={avatarPreview}
-                      alt="avatar"
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-primary bg-gradient-to-br from-primary/10 to-primaryLight/10">
-                      <FiUser size={60} />
-                    </div>
-                  )}
-                  <label
-                    htmlFor="avatarInput"
-                    className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer backdrop-blur-sm"
-                  >
-                    <div className="flex flex-col items-center text-white scale-75 group-hover:scale-100 transition-transform">
-                      <FiCamera size={28} className="mb-1" />
-                      <span className="text-xs font-bold uppercase tracking-wider">Đổi ảnh</span>
-                    </div>
-                  </label>
+  const fetchActivityLogs = async () => {
+    setLoading(true);
+    try {
+      const res = await getInventoryLogs({ userId: user.id });
+      setActivityLogs(res || []);
+      setShowActivityModal(true);
+    } catch (err) {
+      toast.error("Lỗi khi tải lịch sử hoạt động!");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast.error("Mật khẩu mới không khớp!");
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await ChangePassword({
+        id: user.id,
+        oldPassword: passwordData.oldPassword,
+        newPassword: passwordData.newPassword,
+      });
+      if (res.errCode === 0) {
+        toast.success("Đổi mật khẩu thành công!");
+        setShowPasswordModal(false);
+        setPasswordData({ oldPassword: "", newPassword: "", confirmPassword: "" });
+      } else {
+        toast.error(res.errMessage || "Lỗi đổi mật khẩu!");
+      }
+    } catch (err) {
+      toast.error("Lỗi hệ thống!");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const controlItems = [
+    { 
+      icon: <FiActivity />, 
+      label: "Hoạt động gần đây", 
+      color: "text-primary",
+      action: fetchActivityLogs
+    },
+    { 
+      icon: <FiShield />, 
+      label: "Bảo mật & Quyền riêng tư", 
+      color: "text-success",
+      action: () => setShowPasswordModal(true)
+    },
+    { 
+      icon: <FiSettings />, 
+      label: "Cấu hình hệ thống", 
+      color: "text-info", 
+      path: "/settings" 
+    },
+    { 
+      icon: <FiLogOut />, 
+      label: "Đăng xuất tài khoản", 
+      color: "text-error", 
+      action: () => setShowLogoutModal(true) 
+    },
+  ];
+
+  return (
+    <div className="flex flex-col gap-y-8 animate-in fade-in duration-700 pb-10">
+      {/* Header Banner */}
+      <div className="relative h-64 w-full rounded-[3rem] overflow-hidden shadow-soft-2xl border border-white/20">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary-light to-accent opacity-90" />
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20" />
+        
+        {/* Back Button */}
+        <button 
+          onClick={() => navigate(-1)}
+          className="absolute top-6 left-6 z-10 p-3 rounded-2xl bg-white/20 hover:bg-white/30 text-white backdrop-blur-md transition-all duration-300 border border-white/20 active:scale-90 shadow-lg group"
+          title="Quay lại"
+        >
+          <FiArrowLeft size={20} className="group-hover:-translate-x-0.5 transition-transform" />
+        </button>
+
+        {/* Animated Orbs */}
+        <div className="absolute top-10 right-20 size-32 bg-white/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute -bottom-10 left-10 w-48 h-48 bg-accent/20 rounded-full blur-3xl animate-bounce duration-[10000ms]" />
+
+        <div className="absolute bottom-8 left-10 flex items-end gap-x-6">
+          <div className="relative group">
+            <div className="size-32 rounded-[2.5rem] overflow-hidden border-4 border-white shadow-2xl bg-bg-subtle relative transition-transform duration-500 group-hover:scale-105">
+              {avatarPreview ? (
+                <img src={avatarPreview} alt="avatar" className="size-full object-cover" />
+              ) : (
+                <div className="size-full flex items-center justify-center text-primary bg-primary/10 font-black text-3xl uppercase">
+                  {user.firstName?.[0]}{user.lastName?.[0]}
                 </div>
-                <input
-                  id="avatarInput"
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleAvatarChange}
-                />
-              </div>
-              <div className="text-center">
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20 uppercase tracking-tighter">
-                  {user.role || "Thành viên"}
-                </span>
+              )}
+              <label htmlFor="avatarInput" className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all cursor-pointer backdrop-blur-sm">
+                <FiCamera size={24} className="text-white" />
+              </label>
+            </div>
+            <input id="avatarInput" type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
+          </div>
+          <div className="pb-2 text-white">
+            <h1 className="text-3xl font-semibold tracking-tighter uppercase leading-none mb-2">
+              {user.firstName} {user.lastName}
+            </h1>
+            <div className="flex items-center gap-x-3">
+              <Badge variant="neutral" className="bg-white/20 border-white/30 text-white text-[10px] backdrop-blur-md">
+                {user.role || "Thành viên"}
+              </Badge>
+              <div className="flex items-center text-white/80 text-xs font-bold tracking-tight">
+                <FiMail className="mr-1.5" /> {user.email}
               </div>
             </div>
+          </div>
+        </div>
+      </div>
 
-            {/* Form Section */}
-            <div className="flex-1 space-y-8">
-              <div className="flex items-center justify-between border-b border-border pb-6">
-                <div>
-                  <h1 className="text-3xl font-black text-textPrimary leading-none mb-2">
-                    {user.firstName} {user.lastName}
-                  </h1>
-                  <p className="text-textSecondary flex items-center text-sm font-medium">
-                    <FiMail className="mr-2 text-primary" /> {user.email}
-                  </p>
-                </div>
-                <div className="hidden sm:flex space-x-2">
-                  <div className="w-10 h-10 rounded-xl bg-blue-50 border border-border flex items-center justify-center text-primary shadow-sm">
-                    <FiSettings size={18} />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Left Col: Quick Actions */}
+        <div className="flex flex-col gap-y-6">
+          <Card title="Trung tâm điều khiển" className="shadow-soft-xl">
+            <div className="flex flex-col gap-y-2">
+              {controlItems.map((item, i) => (
+                <button 
+                  key={item.label} 
+                  onClick={() => {
+                    if (item.path) navigate(item.path);
+                    if (item.action) item.action();
+                  }}
+                  className="w-full flex items-center justify-between p-4 rounded-2xl hover:bg-bg-subtle transition-all group"
+                >
+                  <div className="flex items-center gap-x-3">
+                    <span className={cn("size-5", item.color)}>{item.icon}</span>
+                    <span className="text-[11px] font-black text-text-primary uppercase tracking-tighter">{item.label}</span>
                   </div>
-                </div>
+                  <svg className="size-4 text-text-tertiary group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              ))}
+            </div>
+          </Card>
+
+          <div className="bg-gradient-to-br from-primary/10 to-accent/5 p-8 rounded-[2.5rem] border border-primary/10 relative overflow-hidden group shadow-soft-lg">
+            <div className="absolute top-0 right-0 size-24 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2" />
+            <h4 className="text-xs font-black text-primary uppercase tracking-[0.2em] mb-4">Thống kê cá nhân</h4>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-white p-4 rounded-2xl border border-primary/10 shadow-sm">
+                <p className="text-[9px] font-black text-text-tertiary uppercase mb-1">Phiếu đã lập</p>
+                <p className="text-xl font-black text-text-primary">128</p>
               </div>
-
-              <form onSubmit={handleSubmit} className="space-y-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
-                  <InputField
-                    label="Họ"
-                    value={user.firstName}
-                    onChange={(e) => setUser({ ...user, firstName: e.target.value })}
-                    icon={<FiUser size={16} />}
-                    onEnter={handleSubmit}
-                  />
-                  <InputField
-                    label="Tên"
-                    value={user.lastName}
-                    onChange={(e) => setUser({ ...user, lastName: e.target.value })}
-                    icon={<FiUser size={16} />}
-                    onEnter={handleSubmit}
-                  />
-                  <InputField
-                    label="Email"
-                    value={user.email}
-                    onChange={(e) => setUser({ ...user, email: e.target.value })}
-                    icon={<FiMail size={16} />}
-                    disabled
-                  />
-                  <InputField
-                    label="Số điện thoại"
-                    value={user.phoneNumber}
-                    onChange={(e) =>
-                      setUser({ ...user, phoneNumber: e.target.value })
-                    }
-                    onEnter={handleSubmit}
-                    icon={<FiPhone size={16} />}
-                  />
-                </div>
-
-                <InputField
-                  label="Địa chỉ"
-                  value={user.address}
-                  onChange={(e) => setUser({ ...user, address: e.target.value })}
-                  icon={<FiMapPin size={16} />}
-                  onEnter={handleSubmit}
-                />
-
-                <div className="flex flex-col sm:flex-row gap-4 items-center pt-4">
-                  <button
-                    type="submit"
-                    className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 bg-primary text-white rounded-2xl font-bold shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
-                    disabled={loading}
-                  >
-                    {loading ? (
-                      <div className="flex items-center">
-                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-                        </svg>
-                        Đang lưu...
-                      </div>
-                    ) : (
-                      <>
-                        <FiSave size={20} className="mr-2 group-hover:scale-110 transition-transform" />
-                        Lưu thông tin cá nhân
-                      </>
-                    )}
-                  </button>
-                  <p className="text-xs text-textSecondary text-center sm:text-left italic">
-                    * Thông tin vai trò chỉ có thể thay đổi bởi quản trị viên.
-                  </p>
-                </div>
-              </form>
+              <div className="bg-white p-4 rounded-2xl border border-primary/10 shadow-sm">
+                <p className="text-[9px] font-black text-text-tertiary uppercase mb-1">Đơn hàng xử lý</p>
+                <p className="text-xl font-black text-text-primary">42</p>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Decorative Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-          {[
-            { label: 'Bảo mật', desc: 'Mật khẩu và xác thực 2 lớp', icon: <FiShield />, color: 'bg-green-500' },
-            { label: 'Địa chỉ', desc: 'Quản lý danh sách địa chỉ nhận hàng', icon: <FiHome />, color: 'bg-blue-500' },
-            { label: 'Cài đặt', desc: 'Cấu hình thông báo và giao diện', icon: <FiSettings />, color: 'bg-purple-500' },
-          ].map((item, i) => (
-            <div key={i} className="bg-white p-6 rounded-[2rem] shadow-xl border border-border hover:border-primary/30 transition-all cursor-pointer group">
-              <div className={`${item.color} w-12 h-12 rounded-2xl flex items-center justify-center text-white mb-4 group-hover:scale-110 transition-transform`}>
-                {item.icon}
+        {/* Right Col: Edit Form */}
+        <div className="lg:col-span-2">
+          <Card title="Cập nhật hồ sơ" extra={<FiUser className="text-primary" />}>
+            <form onSubmit={handleSubmit} className="flex flex-col gap-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Input
+                  label="Họ"
+                  value={user.firstName}
+                  onChange={(e) => setUser(prev => ({ ...prev, firstName: e.target.value }))}
+                  placeholder="Họ người dùng"
+                />
+                <Input
+                  label="Tên"
+                  value={user.lastName}
+                  onChange={(e) => setUser(prev => ({ ...prev, lastName: e.target.value }))}
+                  placeholder="Tên người dùng"
+                />
+                <Input
+                  label="Số điện thoại"
+                  value={user.phoneNumber}
+                  onChange={(e) => setUser(prev => ({ ...prev, phoneNumber: e.target.value }))}
+                  placeholder="09xx xxx xxx"
+                />
+                <Input
+                  label="Email (Không thể thay đổi)"
+                  value={user.email}
+                  disabled
+                  placeholder="example@gmail.com"
+                  className="bg-bg-subtle/50 opacity-70"
+                />
               </div>
-              <h3 className="font-bold text-textPrimary mb-1">{item.label}</h3>
-              <p className="text-xs text-textSecondary font-medium">{item.desc}</p>
-            </div>
-          ))}
+
+              <Input
+                label="Địa chỉ cư trú"
+                value={user.address}
+                onChange={(e) => setUser(prev => ({ ...prev, address: e.target.value }))}
+                placeholder="Nhập địa chỉ chi tiết…"
+              />
+
+              <div className="flex items-center justify-between pt-6 border-t border-border/40">
+                <div className="flex items-center text-text-tertiary">
+                   <FiShield className="mr-2" />
+                   <span className="text-[10px] font-bold uppercase italic">* Dữ liệu được bảo mật bởi WMS Pro</span>
+                </div>
+                <Button
+                  type="submit"
+                  isLoading={loading}
+                  className="h-12 px-10 shadow-primary/30"
+                >
+                  {loading ? "Đang lưu..." : "Lưu thay đổi"}
+                </Button>
+              </div>
+            </form>
+          </Card>
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        onConfirm={handleLogout}
+        title="Xác nhận đăng xuất"
+        message="Bạn có chắc chắn muốn rời khỏi hệ thống? Phiên làm việc hiện tại sẽ kết thúc."
+        confirmText="Đăng xuất"
+        variant="danger"
+      />
+
+      <Modal
+        isOpen={showPasswordModal}
+        onClose={() => setShowPasswordModal(false)}
+        title="Đổi mật khẩu"
+        size="sm"
+      >
+        <form onSubmit={handleChangePassword} className="flex flex-col gap-y-6 p-2">
+          <div className="flex flex-col items-center mb-6">
+            <div className="size-16 rounded-3xl bg-primary/10 flex items-center justify-center text-primary mb-3">
+              <FiLock size={32} />
+            </div>
+            <p className="text-[10px] font-black text-text-tertiary uppercase tracking-widest text-center">
+              Nhập mật khẩu cũ và mới để cập nhật bảo mật tài khoản
+            </p>
+          </div>
+          
+          <Input
+            label="Mật khẩu cũ"
+            type="password"
+            required
+            value={passwordData.oldPassword}
+            onChange={(e) => setPasswordData(prev => ({ ...prev, oldPassword: e.target.value }))}
+            placeholder="••••••••"
+          />
+          <Input
+            label="Mật khẩu mới"
+            type="password"
+            required
+            value={passwordData.newPassword}
+            onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
+            placeholder="••••••••"
+          />
+          <Input
+            label="Xác nhận mật khẩu mới"
+            type="password"
+            required
+            value={passwordData.confirmPassword}
+            onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+            placeholder="••••••••"
+          />
+          
+          <div className="flex gap-3 pt-4">
+            <Button
+              variant="outline"
+              type="button"
+              className="flex-1 h-12 rounded-2xl"
+              onClick={() => setShowPasswordModal(false)}
+            >
+              Hủy bỏ
+            </Button>
+            <Button
+              type="submit"
+              isLoading={loading}
+              className="flex-1 h-12 rounded-2xl shadow-primary/30"
+            >
+              Cập nhật
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      <Modal
+        isOpen={showActivityModal}
+        onClose={() => setShowActivityModal(false)}
+        title="Lịch sử hoạt động cá nhân"
+        size="md"
+      >
+        <div className="flex flex-col gap-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+          {activityLogs.length > 0 ? (
+            activityLogs.map((log) => (
+              <div key={log.id || log.createdAt} className="flex items-start gap-x-4 p-4 rounded-2xl bg-bg-subtle/30 border border-border/40 hover:border-primary/20 transition-all group">
+                <div className={cn(
+                  "size-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm",
+                  log.change_type === "IMPORT" ? "bg-success/10 text-success" : 
+                  log.change_type === "EXPORT" ? "bg-error/10 text-error" : "bg-info/10 text-info"
+                )}>
+                  {log.change_type === "IMPORT" ? <FiArrowDownLeft size={20} /> : 
+                   log.change_type === "EXPORT" ? <FiArrowUpRight size={20} /> : <FiClock size={20} />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between items-start mb-1">
+                    <h4 className="text-xs font-black text-text-primary uppercase tracking-tight truncate">
+                      {log.stock?.product?.name || "Sản phẩm không tên"}
+                    </h4>
+                    <span className="text-[10px] font-bold text-text-tertiary whitespace-nowrap">
+                      {new Date(log.createdAt).toLocaleString('vi-VN')}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-x-2">
+                    <Badge variant={log.change_type === "IMPORT" ? "success" : log.change_type === "EXPORT" ? "error" : "info"} className="text-[9px] px-2 py-0.5">
+                      {log.change_type}
+                    </Badge>
+                    <span className="text-[11px] font-bold text-text-secondary">
+                      Số lượng: <span className={cn(log.quantity > 0 ? "text-success" : "text-error")}>
+                        {log.quantity > 0 ? `+${log.quantity}` : log.quantity}
+                      </span>
+                    </span>
+                  </div>
+                  {log.note && (
+                    <p className="mt-2 text-[10px] text-text-tertiary italic leading-relaxed">
+                      " {log.note} "
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="text-center py-12 opacity-50">
+              <FiPackage size={48} className="mx-auto mb-4 text-text-tertiary" />
+              <p className="text-xs font-black uppercase tracking-widest">Chưa có lịch sử hoạt động</p>
+            </div>
+          )}
+        </div>
+      </Modal>
     </div>
   );
 };

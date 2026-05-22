@@ -10,20 +10,25 @@ const SignInUser = async (userEmail, userPassword) => {
       }
     );
 
-    const { user, access_token, errCode, message } = response.data;
+    const { user, access_token, errCode, message, requires2FA, requiresPIN, email } = response.data;
 
-    const userData = {
-      ...user,
-      access_token,
-    };
-
-    localStorage.setItem("user", JSON.stringify(userData));
+    // Only save to localStorage if login is complete (not waiting for 2FA or PIN)
+    if (errCode === 0 && !requires2FA && !requiresPIN) {
+      const userData = {
+        ...user,
+        access_token,
+      };
+      localStorage.setItem("user", JSON.stringify(userData));
+    }
 
     return {
       user,
       access_token,
       errCode,
       message,
+      requires2FA,
+      requiresPIN,
+      email
     };
   } catch (e) {
     console.error("SignInUser failed:", e);
@@ -104,6 +109,32 @@ const RefreshToken = async () => {
   }
 };
 
+const ChangePassword = async (data) => {
+  try {
+    const response = await axiosInstance.put(
+      `/user/change-password`,
+      data
+    );
+    return response.data;
+  } catch (e) {
+    console.error(e);
+    throw e;
+  }
+};
+
+const UpdatePreferences = async (data) => {
+  try {
+    const response = await axiosInstance.put(
+      `/user/update-preferences`,
+      data
+    );
+    return response.data;
+  } catch (e) {
+    console.error(e);
+    throw e;
+  }
+};
+
 export {
   SignInUser,
   SignUpUser,
@@ -112,4 +143,6 @@ export {
   GetDetailUser,
   DeleteUser,
   UpdateDetailUser,
+  ChangePassword,
+  UpdatePreferences,
 };

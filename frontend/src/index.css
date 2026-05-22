@@ -6,38 +6,49 @@
     
     body {
       font-family: 'Inter', sans-serif;
-      background-color: #F0F8FF;
+      @apply bg-bg-light dark:bg-dark-bg text-text-primary dark:text-dark-text-primary transition-colors duration-300;
     }
     
     .gradient-bg {
-      background: linear-gradient(to right, #00BFFF, #87CEFA);
+      @apply bg-gradient-to-r from-primary to-primary-light;
     }
     
     .gradient-text {
-      background: linear-gradient(to right, #00BFFF, #87CEFA);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
+      @apply bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent;
     }
     
-    /* Particle animation */
-    .particle {
-      position: absolute;
-      border-radius: 50%;
-      pointer-events: none;
+    /* Global Transitions */
+    * {
+      @apply transition-colors duration-200;
     }
     
-    @keyframes float {
-      0%, 100% {
-        transform: translateY(0) translateX(0);
-      }
-      25% {
-        transform: translateY(-20px) translateX(10px);
-      }
-      50% {
-        transform: translateY(-10px) translateX(-15px);
-      }
-      75% {
-        transform: translateY(15px) translateX(5px);
-      }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
     }
+    
+    .custom-scrollbar::-webkit-scrollbar-track {
+      @apply bg-transparent;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      @apply bg-text-tertiary/20 rounded-full hover:bg-text-tertiary/40 dark:bg-white/10 dark:hover:bg-white/20 transition-colors;
+    }
+
+    /* Animation Utilities */
+    .shake {
+      animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+    }
+
+    @keyframes shake {
+      10%, 90% { transform: translate3d(-1px, 0, 0); }
+      20%, 80% { transform: translate3d(2px, 0, 0); }
+      30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+      40%, 60% { transform: translate3d(4px, 0, 0); }
+    }
+
+    /* Glassmorphism utility */
+    .glass {
+      @apply bg-white/70 dark:bg-dark-card/70 backdrop-blur-xl border border-white/40 dark:border-white/5 shadow-soft-xl;
+    }
+

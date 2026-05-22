@@ -1,92 +1,98 @@
-# 🚀 Backend API - XD_HTTQL
+# Backend Smart WMS 3.0.0
 
-Server API mạnh mẽ cho hệ thống quản lý kho, xây dựng trên nền tảng **Node.js** và **Express.js**, quản lý dữ liệu thông qua **Sequelize ORM**.
+Backend cung cấp REST API cho toàn bộ hệ thống quản lý kho, xác thực người dùng, thống kê, thông báo và sao lưu dữ liệu.
 
----
+## Stack
 
-## 🛠️ Công nghệ sử dụng
-- **Runtime:** Node.js
-- **Framework:** Express.js
-- **Database:** MySQL
-- **ORM:** Sequelize
-- **Authentication:** JSON Web Token (JWT) & Cookies
-- **Security:** Bcrypt (Mã hóa mật khẩu), CORS, Cookie-parser
-- **File Upload:** Multer
+- Node.js
+- Express 5
+- Sequelize
+- MySQL
+- JWT + cookie
+- bcrypt / bcryptjs
+- speakeasy + qrcode
+- multer
 
----
+## Cấu trúc chính
 
-## 📁 Cấu trúc thư mục
 ```text
 backend/
-├── src/
-│   ├── config/      # Cấu hình Database & Environment
-│   ├── controller/  # Xử lý Request/Response và Logic điều hướng
-│   ├── middleware/  # Kiểm soát truy cập, upload file
-│   ├── migrations/  # Quản lý cấu trúc bảng database
-│   ├── models/      # Định nghĩa Schema (Sequelize Models)
-│   ├── routers/     # Định nghĩa các Endpoint API
-│   ├── seeders/     # Dữ liệu mẫu (Demo Data)
-│   ├── services/    # Xử lý nghiệp vụ (Business Logic) chuyên sâu
-│   └── utils/       # Các hàm tiện ích dùng chung
-├── public/          # Tài nguyên tĩnh (Hình ảnh sản phẩm)
-├── .env.example     # File mẫu cấu hình môi trường
-└── package.json     # Quản lý thư viện và script
+|-- src/
+|   |-- config/
+|   |-- controller/
+|   |-- middleware/
+|   |-- migrations/
+|   |-- models/
+|   |-- routers/
+|   `-- services/
+|-- public/
+|-- backups/
+|-- .env.example
+`-- package.json
 ```
 
----
+## Biến môi trường
 
-## ⚙️ Cài đặt môi trường
+Tạo `backend/.env` từ `.env.example`:
 
-1. Tạo file `.env` tại thư mục gốc của `/backend`.
-2. Sao chép nội dung từ `.env.example` và điều chỉnh các thông số sau:
-   - `PORT`: Cổng chạy server (mặc định 3001).
-   - `DB_DEV_NAME`: Tên database của bạn.
-   - `DB_DEV_USERNAME` & `DB_DEV_PASSWORD`: Tài khoản MySQL.
-   - `JWT_SECRET`: Chuỗi bảo mật để ký token.
+```env
+PORT=3001
+NODE_ENV=development
+DB_DEV_USERNAME=root
+DB_DEV_PASSWORD=
+DB_DEV_NAME=httt
+DB_DEV_HOST=127.0.0.1
+DB_DEV_DIALECT=mysql
+JWT_SECRET=your_secret
+```
 
----
+## Khởi động
 
-## 💾 Quản lý Database
-
-Sử dụng **Sequelize CLI** để quản lý database:
-
-- **Tạo bảng:** `npx sequelize-cli db:migrate`
-- **Tạo dữ liệu mẫu:** `npx sequelize-cli db:seed:all`
-- **Reset database:** `npx sequelize-cli db:migrate:undo:all`
-
----
-
-## 🛣️ API Endpoints (v1)
-
-Tất cả các route đều bắt đầu bằng `/api/v1`
-
-| Tài nguyên | Endpoint | Mô tả |
-| :--- | :--- | :--- |
-| **User** | `/user` | Quản lý đăng nhập, đăng ký, thông tin người dùng |
-| **Products** | `/products` | CRUD sản phẩm, quản lý hình ảnh |
-| **Orders** | `/orders` | Quản lý đơn hàng và trạng thái đơn |
-| **Customer** | `/customer` | Quản lý thông tin khách hàng |
-| **Supplier** | `/suppliers` | Quản lý nhà cung cấp |
-| **Shipper** | `/shipper` | Quản lý đối tác giao hàng |
-| **Stock** | `/stock` | Quản lý tồn kho và các lô hàng (Batches) |
-| **Import** | `/import-receipt` | Phiếu nhập kho và chi tiết nhập |
-| **Export** | `/export-receipt` | Phiếu xuất kho và chi tiết xuất |
-| **Inventory** | `/inventory` | Nhật ký thay đổi kho |
-| **Statistics** | `/statistics` | Báo cáo doanh thu và tăng trưởng |
-
----
-
-## 🛡️ Xác thực & Bảo mật
-- **JWT:** Token được lưu trữ trong **HTTP-Only Cookie** để ngăn chặn tấn công XSS.
-- **Middleware:** Kiểm tra quyền truy cập trước khi thực hiện các tác vụ quan trọng (Create, Update, Delete).
-
----
-
-## 🏃 Khởi động
 ```bash
-# Cài đặt dependencies
+cd backend
 npm install
-
-# Chạy ở chế độ phát triển (auto reload với nodemon)
+npx sequelize-cli db:migrate
 npm start
+```
+
+## Route modules
+
+Tất cả endpoint dùng prefix `/api/v1`:
+
+- `/user`
+- `/products`
+- `/shipper`
+- `/orders`
+- `/customer`
+- `/suppliers`
+- `/import-receipt`
+- `/import-detail`
+- `/export-receipt`
+- `/export-detail`
+- `/inventory`
+- `/stock`
+- `/statistics`
+- `/notifications`
+- `/2fa`
+- `/pin`
+- `/backup`
+
+## Tính năng backend nổi bật
+
+- Đăng nhập, refresh token, logout.
+- Quản lý session và thu hồi thiết bị.
+- 2FA bằng Authenticator app.
+- Security PIN 6 chữ số.
+- CRUD sản phẩm, đơn hàng, khách hàng, nhà cung cấp, shipper.
+- Quản lý nhập kho, xuất kho, tồn kho và inventory log.
+- Kiểm tra kết nối DB.
+- Export SQL và backup JSON.
+
+## Lệnh thường dùng
+
+```bash
+npm start
+npx sequelize-cli db:migrate
+npx sequelize-cli db:migrate:undo:all
+npx sequelize-cli db:seed:all
 ```

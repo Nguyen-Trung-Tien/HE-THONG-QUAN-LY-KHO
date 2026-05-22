@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import {
@@ -18,10 +18,11 @@ import Button from '../common/Button';
 import Input from '../common/Input';
 import Card from '../common/Card';
 import ConfirmModal from '../common/ConfirmModal';
+import Pagination from "../common/Pagination";
+import ExportExcel from "../common/ExportExcel";
+import ExportPDF from "../common/ExportPDF";
 
 const CURRENCY_UNIT = "VND";
-
-import Pagination from "../common/Pagination";
 
 export default function ImportReceipt() {
   const currentUser = useSelector((state) => state.user.currentUser);
@@ -54,10 +55,12 @@ export default function ImportReceipt() {
   const location = useLocation();
 
   useEffect(() => {
-    if (location.state?.openForm) setShowReceiptForm(true);
-  }, [location.state]);
+    if (location.state?.openForm) {
+      setShowReceiptForm(true);
+    }
+  }, [location]); // Depend on location instead of location.state if location comes from useLocation()
 
-  const fetchReceipts = async (page = currentPage, search = searchQuery) => {
+  const fetchReceipts = useCallback(async (page = currentPage, search = searchQuery) => {
     setLoading(true);
     try {
       const res = await getAllImportReceipts({
@@ -70,14 +73,14 @@ export default function ImportReceipt() {
         setTotalPages(res.totalPages || 1);
         setCurrentPage(res.currentPage || 1);
       }
-    } catch (e) {
+    } catch {
       toast.error("Lỗi khi tải dữ liệu phiếu nhập");
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, searchQuery, itemsPerPage]);
 
-  const fetchStockProducts = async () => {
+  const fetchStockProducts = useCallback(async () => {
     try {
       const stocks = await getStockProduct();
       const products = stocks.map((item) => ({
@@ -96,33 +99,31 @@ export default function ImportReceipt() {
     } catch (e) {
       console.error(e);
     }
-  };
+  }, []);
 
-  const fetchSuppliers = async () => {
+  const fetchSuppliers = useCallback(async () => {
     try {
       const data = await getManySupplier();
       setSupplierOptions([...new Map(data.map((s) => [s.name, s])).values()]);
     } catch (e) {
       console.error(e);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchReceipts();
     fetchSuppliers();
     fetchStockProducts();
-  }, []);
+  }, [fetchReceipts, fetchSuppliers, fetchStockProducts]);
 
   const handleSearchChange = (e) => {
     const value = e.target.value;
     setSearchQuery(value);
     setCurrentPage(1);
-    fetchReceipts(1, value);
   };
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
-    fetchReceipts(page, searchQuery);
   };
 
   const handleReceiptDelete = async () => {
@@ -130,7 +131,7 @@ export default function ImportReceipt() {
       await deleteImportReceipt(selectedReceiptId);
       toast.success("Xóa phiếu nhập thành công!");
       fetchReceipts();
-    } catch (e) {
+    } catch {
       toast.error(`Xóa phiếu nhập thất bại`);
     } finally {
       setIsDeleteModalOpen(false);
@@ -262,36 +263,62 @@ export default function ImportReceipt() {
 
     const { supplierData, import_date, userId, details, note } = receiptFormData;
 
-    if (!supplierData?.id || !import_date || !userId || details.length === 0) {
-      toast.error("Vui lòng điền đầy đủ thông tin");
+    // Validation
+    if (!supplierData?.id) {
+      toast.error("Vui lòng chọn nhà cung cấp");
+      setFormLoading(false);
+      return;
+    }
+    if (!import_date) {
+      toast.error("Vui lòng chọn ngày nhập");
+      setFormLoading(false);
+      return;
+    }
+    if (details.length === 0) {
+      toast.error("Phiếu nhập phải có ít nhất một mặt hàng");
+      setFormLoading(false);
+      return;
+    }
+
+    const invalidDetail = details.find(d => !d.productId || !d.quantity || Number(d.quantity) <= 0);
+    if (invalidDetail) {
+      toast.error("Vui lòng kiểm tra lại thông tin các mặt hàng (Mã SP, Số lượng > 0)");
       setFormLoading(false);
       return;
     }
 
     const payload = {
       supplierId: supplierData.id,
-      userId,
-      import_date,
-      note,
+      userId: userId || currentUser?.id,
+      import_date: import_date,
+      note: note || "Nhập kho hàng hóa",
       details: details.map((item) => ({
-        productId: item.productId,
-        quantity: item.quantity,
-        price: item.price,
+        productId: Number(item.productId),
+        quantity: Number(item.quantity),
+        price: String(item.price),
       })),
     };
+
+    if (!payload.userId) {
+      toast.error("Không tìm thấy thông tin người lập phiếu. Vui lòng đăng nhập lại.");
+      setFormLoading(false);
+      return;
+    }
 
     try {
       if (receiptFormData.id) {
         await updateImportReceipt(receiptFormData.id, payload);
-        toast.success("Cập nhật thành công!");
+        toast.success("Cập nhật phiếu nhập thành công!");
       } else {
         await createImportReceipt(payload);
         toast.success("Tạo phiếu nhập thành công!");
       }
       setShowReceiptForm(false);
       fetchReceipts();
-    } catch (e) {
-      toast.error(`Lỗi khi lưu phiếu nhập`);
+    } catch (err) {
+      console.error("Submit Error:", err);
+      const errorMsg = err.response?.data?.error || err.message || "Lỗi không xác định";
+      toast.error(`Lỗi khi lưu phiếu nhập: ${errorMsg}`);
     } finally {
       setFormLoading(false);
     }
@@ -306,23 +333,49 @@ export default function ImportReceipt() {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-textPrimary uppercase tracking-wide">
+          <h2 className="text-xl font-black text-text-primary tracking-tighter uppercase">
             Danh sách phiếu nhập
           </h2>
         </div>
         <div className="flex flex-col sm:flex-row gap-3">
+          <ExportPDF
+            data={receipts}
+            allData={receipts}
+            fileName="Danh_sach_phieu_nhap"
+            title="Danh sách phiếu nhập kho"
+            columns={[
+              { key: 'id', header: 'Ma phieu' },
+              { key: 'import_date', header: 'Ngay nhap' },
+              { key: 'supplierData.name', header: 'Nha cung cap' },
+              { key: 'userData.email', header: 'Nguoi lap' },
+              { key: 'note', header: 'Ghi chu' },
+            ]}
+          />
+          <ExportExcel
+            data={receipts}
+            allData={receipts}
+            fileName="Danh_sach_phieu_nhap"
+            sheetName="PhieuNhap"
+            columns={[
+              { key: 'id', header: 'Mã phiếu' },
+              { key: 'import_date', header: 'Ngày nhập' },
+              { key: 'supplierData.name', header: 'Nhà cung cấp' },
+              { key: 'userData.email', header: 'Người lập' },
+              { key: 'note', header: 'Ghi chú' },
+            ]}
+          />
           <div className="w-full sm:w-80">
             <Input
               placeholder="Tìm kiếm phiếu nhập..."
               value={searchQuery}
               onChange={handleSearchChange}
-              icon={<svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>}
+              leftIcon={<svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>}
             />
           </div>
           <Button
             onClick={() => openReceiptForm()}
-            variant="gradient"
-            leftIcon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>}
+            variant="primary"
+            leftIcon={<svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>}
           >
             Tạo phiếu mới
           </Button>
@@ -341,7 +394,6 @@ export default function ImportReceipt() {
             setSelectedReceiptId(id);
             setIsDeleteModalOpen(true);
           }}
-          CURRENCY_UNIT={CURRENCY_UNIT}
           loading={loading}
         />
         <div className="px-6 pb-6">
