@@ -13,30 +13,25 @@ module.exports = {
       },
       colors: {
         primary: {
-          DEFAULT: "#00BFFF",
+          DEFAULT: "rgb(var(--color-primary) / <alpha-value>)",
           light: "#87CEFA",
           dark: "#009ACD",
         },
         accent: "#FFD700",
         text: {
-          primary: "#2D3748",
-          secondary: "#718096",
-          tertiary: "#A0AEC0",
+          primary: "rgb(var(--text-primary) / <alpha-value>)",
+          secondary: "rgb(var(--text-secondary) / <alpha-value>)",
+          tertiary: "rgb(var(--text-tertiary) / <alpha-value>)",
         },
         // Dark Mode Colors
         dark: {
-          bg: "#0F172A",
-          card: "#1E293B",
-          border: "#334155",
-          text: {
-            primary: "#F8FAFC",
-            secondary: "#94A3B8",
-            tertiary: "#64748B",
-          }
+          bg: "#020617",
+          card: "#0F172A",
+          border: "#1E293B",
         },
         // Aliases for backward compatibility
-        textPrimary: "#2D3748",
-        textSecondary: "#718096",
+        textPrimary: "rgb(var(--text-primary) / <alpha-value>)",
+        textSecondary: "rgb(var(--text-secondary) / <alpha-value>)",
         primaryLight: "#87CEFA",
         border: "#E2E8F0",
         card: "#FFFFFF",
@@ -44,10 +39,10 @@ module.exports = {
           light: "#F0F8FF",
           subtle: "#F7FAFC",
         },
-        success: "#10B981",
-        error: "#EF4444",
-        warning: "#F59E0B",
-        info: "#3B82F6",
+        success: "rgb(var(--color-success) / <alpha-value>)",
+        error: "rgb(var(--color-error) / <alpha-value>)",
+        warning: "rgb(var(--color-warning) / <alpha-value>)",
+        info: "rgb(var(--color-info) / <alpha-value>)",
       },
       borderRadius: {
         'xl': '0.75rem',

@@ -5,7 +5,6 @@ import CreateProduct from "./CreateProduct";
 import EditProduct from "./EditProduct";
 import ProductDetail from "./ProductDetail";
 import { useSelector } from "react-redux";
-import { useTranslation } from "../../i18n/useTranslation";
 
 // Common Components
 import Button from "../common/Button";
@@ -21,7 +20,6 @@ import ExportPDF from "../common/ExportPDF";
 import { cn } from "../../utils/cn";
 
 const ProductList = () => {
-  const { t } = useTranslation();
   const [products, setProducts] = useState([]);
   const [filter, setFilter] = useState("Tất cả");
   const [search, setSearch] = useState("");
@@ -61,7 +59,7 @@ const ProductList = () => {
     try {
       await deleteProduct(selectedProduct.id);
       setProducts((prev) => prev.filter((p) => p.id !== selectedProduct.id));
-      toast.success(t('delete') + " thành công");
+      toast.success("Xóa thành công");
     } catch {
       toast.error("Xóa thất bại");
     } finally {
@@ -81,10 +79,10 @@ const ProductList = () => {
       title: "STT",
       key: "index",
       render: (_, __, index) => (page - 1) * 10 + index + 1,
-      className: "w-12 text-center text-[11px] dark:text-dark-text-tertiary",
+      className: "w-12 text-center text-[11px]",
     },
     {
-      title: t('products'),
+      title: "Sản phẩm",
       key: "name",
       render: (name, row) => (
         <div className="flex items-center gap-x-2">
@@ -99,14 +97,14 @@ const ProductList = () => {
               </div>
             )}
           </div>
-          <span className="font-bold text-text-primary dark:text-dark-text-primary text-[11px] tracking-tight truncate max-w-[150px] uppercase">{name}</span>
+          <span className="font-bold text-text-primary text-[11px] tracking-tight truncate max-w-[150px] uppercase">{name}</span>
         </div>
       ),
     },
     {
       title: "Danh mục",
       key: "category",
-      className: "text-[11px] text-text-secondary dark:text-dark-text-secondary uppercase font-semibold",
+      className: "text-[11px] text-text-secondary uppercase font-semibold",
     },
     {
       title: "Giá",
@@ -114,10 +112,10 @@ const ProductList = () => {
       render: (price) => <span className="font-black text-primary text-[11px]">{Number(price).toLocaleString()} đ</span>,
     },
     {
-      title: t('inventory'),
+      title: "Tồn kho",
       key: "stock",
       render: (stock, row) => (
-        <span className={cn("text-[11px] font-bold", stock < 10 ? "text-error font-black" : "text-text-primary dark:text-dark-text-primary")}>
+        <span className={cn("text-[11px] font-bold", stock < 10 ? "text-error font-black" : "text-text-primary")}>
           {stock} <span className="text-[10px] text-text-tertiary font-medium">{row.unit}</span>
         </span>
       ),
@@ -184,13 +182,13 @@ const ProductList = () => {
     <div className="flex flex-col gap-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500 pb-10">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-3">
         <div>
-          <Badge variant="primary" className="mb-1 uppercase tracking-widest">{t('inventory')}</Badge>
-          <h1 className="text-xl font-semibold text-text-primary dark:text-dark-text-primary tracking-tighter uppercase leading-none">
-            {t('products')}
+          <Badge variant="primary" className="mb-1 uppercase tracking-widest">Tồn kho</Badge>
+          <h1 className="heading-1">
+            Sản phẩm
           </h1>
-          <p className="text-[10px] text-text-secondary dark:text-dark-text-tertiary font-semibold uppercase mt-1">Quản lý danh mục hàng hóa hệ thống</p>
+          <p className="subheading">Quản lý danh mục hàng hóa hệ thống</p>
         </div>
-        <div className="flex flex-wrap gap-2 scale-90 sm:scale-100 origin-right">
+        <div className="flex flex-wrap gap-2 scale-90 sm:scale-100 origin-right relative z-50">
           <ExportPDF
             data={products}
             fileName="Danh_sach_san_pham"
@@ -233,16 +231,16 @@ const ProductList = () => {
         </div>
       </div>
 
-      <Card className="shadow-soft-xl border-border/50 dark:border-white/5" noPadding>
-        <div className="p-4 flex flex-col md:flex-row items-center gap-3 justify-between border-b border-border/40 dark:border-white/5">
-          <div className="flex bg-bg-subtle dark:bg-white/5 p-0.5 rounded-lg w-full md:w-auto border border-border/50 dark:border-white/10">
+      <Card className="shadow-soft-xl border-border/50 dark:border-dark-border/40" noPadding>
+        <div className="p-4 flex flex-col md:flex-row items-center gap-3 justify-between border-b border-border/40 dark:border-dark-border/40">
+          <div className="flex bg-bg-subtle dark:bg-white/5 p-0.5 rounded-lg w-full md:w-auto border border-border/50 dark:border-dark-border/60">
             {["Tất cả", "Còn hàng", "Hết hàng"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setFilter(tab)}
                 className={cn(
                   "flex-1 md:flex-none px-4 py-1 text-[10px] font-black rounded-md transition-all duration-300 uppercase tracking-tighter",
-                  filter === tab ? "bg-white dark:bg-dark-card text-primary shadow-sm" : "text-text-secondary dark:text-dark-text-tertiary hover:text-text-primary dark:hover:text-dark-text-primary"
+                  filter === tab ? "bg-white dark:bg-dark-card text-primary shadow-sm" : "text-text-secondary hover:text-text-primary"
                 )}
               >
                 {tab}
@@ -264,7 +262,7 @@ const ProductList = () => {
           <Table columns={columns} data={filteredProducts} loading={loading} />
         </div>
 
-        <div className="p-4 border-t border-border/40 dark:border-white/5 flex justify-center">
+        <div className="p-4 border-t border-border/40 dark:border-dark-border/40 flex justify-center">
           <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
         </div>
       </Card>
@@ -282,7 +280,7 @@ const ProductList = () => {
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleDelete}
-        title={t('confirm_delete')}
+        title="Xác nhận xóa"
         message={`Xóa sản phẩm "${selectedProduct?.name}"?`}
       />
     </div>

@@ -29,7 +29,7 @@ module.exports = (sequelize, DataTypes) => {
       role: DataTypes.STRING,
       status: DataTypes.STRING,
       gender: DataTypes.STRING,
-      image: DataTypes.BLOB("long"),
+      image: DataTypes.TEXT("long"),
       refresh_token: DataTypes.TEXT,
       is2FAEnabled: {
         type: DataTypes.BOOLEAN,
@@ -52,10 +52,6 @@ module.exports = (sequelize, DataTypes) => {
       notifStockAlert: {
         type: DataTypes.BOOLEAN,
         defaultValue: true,
-      },
-      preferredLanguage: {
-        type: DataTypes.STRING,
-        defaultValue: "vi",
       },
       preferredTheme: {
         type: DataTypes.STRING,

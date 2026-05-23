@@ -109,10 +109,10 @@ export default function EditShipperForm({ shipper, onSubmit, onClose }) {
               name="status"
               value={formData.status}
               onChange={handleChange}
-              className="w-full bg-bg-subtle/30 border border-border/50 text-text-primary text-xs rounded-xl h-11 px-4 outline-none focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold shadow-inner-sm transition-all duration-300"
+              className="w-full bg-bg-subtle/30 dark:bg-dark-card border border-border/50 dark:border-dark-border/40 text-text-primary text-xs rounded-xl h-11 px-4 outline-none focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold shadow-inner-sm transition-all duration-300"
             >
-              <option value="available">Sẵn sàng</option>
-              <option value="delivering">Đang giao hàng</option>
+              <option className="dark:bg-dark-card dark:text-text-primary" value="available">Sẵn sàng</option>
+              <option className="dark:bg-dark-card dark:text-text-primary" value="delivering">Đang giao hàng</option>
             </select>
           </div>
 

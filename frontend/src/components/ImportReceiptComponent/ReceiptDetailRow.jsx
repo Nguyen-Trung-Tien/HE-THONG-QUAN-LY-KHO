@@ -34,9 +34,9 @@ export default function ReceiptDetailRow({
   const StockProductData = detail.StockProductData || {};
 
   return (
-    <div className="group flex flex-col w-full gap-4 p-6 border border-border/50 rounded-3xl shadow-sm bg-white hover:border-primary/40 hover:shadow-soft-xl transition-all duration-300 relative overflow-hidden">
+    <div className="group flex flex-col w-full gap-4 p-6 border border-border/50 rounded-3xl shadow-sm bg-white dark:bg-dark-card hover:border-primary/40 hover:shadow-soft-xl transition-all duration-300 relative overflow-hidden">
       {/* Index Badge */}
-      <div className="absolute top-0 left-0 w-8 h-8 bg-bg-subtle flex items-center justify-center rounded-br-2xl text-[10px] font-black text-text-tertiary">
+      <div className="absolute top-0 left-0 w-8 h-8 bg-bg-subtle dark:bg-dark-border/40 flex items-center justify-center rounded-br-2xl text-[10px] font-black text-text-tertiary">
         {String(index + 1).padStart(2, '0')}
       </div>
 
@@ -49,16 +49,16 @@ export default function ReceiptDetailRow({
           <select
             value={detail.productId}
             onChange={handleProductSelect}
-            className="w-full bg-bg-subtle/30 border border-border/50 text-text-primary text-xs rounded-2xl py-3 px-5 outline-none transition-all duration-300 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold shadow-inner-sm"
+            className="w-full bg-bg-subtle/30 dark:bg-dark-card border border-border/50 dark:border-dark-border/40 text-text-primary text-xs rounded-2xl py-3 px-5 outline-none transition-all duration-300 focus:bg-white focus:dark:bg-dark-card focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold shadow-inner-sm"
             disabled={formLoading || productOptions.length === 0}
           >
-            <option value="">
+            <option className="dark:bg-dark-card dark:text-text-primary" value="">
               {productOptions.length === 0
                 ? "Không có dữ liệu hàng hóa"
                 : "-- Chọn sản phẩm nhập --"}
             </option>
             {productOptions.map((p) => (
-              <option key={p.id} value={p.id}>
+              <option className="dark:bg-dark-card dark:text-text-primary" key={p.id} value={p.id}>
                 {p.name} ({p.supplierName || "N/A"})
               </option>
             ))}
@@ -105,7 +105,7 @@ export default function ReceiptDetailRow({
       </div>
 
       {detail.StockProductData?.id && (
-        <div className="flex items-center gap-4 p-4 rounded-[1.5rem] bg-gradient-to-r from-bg-subtle/50 to-transparent border border-border/30">
+        <div className="flex items-center gap-4 p-4 rounded-[1.5rem] bg-gradient-to-r from-bg-subtle/50 dark:from-white/[0.02] to-transparent border border-border/30 dark:border-dark-border/40">
           <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="flex flex-col">
               <span className="text-[9px] font-black text-text-tertiary uppercase tracking-tighter">Hiện có</span>

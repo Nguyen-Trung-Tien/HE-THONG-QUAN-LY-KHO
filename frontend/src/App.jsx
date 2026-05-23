@@ -29,18 +29,11 @@ function App() {
 	const dispatch = useDispatch();
 	const user = useSelector((state) => state.user.currentUser);
 
-	useEffect(() => {
-		const storedUser = localStorage.getItem('user');
-		if (storedUser) {
-			dispatch(login(JSON.parse(storedUser)));
-		}
-	}, [dispatch]);
-
 	// Apply global theme
 	useEffect(() => {
 		if (user?.preferredTheme === 'dark') {
 			document.documentElement.classList.add('dark');
-		} else {
+		} else if (user?.preferredTheme === 'light') {
 			document.documentElement.classList.remove('dark');
 		}
 	}, [user?.preferredTheme]);

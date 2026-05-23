@@ -98,7 +98,7 @@ const CreateProduct = ({ onSuccess }) => {
         <div className="flex flex-col items-center">
           <div className="group relative w-32 h-32">
             <label htmlFor="create-product-image" className="cursor-pointer block h-full">
-              <div className="h-full rounded-3xl border-2 border-dashed border-border/60 bg-bg-subtle/30 overflow-hidden transition-all duration-300 group-hover:border-primary group-hover:bg-white shadow-inner-sm">
+              <div className="h-full rounded-3xl border-2 border-dashed border-border/60 dark:border-dark-border/40 bg-bg-subtle/30 dark:bg-dark-card/40 overflow-hidden transition-all duration-300 group-hover:border-primary group-hover:bg-white dark:group-hover:bg-dark-card shadow-inner-sm">
                 {preview ? (
                   <img src={preview} alt="Preview" className="w-full h-full object-cover" />
                 ) : (
@@ -164,10 +164,10 @@ const CreateProduct = ({ onSuccess }) => {
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value)}
-              className="w-full bg-bg-subtle/30 border border-border/50 text-text-primary text-xs rounded-2xl h-11 px-4 outline-none transition-all duration-300 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold shadow-inner-sm"
+              className="w-full bg-bg-subtle/30 dark:bg-dark-card/40 border border-border/50 dark:border-dark-border/40 text-text-primary text-xs rounded-2xl h-11 px-4 outline-none transition-all duration-300 focus:bg-white dark:focus:bg-dark-card focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold shadow-inner-sm"
             >
-              <option value="Còn hàng">Còn hàng</option>
-              <option value="Hết hàng">Hết hàng</option>
+              <option value="Còn hàng" className="dark:bg-dark-card">Còn hàng</option>
+              <option value="Hết hàng" className="dark:bg-dark-card">Hết hàng</option>
             </select>
           </div>
 
@@ -179,11 +179,11 @@ const CreateProduct = ({ onSuccess }) => {
             <select
               value={supplierId}
               onChange={(e) => setSupplierId(e.target.value)}
-              className="w-full bg-bg-subtle/30 border border-border/50 text-text-primary text-xs rounded-2xl h-11 px-4 outline-none transition-all duration-300 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold shadow-inner-sm"
+              className="w-full bg-bg-subtle/30 dark:bg-dark-card/40 border border-border/50 dark:border-dark-border/40 text-text-primary text-xs rounded-2xl h-11 px-4 outline-none transition-all duration-300 focus:bg-white dark:focus:bg-dark-card focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold shadow-inner-sm"
             >
-              <option value="">-- Chọn nhà cung cấp --</option>
+              <option value="" className="dark:bg-dark-card">-- Chọn nhà cung cấp --</option>
               {suppliers.map((s) => (
-                <option key={s.id} value={s.id}>{s.name}</option>
+                <option key={s.id} value={s.id} className="dark:bg-dark-card">{s.name}</option>
               ))}
             </select>
           </div>
@@ -197,7 +197,7 @@ const CreateProduct = ({ onSuccess }) => {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows="2"
-              className="w-full bg-bg-subtle/30 border border-border/50 text-text-primary text-xs rounded-2xl py-3 px-4 outline-none transition-all duration-300 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold shadow-inner-sm resize-none"
+              className="w-full bg-bg-subtle/30 dark:bg-dark-card/40 border border-border/50 dark:border-dark-border/40 text-text-primary text-xs rounded-2xl py-3 px-4 outline-none transition-all duration-300 focus:bg-white dark:focus:bg-dark-card focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold shadow-inner-sm resize-none"
               placeholder="Nhập ghi chú sản phẩm..."
             />
           </div>

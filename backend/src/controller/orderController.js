@@ -65,10 +65,25 @@ const createOrder = async (req, res) => {
             message: `Số lượng tồn kho không đủ cho sản phẩm ${stockRecord.name}`,
           });
         }
+        const oldQuantity = stockRecord.stock;
         await stockRecord.decrement("stock", {
           by: item.quantity,
           transaction: t,
         });
+
+        await db.InventoryLog.create(
+          {
+            stockId: stockRecord.id,
+            userId: null, // Orders are usually placed by customers, but we could link a system user if needed
+            change_type: "EXPORT",
+            quantity: -item.quantity,
+            qtyBefore: oldQuantity,
+            qtyAfter: oldQuantity - item.quantity,
+            note: `Xuất hàng cho đơn hàng #${order.orderNumber}`,
+          },
+          { transaction: t }
+        );
+
         await db.OrderItem.create(
           {
             orderId: order.id,

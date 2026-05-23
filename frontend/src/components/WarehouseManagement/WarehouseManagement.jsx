@@ -76,19 +76,19 @@ export default function WarehouseManagement() {
           <p className="text-[10px] text-text-secondary font-semibold">Nhập xuất kho và chứng từ</p>
         </div>
         
-        <div className="flex bg-bg-subtle p-0.5 rounded-xl border border-border/50 shadow-sm">
+        <div className="flex bg-bg-subtle dark:bg-white/5 p-1 rounded-2xl border border-border/40 dark:border-dark-border/40 backdrop-blur-sm shadow-sm">
           {menuItems.map((item) => (
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
               className={cn(
-                "flex items-center gap-1.5 px-5 py-1.5 rounded-lg font-black text-[11px] transition-all duration-300",
+                "flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all duration-300",
                 activeTab === item.id
-                  ? "bg-white text-primary shadow-sm scale-100"
-                  : "text-text-secondary hover:text-text-primary"
+                  ? "bg-white dark:bg-dark-card text-primary shadow-soft-md scale-[1.05]"
+                  : "text-text-tertiary hover:text-text-primary"
               )}
             >
-              <span className="scale-90">{item.icon}</span>
+              <span className="scale-110">{item.icon}</span>
               <span>{item.label}</span>
             </button>
           ))}

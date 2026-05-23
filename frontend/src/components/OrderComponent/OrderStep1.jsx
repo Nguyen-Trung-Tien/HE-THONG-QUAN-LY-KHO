@@ -1,4 +1,8 @@
 import React, { useState, useMemo } from "react";
+import Badge from "../common/Badge";
+import Button from "../common/Button";
+import { FiPlus, FiTrash2, FiSearch, FiPackage, FiRefreshCw, FiCheckCircle } from "react-icons/fi";
+import { cn } from "../../utils/cn";
 
 function OrderStep1({
   products,
@@ -30,20 +34,18 @@ function OrderStep1({
   }, [products, searchTerm, selectedCategory, filter]);
 
   const updateProductQuantity = (index, newQuantity) => {
-  let quantity = Number(newQuantity);
+    let quantity = Number(newQuantity);
+    if (isNaN(quantity) || quantity < 1) quantity = 1;
+    if (quantity > orderData.products[index].stock) {
+      quantity = orderData.products[index].stock;
+    }
 
-
-  if (isNaN(quantity) || quantity < 1) quantity = 1;
-  if (quantity > orderData.products[index].stock) {
-    quantity = orderData.products[index].stock;
-  }
-
-  setOrderData((prev) => {
-    const updatedProducts = [...prev.products];
-    updatedProducts[index].quantity = quantity;
-    return { ...prev, products: updatedProducts };
-  });
-};
+    setOrderData((prev) => {
+      const updatedProducts = [...prev.products];
+      updatedProducts[index].quantity = quantity;
+      return { ...prev, products: updatedProducts };
+    });
+  };
 
   const removeProductFromOrder = (index) => {
     setOrderData((prev) => {
@@ -52,196 +54,128 @@ function OrderStep1({
       return { ...prev, products: updatedProducts };
     });
   };
+
   const parsePrice = (priceString) => {
-    if (typeof priceString !== "string") return 0;
+    if (typeof priceString !== "string") return Number(priceString) || 0;
     return Number(priceString.replace(/\./g, "").replace("đ", "").trim());
   };
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center space-x-2">
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-center space-x-3">
           <label
             htmlFor="categoryFilter"
-            className="text-sm font-medium text-textSecondary"
+            className="text-[10px] font-black text-text-tertiary uppercase tracking-widest ml-2"
           >
-            Danh mục:
+            Danh mục
           </label>
           <select
             id="categoryFilter"
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="px-3 py-2 border rounded-lg bg-white"
+            className="px-4 py-2 border border-border/50 dark:border-dark-border/40 rounded-xl bg-white dark:bg-dark-card text-xs font-bold text-text-primary dark:text-text-primary outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all shadow-sm"
           >
-            <option value="all">Tất cả</option>
+            <option className="dark:bg-dark-card dark:text-text-primary" value="all">Tất cả danh mục</option>
             {categories.map((category) => (
-              <option key={category} value={category}>
+              <option className="dark:bg-dark-card dark:text-text-primary" key={category} value={category}>
                 {category}
               </option>
             ))}
           </select>
         </div>
 
-        <div className="relative flex-grow max-w-lg mx-4">
+        <div className="relative flex-grow max-w-lg">
           <input
             onChange={(e) => setSearchTerm(e.target.value)}
             value={searchTerm}
             type="text"
-            placeholder="Tìm kiếm sản phẩm..."
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+            placeholder="Tìm kiếm sản phẩm theo tên..."
+            className="w-full pl-12 pr-4 py-3 rounded-2xl border border-border/50 dark:border-dark-border/60 bg-bg-subtle/30 dark:bg-dark-card text-text-primary dark:text-text-primary text-xs outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold shadow-inner-sm"
           />
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg
-              className="h-5 w-5 text-textSecondary"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
+          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-text-tertiary">
+            <FiSearch size={18} />
           </div>
         </div>
 
-        <div className="flex space-x-2">
-          <button
-            onClick={() => setFilter("Tất cả")}
-            className={`px-3 py-1 text-sm rounded-md ${
-              filter === "Tất cả"
-                ? "gradient-bg text-white"
-                : "bg-white text-textSecondary hover:bg-gray-200"
-            } transition-colors`}
-          >
-            Tất cả
-          </button>
-          <button
-            onClick={() => setFilter("Còn hàng")}
-            className={`px-3 py-1 text-sm rounded-md ${
-              filter === "Còn hàng"
-                ? "gradient-bg text-white"
-                : "bg-white text-textSecondary hover:bg-gray-200"
-            } transition-colors`}
-          >
-            Còn hàng
-          </button>
-          <button
-            onClick={() => setFilter("Hết hàng")}
-            className={`px-3 py-1 text-sm rounded-md ${
-              filter === "Hết hàng"
-                ? "gradient-bg text-white"
-                : "bg-white text-textSecondary hover:bg-gray-200"
-            } transition-colors`}
-          >
-            Hết hàng
-          </button>
+        <div className="flex bg-bg-subtle dark:bg-white/5 p-1 rounded-2xl border border-border/40 dark:border-dark-border/40 backdrop-blur-sm">
+          {["Tất cả", "Còn hàng", "Hết hàng"].map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={cn(
+                "px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300",
+                filter === f
+                  ? "bg-white dark:bg-dark-card text-primary shadow-soft-md scale-[1.05]"
+                  : "text-text-tertiary hover:text-text-primary"
+              )}
+            >
+              {f}
+            </button>
+          ))}
         </div>
       </div>
+
       {isLoadingProducts ? (
-        <div className="flex justify-center py-8">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        <div className="flex flex-col items-center justify-center py-20 opacity-30">
+          <FiRefreshCw className="animate-spin size-10 mb-4" />
+          <p className="text-xs font-black uppercase tracking-widest">Đang tải danh sách sản phẩm...</p>
         </div>
       ) : (
-        <div className="bg-white shadow-card rounded-lg overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-border">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-textSecondary uppercase tracking-wider">
-                    Tên sản phẩm
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-textSecondary uppercase tracking-wider">
-                    Danh mục
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-textSecondary uppercase tracking-wider">
-                    Giá
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-textSecondary uppercase tracking-wider">
-                    Trạng thái
-                  </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-textSecondary uppercase tracking-wider">
-                    Hành động
-                  </th>
+        <div className="bg-white dark:bg-dark-card shadow-soft-xl rounded-[2rem] border border-border/40 dark:border-dark-border/40 overflow-hidden">
+          <div className="overflow-x-auto custom-scrollbar">
+            <table className="min-w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-gradient-to-r from-bg-subtle/50 dark:from-white/[0.01] to-white dark:to-dark-card">
+                  {["Tên sản phẩm", "Danh mục", "Giá", "Trạng thái", "Hành động"].map((header, i) => (
+                    <th key={i} className="px-8 py-5 text-[10px] font-black text-text-tertiary uppercase tracking-widest border-b border-border/30 dark:border-dark-border/40">
+                      {header}
+                    </th>
+                  ))}
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-border">
+              <tbody className="divide-y divide-border/20 dark:divide-dark-border/40">
                 {filteredProducts.map((product) => {
                   const isInOrder = orderData.products.some(
                     (item) => item.productId === product.id
                   );
                   return (
-                    <tr key={product.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-textPrimary">
+                    <tr key={product.id} className="group hover:bg-primary/5 dark:hover:bg-white/[0.02] transition-all duration-300">
+                      <td className="px-8 py-5 whitespace-nowrap">
+                        <div className="text-xs font-black text-text-primary uppercase tracking-tight group-hover:translate-x-1 transition-transform">
                           {product.name}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-textPrimary">
+                      <td className="px-8 py-5 whitespace-nowrap">
+                        <Badge variant="neutral" size="sm">
                           {product.category}
-                        </div>
+                        </Badge>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-textPrimary">
+                      <td className="px-8 py-5 whitespace-nowrap">
+                        <div className="text-xs font-black text-primary tracking-tighter">
                           {product.price.toLocaleString("vi-VN")}đ
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`px-2 py-1 text-xs rounded-full ${
-                            product.status === "Còn hàng"
-                              ? "bg-green-100 text-green-800"
-                              : "bg-red-100 text-red-800"
-                          }`}
-                        >
+                      <td className="px-8 py-5 whitespace-nowrap">
+                        <Badge variant={product.status === "Còn hàng" ? "success" : "error"} size="sm">
                           {product.status}
-                        </span>
+                        </Badge>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
+                      <td className="px-8 py-5 whitespace-nowrap text-center">
                         <button
                           onClick={() => addProductToOrder(product)}
                           disabled={product.status === "Hết hàng" || isInOrder}
-                          className={`p-1.5 rounded-full transition-all duration-300 ${
+                          className={cn(
+                            "size-10 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm mx-auto",
                             isInOrder
-                              ? "bg-green-100 text-green-600 cursor-not-allowed"
+                              ? "bg-success text-white scale-110 shadow-success/20 cursor-not-allowed"
                               : product.status === "Hết hàng"
-                              ? "text-gray-400 cursor-not-allowed"
-                              : "text-primary hover:bg-primary/10"
-                          }`}
+                              ? "bg-bg-subtle dark:bg-white/5 text-text-tertiary cursor-not-allowed opacity-50"
+                              : "bg-primary/10 text-primary hover:bg-primary hover:text-white hover:shadow-lg hover:shadow-primary/30 active:scale-90"
+                          )}
                           title={isInOrder ? "Đã thêm" : "Thêm vào đơn"}
                         >
-                          {isInOrder ? (
-                            <svg
-                              className="w-5 h-5"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M5 13l4 4L19 7"
-                              />
-                            </svg>
-                          ) : (
-                            <svg
-                              className="w-5 h-5"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                              />
-                            </svg>
-                          )}
+                          {isInOrder ? <FiCheckCircle size={18} /> : <FiPlus size={18} />}
                         </button>
                       </td>
                     </tr>
@@ -252,108 +186,78 @@ function OrderStep1({
           </div>
         </div>
       )}
+
       {orderData.products.length > 0 && (
-        <div className="mt-8">
-          <h4 className="text-md font-semibold text-textPrimary mb-4">
-            Sản phẩm đã chọn
-          </h4>
-          <div className="bg-white shadow-card rounded-lg overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-border">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-textSecondary uppercase tracking-wider">
-                      Tên sản phẩm
-                    </th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-textSecondary uppercase tracking-wider">
-                      Đơn giá
-                    </th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-textSecondary uppercase tracking-wider">
-                      Số lượng
-                    </th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-textSecondary uppercase tracking-wider">
-                      Thành tiền
-                    </th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-textSecondary uppercase tracking-wider">
-                      Hành động
-                    </th>
+        <div className="mt-12 space-y-6 animate-in slide-in-from-bottom-4 duration-500">
+          <div className="flex items-center space-x-3">
+             <div className="size-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                <FiPackage />
+             </div>
+             <h4 className="text-sm font-black text-text-primary uppercase tracking-[0.2em]">
+                Sản phẩm đã chọn ({orderData.products.length})
+             </h4>
+          </div>
+
+          <div className="bg-white dark:bg-dark-card shadow-soft-2xl rounded-[2.5rem] border border-border/40 dark:border-dark-border/40 overflow-hidden">
+            <div className="overflow-x-auto custom-scrollbar">
+              <table className="min-w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-bg-subtle/30 dark:bg-white/[0.01]">
+                    {["Tên sản phẩm", "Đơn giá", "Số lượng", "Thành tiền", "Hành động"].map((h, i) => (
+                       <th key={i} className={cn(
+                         "px-8 py-5 text-[10px] font-black text-text-tertiary uppercase tracking-widest border-b border-border/30 dark:border-dark-border/40",
+                         i > 0 && "text-center"
+                       )}>
+                        {h}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-border">
+                <tbody className="divide-y divide-border/20 dark:divide-dark-border/40">
                   {orderData.products.map((item, index) => (
-                    <tr
-                      key={item.productId}
-                      className="hover:bg-gray-50 bg-white"
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-textPrimary">
+                    <tr key={item.productId} className="group hover:bg-primary/[0.02] dark:hover:bg-white/[0.01] transition-all">
+                      <td className="px-8 py-6 whitespace-nowrap">
+                        <div className="text-xs font-black text-text-primary uppercase tracking-tight">
                           {item.name}
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-center whitespace-nowrap">
+                      <td className="px-8 py-6 text-center whitespace-nowrap text-xs font-bold text-text-secondary">
                         {item.price.toLocaleString("vi-VN")}đ
                       </td>
-                      <td className="px-6 py-4 text-center whitespace-nowrap">
-                        <div className="inline-flex items-center space-x-2">
+                      <td className="px-8 py-6 text-center whitespace-nowrap">
+                        <div className="inline-flex items-center bg-bg-subtle dark:bg-white/5 p-1 rounded-xl border border-border/40 dark:border-dark-border/40">
                           <button
-                            onClick={() =>
-                              updateProductQuantity(index, item.quantity - 1)
-                            }
+                            onClick={() => updateProductQuantity(index, item.quantity - 1)}
                             disabled={item.quantity <= 1}
-                            className="px-2 py-1 border rounded hover:bg-gray-100 disabled:opacity-50 "
+                            className="size-8 flex items-center justify-center rounded-lg hover:bg-white dark:hover:bg-dark-card hover:text-primary transition-all disabled:opacity-30 disabled:cursor-not-allowed font-black"
                           >
                             -
                           </button>
                           <input
-                        
                             min={1}
                             max={item.stock}
                             value={item.quantity}
-                            onChange={(e) =>
-                              updateProductQuantity(
-                                index,
-                                Number(e.target.value)
-                              )
-                            }
-                            className="w-16 text-center border rounded "
+                            onChange={(e) => updateProductQuantity(index, Number(e.target.value))}
+                            className="w-12 text-center bg-transparent text-xs font-black text-text-primary outline-none"
                           />
-
                           <button
-                            onClick={() =>
-                              updateProductQuantity(index, item.quantity + 1)
-                            }
+                            onClick={() => updateProductQuantity(index, item.quantity + 1)}
                             disabled={item.quantity >= item.stock}
-                            className="px-2 py-1 border rounded hover:bg-gray-100 disabled:opacity-50"
+                            className="size-8 flex items-center justify-center rounded-lg hover:bg-white dark:hover:bg-dark-card hover:text-primary transition-all disabled:opacity-30 disabled:cursor-not-allowed font-black"
                           >
                             +
                           </button>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-center whitespace-nowrap font-semibold text-primary">
-                        {(
-                          parsePrice(item.price) * item.quantity
-                        ).toLocaleString("vi-VN")}
-                        đ
+                      <td className="px-8 py-6 text-center whitespace-nowrap font-black text-primary text-sm tracking-tighter">
+                        {(parsePrice(item.price) * item.quantity).toLocaleString("vi-VN")}đ
                       </td>
-                      <td className="px-6 py-4 text-center whitespace-nowrap">
+                      <td className="px-8 py-6 text-center whitespace-nowrap">
                         <button
                           onClick={() => removeProductFromOrder(index)}
-                          className="text-rose-600 hover:text-rose-800 p-1 hover:bg-rose-50 rounded transition-colors"
-                          title="Xóa khỏi đơn"
+                          className="size-9 rounded-xl bg-error/5 text-error hover:bg-error hover:text-white transition-all duration-300 flex items-center justify-center mx-auto group/btn"
                         >
-                          <svg
-                            className="w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                            ></path>
-                          </svg>
+                          <FiTrash2 size={16} className="group-hover/btn:scale-110 transition-transform" />
                         </button>
                       </td>
                     </tr>
@@ -362,34 +266,26 @@ function OrderStep1({
               </table>
             </div>
           </div>
-          <div className="flex justify-end mt-4 text-lg font-semibold">
-            Tổng tạm tính:&nbsp;
-            <span className="text-primary">
-              {orderData.products
-                .reduce(
-                  (total, item) =>
-                    total + parsePrice(item.price) * item.quantity,
-                  0
-                )
-                .toLocaleString("vi-VN")}
-              đ
-            </span>
+          
+          <div className="flex flex-col items-end gap-y-6 pt-4">
+            <div className="flex items-center space-x-4 bg-primary/5 dark:bg-primary/10 px-8 py-5 rounded-[2rem] border border-primary/20 shadow-sm">
+                <span className="text-[10px] font-black text-text-tertiary uppercase tracking-[0.2em]">Tổng tạm tính</span>
+                <span className="text-2xl font-black text-primary tracking-tighter">
+                  {orderData.products.reduce((total, item) => total + parsePrice(item.price) * item.quantity, 0).toLocaleString("vi-VN")}đ
+                </span>
+            </div>
+            
+            <Button
+              onClick={() => setCurrentStep(2)}
+              disabled={orderData.products.length === 0}
+              className="h-14 px-12 rounded-[1.5rem] shadow-primary/30 text-sm"
+              rightIcon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M14 5l7 7-7 7" /></svg>}
+            >
+              Bước tiếp theo
+            </Button>
           </div>
         </div>
       )}
-      <div className="flex justify-end mt-6">
-        <button
-          onClick={() => setCurrentStep(2)}
-          disabled={orderData.products.length === 0}
-          className={`px-6 py-2 gradient-bg text-white rounded-lg font-semibold hover:opacity-90 transition-opacity shadow-sm ${
-            orderData.products.length === 0
-              ? "opacity-50 cursor-not-allowed"
-              : ""
-          }`}
-        >
-          Bước tiếp theo
-        </button>
-      </div>
     </div>
   );
 }

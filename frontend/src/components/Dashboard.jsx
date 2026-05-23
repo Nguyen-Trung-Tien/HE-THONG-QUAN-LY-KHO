@@ -12,7 +12,6 @@ import {
   fetchAllStock,
   fetchAllCustomers,
 } from "../API/statistics/statisticsAPI";
-import { useTranslation } from "../i18n/useTranslation";
 
 // Common Components
 import Card from './common/Card';
@@ -20,7 +19,6 @@ import Badge from './common/Badge';
 import { cn } from '../utils/cn';
 
 function Dashboard() {
-  const { t } = useTranslation();
   const userRole = useSelector((state) => state.user.role);
   const isAdminOrDev = userRole === "admin" || userRole === "dev";
 
@@ -29,14 +27,14 @@ function Dashboard() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <Badge variant="primary" className="mb-2">Smart WMS v3.0</Badge>
-          <h1 className="text-2xl font-black text-text-primary dark:text-dark-text-primary tracking-tighter uppercase">
-            {t('dashboard')}
+          <h1 className="text-2xl font-black text-text-primary tracking-tighter uppercase">
+            Tổng quan
           </h1>
-          <p className="text-xs text-text-secondary dark:text-dark-text-secondary mt-1 font-semibold italic opacity-80">
+          <p className="text-xs text-text-secondary mt-1 font-semibold italic opacity-80">
             Smart Warehouse Management System
           </p>
         </div>
-        <div className="flex items-center space-x-2 text-[10px] font-black text-text-secondary dark:text-dark-text-tertiary bg-white/70 dark:bg-dark-card/70 backdrop-blur-md px-4 py-2 rounded-xl shadow-sm border border-border/50 dark:border-white/5 transition-all hover:scale-105">
+        <div className="flex items-center space-x-2 text-[10px] font-black text-text-secondary bg-white/70 dark:bg-dark-card/70 backdrop-blur-md px-4 py-2 rounded-xl shadow-sm border border-border/50 dark:border-dark-border/40 transition-all hover:scale-105">
           <div className="w-6 h-6 bg-primary/10 rounded-lg flex items-center justify-center">
             <svg className="w-3.5 h-3.5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2v12a2 2 0 002 2z" />
@@ -72,7 +70,6 @@ function Dashboard() {
 }
 
 function DashboardCards() {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const userRole = useSelector((state) => state.user.role);
   const isAdminOrDev = userRole === "admin" || userRole === "dev";
@@ -104,7 +101,7 @@ function DashboardCards() {
 
   const stats = [
     isAdminOrDev && {
-      title: t('total_revenue'),
+      title: "Tổng doanh thu",
       value: totalRevenue.toLocaleString("vi-VN") + "đ",
       change: "12.5%",
       isPositive: true,
@@ -117,7 +114,7 @@ function DashboardCards() {
       path: "/",
     },
     {
-      title: t('orders'),
+      title: "Đơn hàng",
       value: allOrders,
       change: "8.2%",
       isPositive: true,
@@ -130,7 +127,7 @@ function DashboardCards() {
       path: "/orders",
     },
     {
-      title: t('inventory'),
+      title: "Tồn kho",
       value: allStock,
       change: "2.4%",
       isPositive: false,
@@ -143,7 +140,7 @@ function DashboardCards() {
       path: "/inventory",
     },
     {
-      title: t('customers'),
+      title: "Khách hàng",
       value: allCustomers,
       change: "15.3%",
       isPositive: true,
@@ -192,10 +189,10 @@ function DashboardCards() {
           </div>
           
           <div className="relative z-10">
-            <h3 className="text-[10px] font-black text-text-tertiary dark:text-dark-text-tertiary uppercase tracking-[0.15em] mb-1">
+            <h3 className="text-[10px] font-black text-text-tertiary uppercase tracking-[0.15em] mb-1">
               {stat.title}
             </h3>
-            <p className="text-xl font-black text-text-primary dark:text-dark-text-primary tracking-tighter truncate leading-none">
+            <p className="text-xl font-black text-text-primary tracking-tighter truncate leading-none">
               {stat.value}
             </p>
           </div>

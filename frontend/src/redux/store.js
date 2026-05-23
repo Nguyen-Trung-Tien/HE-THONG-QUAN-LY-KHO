@@ -1,29 +1,30 @@
 import { configureStore } from "@reduxjs/toolkit";
-import userReducer, { loadUserFromStorage } from "./slice/userSlice";
+import userReducer from "./slice/userSlice";
 
-const preloadedState = {
-  user: loadUserFromStorage() || {
-    id: "",
-    email: "",
-    firstName: "",
-    lastName: "",
-    address: "",
-    phoneNumber: "",
-    role: "",
-    image: "",
-    status: "",
-    gender: "",
-    avatarBase64: "",
-    access_token: "",
-    refresh_token: "",
-    currentUser: null,
-  },
+const getPreloadedState = () => {
+  try {
+    const userStr = localStorage.getItem("user");
+    if (userStr) {
+      const userData = JSON.parse(userStr);
+      // Ensure state.user has all fields AND currentUser is set to the same data
+      return {
+        user: {
+          ...userData,
+          currentUser: userData
+        }
+      };
+    }
+  } catch (e) {
+    console.error("Failed to load preloaded state", e);
+  }
+  return undefined;
 };
+
 const store = configureStore({
   reducer: {
     user: userReducer,
   },
-  preloadedState,
+  preloadedState: getPreloadedState(),
 });
 
 export default store;

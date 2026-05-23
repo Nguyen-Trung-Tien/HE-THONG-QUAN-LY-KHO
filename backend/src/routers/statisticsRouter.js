@@ -15,4 +15,5 @@ router.get('/deadstock', statisticsController.getDeadstockReport);
 router.get('/all-orders', statisticsController.getAllOrders);
 router.get('/all-stock', statisticsController.getAllStock);
 router.get('/all-customers', statisticsController.getAllCustomers);
+router.get('/inventory-structure', statisticsController.getInventoryStructure);
 module.exports = router;

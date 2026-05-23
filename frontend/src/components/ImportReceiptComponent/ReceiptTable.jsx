@@ -19,14 +19,14 @@ export default function ReceiptTable({
     {
       title: 'Ngày nhập',
       key: 'import_date',
-      render: (date) => <span className="text-textSecondary">{new Date(date).toLocaleDateString("vi-VN")}</span>
+      render: (date) => <span className="text-text-secondary">{new Date(date).toLocaleDateString("vi-VN")}</span>
     },
     {
       title: 'Người nhập',
       key: 'userData',
       render: (user, row) => (
         <div className="flex flex-col">
-          <span className="font-semibold text-textPrimary">
+          <span className="font-semibold text-text-primary">
             {user ? `${user.firstName} ${user.lastName}`.trim() || user.email : `ID ${row.userId}`}
           </span>
           <span className="text-[10px] text-text-tertiary font-bold uppercase">{user?.role}</span>
@@ -36,7 +36,7 @@ export default function ReceiptTable({
     {
       title: 'Nhà cung cấp',
       key: 'supplierData',
-      render: (sup) => <span className="font-medium text-textPrimary truncate max-w-[120px] inline-block">{sup?.name || "N/A"}</span>
+      render: (sup) => <span className="font-medium text-text-primary truncate max-w-[120px] inline-block">{sup?.name || "N/A"}</span>
     },
     {
       title: 'Sản phẩm',

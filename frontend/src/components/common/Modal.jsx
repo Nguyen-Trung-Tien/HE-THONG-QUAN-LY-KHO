@@ -38,20 +38,20 @@ const Modal = ({
     <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 sm:p-6">
       {/* Backdrop */}
       <div 
-        className="fixed inset-0 bg-text-primary/60 backdrop-blur-[8px] animate-in fade-in duration-500" 
+        className="fixed inset-0 bg-text-primary/60 dark:bg-black/80 backdrop-blur-[8px] animate-in fade-in duration-500" 
         onClick={onClose}
       />
       
       {/* Modal Container */}
       <div 
         className={cn(
-          "bg-white rounded-[2.5rem] shadow-[0_32px_80px_-16px_rgba(0,0,0,0.3)] w-full z-10 flex flex-col max-h-[90vh] overflow-hidden transform animate-in zoom-in-95 slide-in-from-bottom-4 duration-500 border border-white/40",
+          "bg-white dark:bg-dark-card rounded-[2.5rem] shadow-[0_32px_80px_-16px_rgba(0,0,0,0.3)] w-full z-10 flex flex-col max-h-[90vh] overflow-hidden transform animate-in zoom-in-95 slide-in-from-bottom-4 duration-500 border border-white/40 dark:border-dark-border/40",
           sizes[size]
         )}
       >
         {/* Header */}
         <div className={cn(
-          "border-b border-border/40 flex items-center justify-between bg-gradient-to-r from-white via-white to-primary/5 sticky top-0 z-20",
+          "border-b border-border/40 dark:border-dark-border/40 flex items-center justify-between bg-gradient-to-r from-white via-white to-primary/5 dark:from-dark-card dark:via-dark-card dark:to-primary/10 sticky top-0 z-20",
           isSmall ? "px-6 py-5" : "px-10 py-7"
         )}>
           <div className="space-y-1">
@@ -65,7 +65,7 @@ const Modal = ({
           </div>
           <button 
             onClick={onClose}
-            className="group p-2 rounded-2xl bg-bg-subtle/50 hover:bg-error/10 text-text-tertiary hover:text-error transition-all duration-300 active:scale-90"
+            className="group p-2 rounded-2xl bg-bg-subtle/50 dark:bg-white/5 hover:bg-error/10 text-text-tertiary hover:text-error transition-all duration-300 active:scale-90"
           >
             <svg className={cn("transition-transform group-hover:rotate-90 duration-300", isSmall ? "w-4 h-4" : "w-5 h-5")} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12" />
@@ -75,7 +75,7 @@ const Modal = ({
 
         {/* Content */}
         <div className={cn(
-          "overflow-y-auto flex-1 custom-scrollbar scroll-smooth",
+          "overflow-y-auto flex-1 custom-scrollbar scroll-smooth dark:bg-dark-card",
           isSmall ? "p-6" : "p-10"
         )}>
           {children}
@@ -84,7 +84,7 @@ const Modal = ({
         {/* Footer */}
         {footer && (
           <div className={cn(
-            "border-t border-border/40 bg-gray-50/50 backdrop-blur-sm sticky bottom-0 z-20",
+            "border-t border-border/40 dark:border-dark-border/40 bg-gray-50/50 dark:bg-dark-bg/50 backdrop-blur-sm sticky bottom-0 z-20",
             isSmall ? "px-6 py-5" : "px-10 py-7"
           )}>
             {footer}

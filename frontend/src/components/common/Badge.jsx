@@ -8,13 +8,13 @@ const Badge = ({
   size = 'md'
 }) => {
   const variants = {
-    neutral: 'bg-bg-subtle text-text-tertiary border-border/50',
+    neutral: 'bg-bg-subtle dark:bg-white/5 text-text-tertiary border-border/50 dark:border-dark-border/40',
     primary: 'bg-primary/10 text-primary border-primary/30 shadow-sm shadow-primary/5',
     success: 'bg-success/10 text-success border-success/30 shadow-sm shadow-success/5',
     error: 'bg-error/10 text-error border-error/30 shadow-sm shadow-error/5',
     warning: 'bg-warning/10 text-warning border-warning/30 shadow-sm shadow-warning/5',
     info: 'bg-info/10 text-info border-info/30 shadow-sm shadow-info/5',
-    accent: 'bg-accent/10 text-amber-600 border-accent/30 shadow-sm shadow-accent/5',
+    accent: 'bg-accent/10 text-amber-600 dark:text-accent border-accent/30 shadow-sm shadow-accent/5',
   };
 
   const sizes = {

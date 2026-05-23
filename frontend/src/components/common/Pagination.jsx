@@ -55,7 +55,7 @@ const Pagination = ({
           onPageChange(currentPage - 1);
         }}
         disabled={currentPage === 1}
-        className="p-1.5 sm:p-2 rounded-lg border border-border/60 bg-white text-text-tertiary hover:bg-primary/5 hover:text-primary hover:border-primary/30 disabled:opacity-30 disabled:hover:bg-white disabled:hover:text-text-tertiary transition-all duration-300 active:scale-90"
+        className="p-1.5 sm:p-2 rounded-lg border border-border/60 dark:border-dark-border/40 bg-white dark:bg-dark-card text-text-tertiary hover:bg-primary/5 hover:text-primary hover:border-primary/30 disabled:opacity-30 disabled:hover:bg-white dark:disabled:hover:bg-dark-card disabled:hover:text-text-tertiary transition-all duration-300 active:scale-90 shadow-sm"
       >
         <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M15 19l-7-7 7-7" />
@@ -79,7 +79,7 @@ const Pagination = ({
                   "w-7 h-7 sm:w-8 sm:h-8 rounded-lg text-[10px] font-black transition-all duration-300 flex items-center justify-center uppercase tracking-tighter",
                   currentPage === page 
                     ? "bg-primary text-white shadow-md shadow-primary/30 scale-105 z-10" 
-                    : "bg-white border border-border/60 text-text-secondary hover:bg-primary/5 hover:text-primary active:scale-90"
+                    : "bg-white dark:bg-dark-card border border-border/60 dark:border-dark-border/40 text-text-secondary hover:bg-primary/5 hover:text-primary active:scale-90 shadow-sm"
                 )}
               >
                 {page}
@@ -95,7 +95,7 @@ const Pagination = ({
           onPageChange(currentPage + 1);
         }}
         disabled={currentPage === totalPages}
-        className="p-1.5 sm:p-2 rounded-lg border border-border/60 bg-white text-text-tertiary hover:bg-primary/5 hover:text-primary hover:border-primary/30 disabled:opacity-30 disabled:hover:bg-white disabled:hover:text-text-tertiary transition-all duration-300 active:scale-90"
+        className="p-1.5 sm:p-2 rounded-lg border border-border/60 dark:border-dark-border/40 bg-white dark:bg-dark-card text-text-tertiary hover:bg-primary/5 hover:text-primary hover:border-primary/30 disabled:opacity-30 disabled:hover:bg-white dark:disabled:hover:bg-dark-card disabled:hover:text-text-tertiary transition-all duration-300 active:scale-90 shadow-sm"
       >
         <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7" />

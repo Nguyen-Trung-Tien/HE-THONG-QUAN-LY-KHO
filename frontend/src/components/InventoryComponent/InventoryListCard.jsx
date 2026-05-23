@@ -1,7 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import Card from '../common/Card';
+import Badge from '../common/Badge';
+import Button from '../common/Button';
+import { FiAlertTriangle, FiShoppingBag, FiArrowRight } from 'react-icons/fi';
 
-const InventoryListCard = ({ inventoryItems, getStatusClass }) => {
+const InventoryListCard = ({ inventoryItems }) => {
 	const navigate = useNavigate();
 
 	const handleCreateOrder = () => {
@@ -10,82 +14,64 @@ const InventoryListCard = ({ inventoryItems, getStatusClass }) => {
 		});
 	};
 
+	const lowStockItems = (inventoryItems || []).filter((item) => item.stock === 0 || item.stock < 10);
+
 	return (
-		<div className='bg-card shadow-card rounded-lg overflow-hidden'>
-			<div className='p-6'>
-				<h3 className='text-lg font-semibold text-textPrimary mb-4'>
-					Sản phẩm cần nhập thêm
-				</h3>
+		<Card title="Sản phẩm cần nhập thêm" className="h-full shadow-soft-xl">
 				<div className='space-y-4'>
-					{inventoryItems
-						.filter((item) => item.stock === 0 || item.stock < 10)
-						.map((item) => (
+					{lowStockItems.length === 0 ? (
+						<div className="text-center py-10 opacity-30">
+							<FiShoppingBag size={48} className="mx-auto mb-3" />
+							<p className="text-[10px] font-black uppercase tracking-widest">Tồn kho hiện tại ổn định</p>
+						</div>
+					) : (
+						lowStockItems.map((item) => (
 							<div
 								key={item.id}
-								className='flex items-center justify-between p-3 bg-gray-50 rounded-lg'>
+								className='flex items-center justify-between p-4 bg-bg-subtle/30 dark:bg-white/[0.01] rounded-2xl border border-border/40 dark:border-dark-border/40 group hover:bg-white dark:hover:bg-dark-card transition-all duration-300'>
 								<div className='flex items-center'>
 									<div
-										className={`w-10 h-10 rounded-md ${
-											item.status === 'Hết hàng' ? 'bg-red-100' : 'bg-accent/10'
-										} flex items-center justify-center mr-3`}>
-										<svg
-											className={`w-6 h-6 ${
-												item.status === 'Hết hàng'
-													? 'text-red-500'
-													: 'text-accent'
-											}`}
-											fill='none'
-											stroke='currentColor'
-											viewBox='0 0 24 24'
-											xmlns='http://www.w3.org/2000/svg'>
-											<path
-												strokeLinecap='round'
-												strokeLinejoin='round'
-												strokeWidth='2'
-												d='M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'></path>
-										</svg>
+										className={`size-10 rounded-xl ${
+											item.stock === 0 ? 'bg-error/10 text-error' : 'bg-warning/10 text-warning'
+										} flex items-center justify-center mr-3 shadow-inner-sm`}>
+										<FiAlertTriangle size={18} />
 									</div>
 									<div>
-										<div className='text-sm font-medium text-textPrimary'>
+										<div className='text-xs font-black text-text-primary uppercase tracking-tight'>
 											{item.name}
 										</div>
-										<div className='text-xs text-textSecondary'>
-											{/* Mã: {item.id} | Kho: {item.location} */}
-											Mã:{item.id}
+										<div className='text-[9px] font-bold text-text-tertiary uppercase tracking-widest'>
+											Mã hàng: {item.id}
 										</div>
 									</div>
 								</div>
 								<div className='text-right'>
-									<div className='text-sm font-semibold text-textPrimary'>
-										{item.stock} sản phẩm
+									<div className='text-xs font-black text-text-primary tracking-tighter mb-1'>
+										{item.stock} <span className="opacity-60">chiếc</span>
 									</div>
-									<span
-										className={`px-2 py-1 text-xs rounded-full ${getStatusClass(
-											item.stock === 0
-												? 'Hết hàng'
-												: item.stock <= 10
-												? 'Sắp hết'
-												: ''
-										)} font-medium`}>
-										{item.stock === 0
-											? 'Hết hàng'
-											: item.stock <= 10
-											? 'Sắp hết'
-											: ''}
-									</span>
+									<Badge 
+										variant={item.stock === 0 ? "error" : "warning"} 
+										size="sm"
+									>
+										{item.stock === 0 ? 'Hết hàng' : 'Sắp hết'}
+									</Badge>
 								</div>
 							</div>
-						))}
+						))
+					)}
 				</div>
 
-				{/* Nút chuyển trang */}
-				<button
-					onClick={handleCreateOrder}
-					className='w-full mt-4 px-4 py-2 border border-primary text-primary rounded-lg hover:bg-primary/5 transition-colors'>
-					Tạo đơn nhập hàng
-				</button>
-			</div>
-		</div>
+				<div className="pt-6 mt-2 border-t border-border/40 dark:border-dark-border/40">
+					<Button
+						onClick={handleCreateOrder}
+						variant="outline"
+						className='w-full h-11 rounded-xl text-[10px] font-black uppercase tracking-widest'
+						rightIcon={<FiArrowRight />}
+					>
+						Tạo đơn nhập hàng
+					</Button>
+				</div>
+		</Card>
 	);
 };
 

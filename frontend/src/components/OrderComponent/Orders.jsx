@@ -31,11 +31,11 @@ function Orders() {
   return (
     <div className='space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500'>
       <div>
-        <Badge variant="primary" className="mb-1">Giao dịch</Badge>
-        <h1 className='text-xl font-black text-text-primary tracking-tighter'>
+        <Badge variant="primary" className="mb-1 uppercase tracking-widest">Giao dịch</Badge>
+        <h1 className="heading-1">
           Quản lý đơn hàng
         </h1>
-        <p className="text-[10px] text-text-secondary font-semibold">Theo dõi và xử lý các đơn hàng</p>
+        <p className="subheading">Theo dõi và xử lý các đơn hàng hệ thống</p>
       </div>
 
       {!showWizard && (

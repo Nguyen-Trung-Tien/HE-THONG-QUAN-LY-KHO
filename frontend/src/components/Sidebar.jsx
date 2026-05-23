@@ -1,15 +1,13 @@
 import { NavLink } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { useTranslation } from "../i18n/useTranslation";
 
 function Sidebar({ onClose }) {
-  const { t } = useTranslation();
   const currentUser = useSelector((state) => state.user.currentUser);
   const menuItems = [
     {
       id: "dashboard",
       path: "/",
-      name: t('dashboard'),
+      name: "Tổng quan",
       icon: (
         <svg
           className="size-5"
@@ -29,7 +27,7 @@ function Sidebar({ onClose }) {
     (currentUser?.role === "admin" || currentUser?.role === "dev") && {
       id: "stats",
       path: "/stats",
-      name: t('statistics'),
+      name: "Thống kê",
       icon: (
         <svg
           className="size-5"
@@ -49,7 +47,7 @@ function Sidebar({ onClose }) {
     (currentUser?.role === "admin" || currentUser?.role === "dev") && {
       id: "users",
       path: "/users",
-      name: t('users'),
+      name: "Nhân viên",
       icon: (
         <svg
           className="size-5"
@@ -69,7 +67,7 @@ function Sidebar({ onClose }) {
     {
       id: "products",
       path: "/products",
-      name: t('products'),
+      name: "Sản phẩm",
       icon: (
         <svg
           className="size-5"
@@ -89,7 +87,7 @@ function Sidebar({ onClose }) {
     {
       id: "inventory",
       path: "/inventory",
-      name: t('inventory'),
+      name: "Tồn kho",
       icon: (
         <svg
           className="size-5"
@@ -109,7 +107,7 @@ function Sidebar({ onClose }) {
     {
       id: "customer",
       path: "/customer",
-      name: t('customers'),
+      name: "Khách hàng",
       icon: (
         <svg
           className="size-5"
@@ -121,7 +119,7 @@ function Sidebar({ onClose }) {
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeWidth="2"
-            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
+            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
           ></path>
         </svg>
       ),
@@ -129,7 +127,7 @@ function Sidebar({ onClose }) {
     {
       id: "suppliers",
       path: "/suppliers",
-      name: t('suppliers'),
+      name: "Nhà cung cấp",
       icon: (
         <svg
           className="size-5"
@@ -149,7 +147,7 @@ function Sidebar({ onClose }) {
     {
       id: "orders",
       path: "/orders",
-      name: t('orders'),
+      name: "Đơn hàng",
       icon: (
         <svg
           className="size-5"
@@ -169,7 +167,7 @@ function Sidebar({ onClose }) {
     {
       id: "shippers",
       path: "/shippers",
-      name: t('shippers'),
+      name: "Shipper",
       icon: (
         <svg
           className="size-5"
@@ -189,7 +187,7 @@ function Sidebar({ onClose }) {
     {
       id: "WarehouseManagement",
       path: "/WarehouseManagement",
-      name: t('import_receipt'),
+      name: "Nhập hóa đơn",
       icon: (
         <svg
           className="size-5"
@@ -226,7 +224,7 @@ function Sidebar({ onClose }) {
               `flex items-center px-3.5 py-2.5 text-[11px] font-black rounded-xl transition-all duration-300 group relative ${
                 isActive
                   ? "bg-primary text-white shadow-lg shadow-primary/30 scale-[1.02] z-10 active"
-                  : "text-text-tertiary dark:text-dark-text-tertiary hover:bg-white dark:hover:bg-dark-card hover:text-primary hover:shadow-sm hover:translate-x-0.5"
+                  : "text-text-tertiary hover:bg-white dark:hover:bg-dark-card hover:text-primary hover:shadow-sm hover:translate-x-0.5"
               }`
             }
           >
@@ -240,14 +238,14 @@ function Sidebar({ onClose }) {
         ))}
       </nav>
 
-      <div className="mt-auto px-3 pt-5 border-t border-border/40 dark:border-white/5">
-        <div className="bg-white/50 dark:bg-dark-card/50 backdrop-blur-sm rounded-2xl p-4 border border-border/50 dark:border-white/5 relative overflow-hidden group hover:shadow-md transition-all duration-500">
+      <div className="mt-auto px-3 pt-5 border-t border-border/40 dark:border-dark-border/40">
+        <div className="bg-white/50 dark:bg-dark-card/50 backdrop-blur-sm rounded-2xl p-4 border border-border/50 dark:border-dark-border/40 relative overflow-hidden group hover:shadow-md transition-all duration-500">
           <p className="text-[8px] font-black text-primary uppercase tracking-[0.2em] mb-1 relative z-10 truncate">
             {currentUser?.systemName || "Smart WMS"}
           </p>
           <div className="flex items-center justify-between relative z-10">
             <span className="text-[9px] font-black text-text-tertiary dark:text-dark-text-tertiary tracking-widest">
-              V3.0.0
+              V3.5.0
             </span>
             <div className="size-1.5 rounded-full bg-success animate-pulse shadow-sm shadow-success/20"></div>
           </div>

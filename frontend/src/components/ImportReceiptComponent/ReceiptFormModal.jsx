@@ -62,7 +62,7 @@ export default function ReceiptFormModal({
             <h4 className="text-[10px] font-black text-text-primary uppercase tracking-[0.2em]">Thông tin vận hành</h4>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-bg-subtle/30 p-6 rounded-[1.5rem] border border-border/40 shadow-inner-sm">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-bg-subtle/30 dark:bg-dark-card/40 p-6 rounded-[1.5rem] border border-border/40 dark:border-dark-border/40 shadow-inner-sm">
             <div className="space-y-1.5">
               <label className="text-[10px] font-black text-text-tertiary ml-2 uppercase tracking-widest flex items-center space-x-1">
                 <span>Nhà cung cấp</span>
@@ -76,16 +76,16 @@ export default function ReceiptFormModal({
                   );
                   handleFormChange("supplierData", selected || null);
                 }}
-                className="w-full bg-white border border-border/50 text-text-primary text-xs rounded-xl h-10 px-4 outline-none transition-all duration-300 focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold shadow-sm disabled:opacity-50"
+                className="w-full bg-white dark:bg-dark-card border border-border/50 dark:border-dark-border/40 text-text-primary text-xs rounded-xl h-10 px-4 outline-none transition-all duration-300 focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold shadow-sm disabled:opacity-50"
                 disabled={formLoading || supplierOptions.length === 0}
               >
-                <option value="">
+                <option className="dark:bg-dark-card dark:text-text-primary" value="">
                   {supplierOptions.length === 0
                     ? "N/A"
                     : "-- Chọn NCC --"}
                 </option>
                 {supplierOptions.map((s) => (
-                  <option key={s.id} value={s.id}>{s.name}</option>
+                  <option className="dark:bg-dark-card dark:text-text-primary" key={s.id} value={s.id}>{s.name}</option>
                 ))}
               </select>
             </div>
@@ -96,7 +96,7 @@ export default function ReceiptFormModal({
               value={formData.import_date}
               onChange={(e) => handleFormChange("import_date", e.target.value)}
               disabled={formLoading}
-              className="bg-white h-10"
+              className="bg-white dark:bg-dark-card h-10"
             />
 
             <Input
@@ -131,7 +131,7 @@ export default function ReceiptFormModal({
             </Button>
           </div>
           
-          <div className="min-h-[150px] max-h-72 overflow-y-auto custom-scrollbar border border-border/40 rounded-[1.5rem] p-4 space-y-3 bg-white shadow-soft-xl">
+          <div className="min-h-[150px] max-h-72 overflow-y-auto custom-scrollbar border border-border/40 dark:border-dark-border/40 rounded-[1.5rem] p-4 space-y-3 bg-white dark:bg-dark-card shadow-soft-xl">
             {formData.details.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-10 opacity-20">
                 <p className="text-[10px] font-black uppercase tracking-widest">Danh sách trống</p>

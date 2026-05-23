@@ -1,283 +1,139 @@
 import React, { useState } from "react";
 import QRCode from "react-qr-code";
+import Card from "../common/Card";
+import Badge from "../common/Badge";
+import Button from "../common/Button";
+import Input from "../common/Input";
+import { FiCheckCircle, FiShoppingCart, FiCreditCard, FiArrowLeft, FiPrinter } from "react-icons/fi";
 
 function OrderStep3({ orderData, setOrderData, setCurrentStep, handleSubmit, currentUser }) {
   const [cashReceived, setCashReceived] = useState(0);
-  const [showBankInfo, setShowBankInfo] = useState(false);
-  
-  const formatCurrency = (amount) => {
-    if (isNaN(amount)) return "0đ";
-    return new Intl.NumberFormat('vi-VN', { style: 'decimal' }).format(amount) + 'đ';
-  };
 
   const subtotal = orderData.products.reduce(
-    (sum, item) => sum + (parseInt(String(item.price).replace(/\D/g, '')) || 0) * item.quantity,
+    (sum, item) =>
+      sum +
+      (parseInt(String(item.price).replace(/\D/g, "")) || 0) * item.quantity,
     0
   );
   const shippingFee = 30000;
-  const discount = 0;
-  const total = subtotal + shippingFee - discount;
-
-  const handlePaymentChange = (e) => {
-    const paymentMethod = e.target.id;
-    setOrderData({
-      ...orderData,
-      payment: paymentMethod,
-    });
-    setShowBankInfo(paymentMethod === "bank-transfer");
-    
-    if (paymentMethod !== "cash" && paymentMethod !== "cod") {
-      setCashReceived(0);
-    }
-  };
-
-  const handleCashReceivedChange = (e) => {
-    const value = parseInt(e.target.value.replace(/\D/g, '')) || 0;
-    setCashReceived(value);
-  };
-
-  const changeDue = (orderData.payment === "cash" || orderData.payment === "cod") && cashReceived > total 
-    ? cashReceived - total 
-    : 0;
-
-  const bankAccountInfo = {
-    bankName: "Ngân hàng MB",
-    accountNumber: "0867919478",
-    accountHolder: "Kho hàng HTTT",
-    amount: total,
-    content: `Thanh toan don hang ${orderData.orderNumber || "MADH123"}`,
-  };
-
+  const total = subtotal + shippingFee;
 
   const canSubmit = () => {
-    if (orderData.payment === "cash" || orderData.payment === "cod") {
-      return cashReceived >= total;
-    }
+    if (orderData.payment === "cash" && cashReceived < total) return false;
     return true;
   };
 
   return (
-    <div className="space-y-6">
-      
-      {currentUser && (
-        <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
-          <p className="text-sm text-gray-700">
-            Người tạo đơn: <span className="font-semibold">{currentUser.name}</span>
-          </p>
-          <p className="text-sm text-gray-700">
-            Vai trò: <span className="font-semibold">{currentUser.role}</span>
-          </p>
-        </div>
-      )}
+    <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500 pb-10">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Left Side: Summary */}
+        <div className="space-y-6">
+          <Card title="Xác nhận thông tin" extra={<FiCheckCircle className="text-success" />}>
+             <div className="space-y-6">
+                <div className="p-5 rounded-2xl bg-bg-subtle/30 dark:bg-white/[0.01] border border-border/40 dark:border-dark-border/40 relative overflow-hidden group">
+                   <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform duration-500">
+                      <FiShoppingCart size={64} />
+                   </div>
+                   <h5 className="text-[10px] font-black text-text-tertiary uppercase tracking-widest mb-3">Thông tin nhận hàng</h5>
+                   <p className="text-sm font-black text-text-primary uppercase tracking-tight">{orderData.customer.name}</p>
+                   <p className="text-xs text-text-secondary font-bold mt-1">{orderData.customer.phone}</p>
+                   <p className="text-xs text-text-tertiary font-medium italic mt-2 leading-relaxed">
+                     {orderData.shipping.address}
+                   </p>
+                </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        
-        <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-          <h4 className="text-lg font-semibold text-gray-800 mb-4">
-            Tóm tắt đơn hàng
-          </h4>
-          <div className="space-y-3">
-            <div className="flex justify-between">
-              <span className="text-gray-600">Tổng tiền hàng:</span>
-              <span className="font-medium">
-                {formatCurrency(subtotal)}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Phí vận chuyển:</span>
-              <span className="font-medium">
-                {formatCurrency(shippingFee)}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Giảm giá:</span>
-              <span className="font-medium text-green-500">
-                {formatCurrency(discount)}
-              </span>
-            </div>
-            <div className="border-t border-gray-200 my-2"></div>
-            <div className="flex justify-between">
-              <span className="font-semibold text-gray-800">Tổng thanh toán:</span>
-              <span className="font-bold text-blue-600 text-lg">
-                {formatCurrency(total)}
-              </span>
-            </div>
-          </div>
+                <div className="p-5 rounded-2xl bg-bg-subtle/30 dark:bg-white/[0.01] border border-border/40 dark:border-dark-border/40">
+                   <h5 className="text-[10px] font-black text-text-tertiary uppercase tracking-widest mb-4">Phương thức thanh toán</h5>
+                   <div className="flex gap-4">
+                      {['cash', 'transfer'].map(method => (
+                        <button
+                          key={method}
+                          onClick={() => setOrderData({ ...orderData, payment: method })}
+                          className={`flex-1 flex flex-col items-center gap-y-2 p-4 rounded-xl border-2 transition-all duration-300 ${
+                            orderData.payment === method 
+                              ? "border-primary bg-primary/5 text-primary" 
+                              : "border-border/40 dark:border-dark-border/40 text-text-tertiary grayscale hover:grayscale-0 hover:border-primary/30"
+                          }`}
+                        >
+                           <FiCreditCard size={24} />
+                           <span className="text-[10px] font-black uppercase tracking-widest">{method === 'cash' ? 'Tiền mặt' : 'Chuyển khoản'}</span>
+                        </button>
+                      ))}
+                   </div>
+                </div>
+
+                {orderData.payment === "cash" && (
+                   <div className="animate-in fade-in zoom-in-95 duration-300">
+                      <Input
+                        label="Tiền khách đưa *"
+                        type="number"
+                        placeholder="0"
+                        value={cashReceived}
+                        onChange={(e) => setCashReceived(Number(e.target.value))}
+                        className="text-xl font-black text-primary tracking-tighter h-14"
+                        rightIcon={<span className="text-[10px] font-black uppercase tracking-widest text-text-tertiary">VND</span>}
+                      />
+                      {cashReceived > total && (
+                        <div className="mt-3 p-3 rounded-xl bg-success/5 border border-success/20 flex justify-between items-center">
+                           <span className="text-[10px] font-black text-success uppercase tracking-widest">Tiền thối lại</span>
+                           <span className="text-sm font-black text-success tracking-tighter">{(cashReceived - total).toLocaleString()}đ</span>
+                        </div>
+                      )}
+                   </div>
+                )}
+             </div>
+          </Card>
         </div>
 
-       
-        <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-          <h4 className="text-lg font-semibold text-gray-800 mb-4">
-            Phương thức thanh toán
-          </h4>
-          <div className="space-y-3">
-          
-            <div className={`p-3 border rounded-lg transition-all ${
-              orderData.payment === "cash" 
-                ? "border-blue-500 bg-blue-50" 
-                : "border-gray-200 hover:bg-gray-50"
-            }`}>
-              <label className="flex items-center space-x-3 cursor-pointer">
-                <input
-                  type="radio"
-                  name="payment"
-                  id="cash"
-                  checked={orderData.payment === "cash"}
-                  onChange={handlePaymentChange}
-                  className="text-blue-600 focus:ring-blue-500"
-                />
-                <div className="flex items-center">
-                  <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                  <span className="font-medium">Tiền mặt</span>
-                </div>
-              </label>
-            </div>
-            
-          
-            <div className={`p-3 border rounded-lg transition-all ${
-              orderData.payment === "bank-transfer" 
-                ? "border-blue-500 bg-blue-50" 
-                : "border-gray-200 hover:bg-gray-50"
-            }`}>
-              <label className="flex items-center space-x-3 cursor-pointer">
-                <input
-                  type="radio"
-                  name="payment"
-                  id="bank-transfer"
-                  checked={orderData.payment === "bank-transfer"}
-                  onChange={handlePaymentChange}
-                  className="text-blue-600 focus:ring-blue-500"
-                />
-                <div className="flex items-center">
-                  <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-                  </svg>
-                  <span className="font-medium">Chuyển khoản ngân hàng</span>
-                </div>
-              </label>
-              
-              {showBankInfo && (
-                <div className="mt-3 p-4 border border-blue-200 rounded-lg bg-blue-50">
-                  <div className="flex flex-col items-center mb-3">
-                    <QRCode 
-                      value={`${bankAccountInfo.bankName}|${bankAccountInfo.accountNumber}|${bankAccountInfo.accountHolder}|${bankAccountInfo.amount}|${bankAccountInfo.content}`} 
-                      size={128} 
-                      level="H"
-                    />
-                    <p className="mt-2 text-sm text-center text-gray-600">
-                      Quét mã QR để thanh toán
-                    </p>
-                  </div>
-                  <div className="space-y-2 text-sm">
-                    {Object.entries({
-                      'Ngân hàng': bankAccountInfo.bankName,
-                      'Số tài khoản': bankAccountInfo.accountNumber,
-                      'Chủ tài khoản': bankAccountInfo.accountHolder,
-                      'Số tiền': formatCurrency(bankAccountInfo.amount),
-                      'Nội dung': bankAccountInfo.content
-                    }).map(([label, value]) => (
-                      <div key={label} className="flex justify-between">
-                        <span className="text-gray-600">{label}:</span>
-                        <span className={label === 'Số tiền' ? "font-semibold" : ""}>
-                          {value}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-            
-            <div className={`p-3 border rounded-lg transition-all ${
-              orderData.payment === "cod" 
-                ? "border-blue-500 bg-blue-50" 
-                : "border-gray-200 hover:bg-gray-50"
-            }`}>
-              <label className="flex items-center space-x-3 cursor-pointer">
-                <input
-                  type="radio"
-                  name="payment"
-                  id="cod"
-                  checked={orderData.payment === "cod"}
-                  onChange={handlePaymentChange}
-                  className="text-blue-600 focus:ring-blue-500"
-                />
-                <div className="flex items-center">
-                  <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  <span className="font-medium">Thanh toán khi nhận hàng (COD)</span>
-                </div>
-              </label>
-            </div>
-          </div>
+        {/* Right Side: Total */}
+        <div className="space-y-6">
+           <Card title="Tổng kết chi phí" className="bg-gradient-to-br from-white to-primary/[0.02] dark:from-dark-card dark:to-primary/[0.05]">
+              <div className="space-y-4">
+                 <div className="flex justify-between text-xs font-bold text-text-secondary uppercase tracking-tight">
+                    <span>Tổng tiền hàng</span>
+                    <span>{subtotal.toLocaleString()}đ</span>
+                 </div>
+                 <div className="flex justify-between text-xs font-bold text-text-secondary uppercase tracking-tight">
+                    <span>Phí vận chuyển</span>
+                    <span>{shippingFee.toLocaleString()}đ</span>
+                 </div>
+                 <div className="h-px bg-border/40 dark:bg-dark-border/40 my-2" />
+                 <div className="flex justify-between items-center py-2">
+                    <span className="text-xs font-black text-text-primary uppercase tracking-[0.2em]">Tổng cộng</span>
+                    <span className="text-3xl font-black text-primary tracking-tighter animate-pulse">{total.toLocaleString()}đ</span>
+                 </div>
+              </div>
+
+              <div className="mt-8 flex flex-col items-center p-6 bg-white dark:bg-dark-bg/40 rounded-3xl border border-border/30 dark:border-dark-border/40 shadow-inner-sm">
+                 <div className="p-3 bg-white rounded-2xl shadow-sm border border-border/20">
+                    <QRCode value={JSON.stringify({o: orderData.customer.name, t: total})} size={120} />
+                 </div>
+                 <p className="text-[9px] font-black text-text-tertiary uppercase tracking-[0.2em] mt-4 flex items-center">
+                    <FiPrinter className="mr-2" /> Quét mã để xác nhận nhanh
+                 </p>
+              </div>
+           </Card>
         </div>
       </div>
 
-     
-      {(orderData.payment === "cash" || orderData.payment === "cod") && (
-        <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-          <h4 className="text-lg font-semibold text-gray-800 mb-3">
-            Thông tin thanh toán {orderData.payment === "cash" ? "tiền mặt" : "COD"}
-          </h4>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Tổng thanh toán
-              </label>
-              <div className="p-2 bg-gray-50 rounded border border-gray-200 font-semibold">
-                {formatCurrency(total)}
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Số tiền nhận được 
-              </label>
-              <input
-                type="text"
-                value={formatCurrency(cashReceived).replace('đ', '')}
-                onChange={handleCashReceivedChange}
-                className="w-full px-3 py-2 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-                placeholder="Nhập số tiền"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Tiền thối lại
-              </label>
-              <div className={`p-2 rounded-lg border ${
-                changeDue > 0 ? "border-green-200 bg-green-50 text-green-700" : "border-gray-200 bg-gray-50"
-              } font-semibold`}>
-                {formatCurrency(changeDue)}
-              </div>
-            </div>
-          </div>
-          {orderData.payment === "cod" && (
-            <div className="mt-3 text-sm text-gray-600">
-              <p>Lưu ý: Với phương thức COD, nhân viên giao hàng sẽ thu tiền khi giao hàng cho khách.</p>
-            </div>
-          )}
-        </div>
-      )}
-
-     <div className="flex justify-between pt-4 border-t border-gray-200">
-        <button
+      <div className="flex justify-between items-center pt-8 border-t border-border/40 dark:border-dark-border/40">
+        <Button
+          variant="secondary"
           onClick={() => setCurrentStep(2)}
-          className="px-6 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors shadow-sm"
+          leftIcon={<FiArrowLeft />}
+          className="rounded-2xl h-12 px-8"
         >
           Quay lại
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={handleSubmit}
           disabled={!canSubmit()}
-          className={`px-6 py-2 gradient-bg text-white rounded-lg font-semibold hover:opacity-90 transition-opacity shadow-sm ${
-            !canSubmit() ? "opacity-50 cursor-not-allowed" : ""
-          }`}
+          className="rounded-2xl h-12 px-12 shadow-primary/30 text-base"
+          variant="primary"
+          rightIcon={<FiCheckCircle />}
         >
           Hoàn tất đơn hàng
-        </button>
+        </Button>
       </div>
     </div>
   );

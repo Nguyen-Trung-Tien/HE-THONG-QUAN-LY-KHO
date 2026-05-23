@@ -5,7 +5,7 @@ import {
   fetchExportDetails,
   updateExportDetail,
 } from "../../API/exportDetailsApi/exportDetailsApi";
-import { FiPlus, FiTrash2 } from "react-icons/fi";
+import { FiPlus, FiTrash2, FiSearch, FiPackage } from "react-icons/fi";
 import { toast } from "react-toastify";
 import ConfirmModal from "../common/ConfirmModal";
 import Pagination from "../common/Pagination";
@@ -116,11 +116,12 @@ export default function ExportDetails() {
     {
       title: 'Phiếu xuất',
       key: 'exportId',
+      className: 'w-32 text-center',
       render: (id, row) => (
         <div className="flex flex-col">
-          <span className="font-bold text-primary">ID: {id}</span>
-          <span className="text-[10px] text-text-tertiary font-bold">
-            {row.exportReceiptData?.export_date ? new Date(row.exportReceiptData.export_date).toLocaleDateString("vi-VN") : ""}
+          <span className="font-black text-primary uppercase tracking-tighter">#{id}</span>
+          <span className="text-[10px] text-text-tertiary font-bold uppercase mt-0.5">
+            {row.exportReceiptData?.export_date ? new Date(row.exportReceiptData.export_date).toLocaleDateString("vi-VN") : "—"}
           </span>
         </div>
       )
@@ -129,19 +130,25 @@ export default function ExportDetails() {
       title: 'Sản phẩm',
       key: 'StockProductData',
       render: (prod) => (
-        <div className="flex flex-col">
-          <span className="font-semibold text-textPrimary">{prod?.name || "—"}</span>
-          <span className="text-[10px] text-text-secondary uppercase font-bold tracking-tight">
-            {prod?.type} | {prod?.category}
-          </span>
+        <div className="flex items-center gap-x-3">
+           <div className="size-8 rounded-lg bg-info/5 flex items-center justify-center text-info/60 shrink-0">
+              <FiPackage size={16} />
+           </div>
+           <div className="flex flex-col">
+              <span className="font-bold text-text-primary uppercase tracking-tight line-clamp-1">{prod?.name || "—"}</span>
+              <span className="text-[9px] text-text-tertiary uppercase font-black tracking-widest mt-0.5">
+                {prod?.type} • {prod?.category}
+              </span>
+           </div>
         </div>
       )
     },
     {
       title: 'Số lượng',
       key: 'quantity',
+      className: 'w-32',
       render: (qty, row) => (
-        <span className="font-bold text-text-primary">
+        <span className="font-black text-text-primary tracking-tighter">
           {qty} <span className="text-[10px] text-text-tertiary font-medium uppercase">{row.StockProductData?.unit}</span>
         </span>
       )
@@ -150,7 +157,7 @@ export default function ExportDetails() {
       title: 'Thành tiền',
       key: 'total',
       render: (_, row) => (
-        <span className="font-black text-primary">
+        <span className="font-black text-primary tracking-tighter">
           {(row.quantity * (row.StockProductData?.price || 0)).toLocaleString("vi-VN")}đ
         </span>
       )
@@ -184,20 +191,22 @@ export default function ExportDetails() {
   ], []);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-10">
       <div className="flex flex-col md:flex-row justify-between items-center gap-4">
         <div>
-          <h2 className="text-xl font-black text-text-primary tracking-tighter">
-            CHI TIẾT PHIẾU XUẤT
+          <Badge variant="primary" className="mb-1">Chi tiết</Badge>
+          <h2 className="text-xl font-black text-text-primary tracking-tighter uppercase leading-none">
+            Lịch sử chi tiết xuất hàng
           </h2>
         </div>
         <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
           <div className="w-full sm:w-80">
             <Input
-              placeholder="Tìm sản phẩm..."
+              placeholder="Tìm tên sản phẩm…"
               value={search}
               onChange={handleSearchChange}
-              leftIcon={<svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>}
+              className="h-11"
+              leftIcon={<FiSearch size={18} />}
             />
           </div>
           <Button
@@ -208,29 +217,34 @@ export default function ExportDetails() {
             }}
             variant="primary"
             leftIcon={<FiPlus />}
+            className="rounded-xl shadow-primary/30 h-11"
           >
             Thêm mới
           </Button>
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-4 mb-2">
-        <Badge variant="success" className="px-4 py-1.5 shadow-sm">
-          Tổng số lượng: {totalQuantity.toLocaleString()}
-        </Badge>
-        <Badge variant="accent" className="px-4 py-1.5 shadow-sm">
-          Tổng giá trị: {totalRevenue.toLocaleString()}đ
-        </Badge>
+      <div className="flex flex-wrap gap-3">
+        <div className="bg-success/5 dark:bg-success/10 border border-success/20 px-5 py-3 rounded-2xl flex items-center gap-x-3 shadow-inner-sm">
+           <div className="size-2 rounded-full bg-success animate-pulse" />
+           <span className="text-[10px] font-black text-success uppercase tracking-widest">Tổng SL:</span>
+           <span className="text-lg font-black text-text-primary tracking-tighter">{totalQuantity.toLocaleString()}</span>
+        </div>
+        <div className="bg-primary/5 dark:bg-primary/10 border border-primary/20 px-5 py-3 rounded-2xl flex items-center gap-x-3 shadow-inner-sm">
+           <div className="size-2 rounded-full bg-primary animate-pulse" />
+           <span className="text-[10px] font-black text-primary uppercase tracking-widest">Tổng giá trị:</span>
+           <span className="text-lg font-black text-text-primary tracking-tighter">{totalRevenue.toLocaleString()}đ</span>
+        </div>
       </div>
 
-      <Card noPadding>
+      <Card noPadding className="shadow-soft-xl overflow-hidden border-border/50 dark:border-dark-border/40">
         <Table 
           columns={columns} 
           data={data} 
           loading={loading} 
           emptyMessage="Không có dữ liệu chi tiết xuất"
         />
-        <div className="px-6 py-4 flex justify-center">
+        <div className="p-6 border-t border-border/40 dark:border-dark-border/40 flex justify-center">
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
@@ -263,14 +277,14 @@ export default function ExportDetails() {
         size="md"
         footer={
           <div className="flex justify-end gap-3">
-            <Button variant="ghost" onClick={() => setShowModal(false)}>Hủy</Button>
-            <Button variant="primary" onClick={handleSubmit}>
-              {isEditing ? "Cập nhật" : "Thêm mới"}
+            <Button variant="ghost" onClick={() => setShowModal(false)} className="rounded-xl h-11 px-6">Hủy</Button>
+            <Button variant="primary" onClick={handleSubmit} className="rounded-xl h-11 px-8 shadow-primary/30">
+              {isEditing ? "Lưu thay đổi" : "Thêm mới"}
             </Button>
           </div>
         }
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6 p-2">
           <Input
             label="Mã phiếu xuất"
             type="number"
@@ -288,7 +302,7 @@ export default function ExportDetails() {
             required
           />
           <Input
-            label="Số lượng"
+            label="Số lượng xuất"
             type="number"
             placeholder="Nhập số lượng"
             value={form.quantity}

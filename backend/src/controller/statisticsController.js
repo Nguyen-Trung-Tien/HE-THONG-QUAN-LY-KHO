@@ -315,6 +315,24 @@ const getDeadstockReport = async (req, res) => {
   }
 };
 
+const getInventoryStructure = async (req, res) => {
+  try {
+    const structure = await Stock.findAll({
+      attributes: [
+        "type",
+        [Sequelize.fn("COUNT", Sequelize.col("id")), "count"],
+      ],
+      where: { deleted: false },
+      group: ["type"],
+      raw: true,
+    });
+    res.status(200).json(structure);
+  } catch (error) {
+    console.error("getInventoryStructure error:", error);
+    res.status(500).json({ message: "Lỗi máy chủ nội bộ", error: error.message });
+  }
+};
+
 module.exports = {
   getTotalRevenue,
   getGeneralStats,
@@ -324,6 +342,7 @@ module.exports = {
   getDeadstockReport,
   getAllOrders,
   getAllStock,
-  getAllCustomers
+  getAllCustomers,
+  getInventoryStructure
 };
 

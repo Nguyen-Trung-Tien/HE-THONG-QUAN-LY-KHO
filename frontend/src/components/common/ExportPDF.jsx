@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import html2pdf from "html2pdf.js";
 import { FiFileText, FiChevronDown } from "react-icons/fi";
 import Button from "./Button";
+import { cn } from "../../utils/cn";
 
 /**
  * Reusable ExportPDF component with UTF-8 (Vietnamese) support using html2pdf.js
@@ -28,13 +29,13 @@ const ExportPDF = ({
 
     // Build the HTML content
     let htmlContent = `
-      <div style="margin-bottom: 20px; border-bottom: 2px solid #00BFFF; padding-bottom: 10px;">
+      <div style="margin-bottom: 20px; border-bottom: 2px solid #38BDF8; padding-bottom: 10px;">
         <h1 style="font-size: 24px; margin: 0; color: #0f172a; text-transform: uppercase;">${title}</h1>
         <p style="font-size: 12px; color: #64748b; margin-top: 5px;">Ngày xuất: ${new Date().toLocaleString("vi-VN")}</p>
       </div>
       <table style="width: 100%; border-collapse: collapse; font-size: 10px;">
         <thead>
-          <tr style="background-color: #00BFFF; color: white;">
+          <tr style="background-color: #38BDF8; color: white;">
             ${columns.map(col => `<th style="padding: 10px; border: 1px solid #e2e8f0; text-align: left;">${col.header}</th>`).join('')}
           </tr>
         </thead>
@@ -73,16 +74,6 @@ const ExportPDF = ({
               style.innerHTML = style.innerHTML.replace(/oklch\([^)]+\)/g, '#334155');
             }
           }
-          // Also check inline styles
-          const elements = clonedDoc.getElementsByTagName('*');
-          for (let i = 0; i < elements.length; i++) {
-            const el = elements[i];
-            if (el.style && (el.style.color?.includes('oklch') || el.style.backgroundColor?.includes('oklch') || el.style.borderColor?.includes('oklch'))) {
-              el.style.color = el.style.color?.includes('oklch') ? '#334155' : el.style.color;
-              el.style.backgroundColor = el.style.backgroundColor?.includes('oklch') ? '#ffffff' : el.style.backgroundColor;
-              el.style.borderColor = el.style.borderColor?.includes('oklch') ? '#e2e8f0' : el.style.borderColor;
-            }
-          }
         }
       },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
@@ -99,38 +90,38 @@ const ExportPDF = ({
   };
 
   return (
-    <div className="relative inline-block text-left">
+    <div className="relative inline-block text-left z-[60]">
       <div className="flex">
         <Button
-          variant="outline"
+          variant="secondary"
           size="md"
           onClick={() => generatePDF(data)}
           leftIcon={<FiFileText className="stroke-[3px]" />}
           isLoading={loading}
-          className="bg-white hover:bg-error/5 hover:text-error hover:border-error/30 rounded-l-xl border-r-0"
+          className="bg-white dark:bg-dark-card hover:bg-error/5 dark:hover:bg-error/10 hover:text-error hover:border-error/30 rounded-l-xl border-r-0 h-10 px-4 transition-all"
         >
           Xuất PDF
         </Button>
         <button
           onClick={() => setShowAddOptions(!showOptions)}
           disabled={loading}
-          className="px-2 border border-border/60 border-l-0 rounded-r-xl hover:bg-bg-subtle transition-all text-text-tertiary disabled:opacity-50"
+          className="px-2 border border-border/60 dark:border-dark-border/60 border-l-0 rounded-r-xl hover:bg-bg-subtle dark:hover:bg-white/5 transition-all text-text-tertiary h-10 disabled:opacity-50"
         >
-          <FiChevronDown />
+          <FiChevronDown className={cn("transition-transform duration-300", showOptions && "rotate-180")} />
         </button>
       </div>
 
       {showOptions && (
         <>
           <div 
-            className="fixed inset-0 z-10" 
+            className="fixed inset-0 z-[90]" 
             onClick={() => setShowAddOptions(false)}
           />
-          <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-white shadow-soft-2xl border border-border/40 z-20 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+          <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-white dark:bg-dark-card shadow-soft-2xl border border-border/40 dark:border-dark-border/60 z-[100] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="p-2 space-y-1">
               <button
                 onClick={() => generatePDF(data, "_trang_hien_tai")}
-                className="w-full text-left px-4 py-2.5 text-[10px] font-black text-text-primary uppercase tracking-widest hover:bg-error/5 hover:text-error rounded-xl transition-all flex items-center"
+                className="w-full text-left px-4 py-2.5 text-[10px] font-black text-text-primary uppercase tracking-widest hover:bg-error/5 dark:hover:bg-white/5 hover:text-error rounded-xl transition-all flex items-center"
               >
                 <div className="w-1.5 h-1.5 rounded-full bg-error/40 mr-2.5" />
                 Trang hiện tại ({data.length})
@@ -138,7 +129,7 @@ const ExportPDF = ({
               {allData && allData.length > 0 && (
                 <button
                   onClick={() => generatePDF(allData, "_tat_ca")}
-                  className="w-full text-left px-4 py-2.5 text-[10px] font-black text-text-primary uppercase tracking-widest hover:bg-error/5 hover:text-error rounded-xl transition-all flex items-center"
+                  className="w-full text-left px-4 py-2.5 text-[10px] font-black text-text-primary uppercase tracking-widest hover:bg-error/5 dark:hover:bg-white/5 hover:text-error rounded-xl transition-all flex items-center"
                 >
                   <div className="w-1.5 h-1.5 rounded-full bg-error/60 mr-2.5" />
                   Tất cả các trang ({allData.length})

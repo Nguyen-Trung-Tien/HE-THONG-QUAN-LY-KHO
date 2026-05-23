@@ -1,54 +1,121 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-    
+:root {
+  --color-primary: 0 191 255; /* #00BFFF */
+  --color-success: 16 185 129; /* #10B981 */
+  --color-error: 239 68 68; /* #EF4444 */
+  --color-warning: 245 158 11; /* #F59E0B */
+  --color-info: 59 130 246; /* #3B82F6 */
+
+  /* Text Colors */
+  --text-primary: 45 55 72; /* #2D3748 */
+  --text-secondary: 113 128 150; /* #718096 */
+  --text-tertiary: 160 174 192; /* #A0AEC0 */
+}
+
+.dark {
+  --color-primary: 56 189 248; /* #38BDF8 - Sky 400 */
+  --color-success: 52 211 153; /* #34D399 - Emerald 400 */
+  --color-error: 248 113 113; /* #F87171 - Red 400 */
+  --color-warning: 251 191 36; /* #FBBF24 - Amber 400 */
+  --color-info: 96 165 250; /* #60A5FA - Blue 400 */
+
+  /* Dark Mode Text Colors - High Contrast */
+  --text-primary: 248 250 252; /* #F8FAFC - Slate 50 */
+  --text-secondary: 203 213 225; /* #CBD5E1 - Slate 300 */
+  --text-tertiary: 148 163 184; /* #94A3B8 - Slate 400 */
+}
+
     body {
       font-family: 'Inter', sans-serif;
-      @apply bg-bg-light dark:bg-dark-bg text-text-primary dark:text-dark-text-primary transition-colors duration-300;
-    }
-    
-    .gradient-bg {
-      @apply bg-gradient-to-r from-primary to-primary-light;
-    }
-    
-    .gradient-text {
-      @apply bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent;
-    }
-    
-    /* Global Transitions */
-    * {
-      @apply transition-colors duration-200;
-    }
-    
-    .custom-scrollbar::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    
-    .custom-scrollbar::-webkit-scrollbar-track {
-      @apply bg-transparent;
-    }
-    
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      @apply bg-text-tertiary/20 rounded-full hover:bg-text-tertiary/40 dark:bg-white/10 dark:hover:bg-white/20 transition-colors;
+      @apply bg-bg-light dark:bg-dark-bg text-text-primary;
     }
 
-    /* Animation Utilities */
-    .shake {
-      animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
-    }
+.heading-1 {
+  @apply text-xl sm:text-2xl font-black text-text-primary tracking-tighter uppercase leading-tight;
+}
 
-    @keyframes shake {
-      10%, 90% { transform: translate3d(-1px, 0, 0); }
-      20%, 80% { transform: translate3d(2px, 0, 0); }
-      30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-      40%, 60% { transform: translate3d(4px, 0, 0); }
-    }
+.heading-2 {
+  @apply text-lg sm:text-xl font-black text-text-primary tracking-tight uppercase leading-tight;
+}
 
-    /* Glassmorphism utility */
-    .glass {
-      @apply bg-white/70 dark:bg-dark-card/70 backdrop-blur-xl border border-white/40 dark:border-white/5 shadow-soft-xl;
-    }
+.subheading {
+  @apply text-[10px] text-text-tertiary font-bold uppercase tracking-[0.2em] mt-1;
+}
 
+/* Global Element Styles */
+h1 {
+  @apply heading-1;
+}
+
+h2 {
+  @apply heading-2;
+}
+
+select, textarea, input:not([type="checkbox"]):not([type="radio"]):not([type="file"]) {
+  @apply dark:bg-dark-card/40 dark:border-dark-border/60 dark:text-text-primary transition-all duration-300;
+}
+select option {
+  @apply dark:bg-dark-card dark:text-text-primary;
+}
+
+input:disabled, select:disabled, textarea:disabled {
+  @apply opacity-50 cursor-not-allowed dark:bg-dark-bg/50;
+}
+.gradient-bg {  @apply bg-gradient-to-r from-primary to-primary-light;
+}
+
+.gradient-text {
+  @apply bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent;
+}
+
+/* Global Transitions - Only for interactive elements to prevent flickering on load */
+a, button, input, select, textarea, .transition-all {
+  @apply transition-colors duration-200;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-text-tertiary/20 rounded-full hover:bg-text-tertiary/40 dark:bg-white/10 dark:hover:bg-white/20 transition-colors;
+}
+
+/* Animation Utilities */
+.shake {
+  animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes shake {
+  10%,
+  90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+  20%,
+  80% {
+    transform: translate3d(2px, 0, 0);
+  }
+  30%,
+  50%,
+  70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+  40%,
+  60% {
+    transform: translate3d(4px, 0, 0);
+  }
+}
+
+/* Glassmorphism utility */
+.glass {
+  @apply bg-white/70 dark:bg-dark-card/60 backdrop-blur-xl border border-white/40 dark:border-dark-border/30 shadow-soft-xl dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.3)];
+}

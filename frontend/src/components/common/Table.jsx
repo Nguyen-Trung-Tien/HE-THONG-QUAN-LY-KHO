@@ -9,16 +9,16 @@ const Table = ({
   rowKey = 'id'
 }) => {
   return (
-    <div className="w-full overflow-hidden rounded-[2rem] border border-border/50 dark:border-white/5 bg-white dark:bg-dark-card shadow-soft-xl">
+    <div className="w-full overflow-hidden rounded-[2rem] border border-border/50 dark:border-dark-border/40 bg-white dark:bg-dark-card shadow-soft-xl">
       <div className="overflow-x-auto custom-scrollbar">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-gradient-to-r from-bg-subtle/50 dark:from-white/[0.02] to-white dark:to-dark-card">
+            <tr className="bg-gradient-to-r from-bg-subtle/50 dark:from-white/[0.01] to-white dark:to-dark-card">
               {columns.map((column, index) => (
                 <th 
                   key={column.key || index}
                   className={cn(
-                    "px-8 py-6 text-[10px] font-semibold text-text-tertiary dark:text-dark-text-tertiary uppercase tracking-[0.2em] border-b border-border/30 dark:border-white/5",
+                    "px-8 py-6 text-[10px] font-semibold text-text-tertiary uppercase tracking-[0.2em] border-b border-border/30 dark:border-dark-border/40",
                     column.className
                   )}
                 >
@@ -30,13 +30,13 @@ const Table = ({
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-border/20 dark:divide-white/5">
+          <tbody className="divide-y divide-border/20 dark:divide-dark-border/40">
             {loading ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <tr key={`skeleton-row-${i}`} className="animate-pulse">
                   {columns.map((_, j) => (
                     <td key={`skeleton-cell-${j}`} className="px-8 py-6">
-                      <div className="h-3 bg-bg-subtle dark:bg-white/5 rounded-full w-full opacity-50" />
+                      <div className="h-3 bg-bg-subtle dark:bg-white/[0.03] rounded-full w-full opacity-50" />
                     </td>
                   ))}
                 </tr>
@@ -59,13 +59,13 @@ const Table = ({
               data.map((row, rowIndex) => (
                 <tr 
                   key={row[rowKey] || rowIndex} 
-                  className="group hover:bg-primary/5 dark:hover:bg-primary/10 transition-all duration-300 cursor-default relative"
+                  className="group hover:bg-primary/5 dark:hover:bg-white/[0.02] transition-all duration-300 cursor-default relative"
                 >
                   {columns.map((column, colIndex) => (
                     <td 
                       key={colIndex} 
                       className={cn(
-                        "px-8 py-6 text-xs font-bold text-text-primary dark:text-dark-text-primary transition-all duration-300 group-hover:translate-x-0.5",
+                        "px-8 py-6 text-xs font-bold text-text-primary transition-all duration-300 group-hover:translate-x-0.5",
                         column.className
                       )}
                     >

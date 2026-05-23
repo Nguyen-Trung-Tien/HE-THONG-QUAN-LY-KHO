@@ -7,6 +7,9 @@ import OrderStep1 from "./OrderStep1";
 import OrderStep2 from "./OrderStep2";
 import OrderStep3 from "./OrderStep3";
 import { toast } from "react-toastify";
+import Card from "../common/Card";
+import Badge from "../common/Badge";
+import { cn } from "../../utils/cn";
 
 function OrderWizard({ onOrderCreated }) {
   const [currentStep, setCurrentStep] = useState(1);
@@ -67,7 +70,7 @@ function OrderWizard({ onOrderCreated }) {
     const loadProducts = async () => {
       setIsLoadingProducts(true);
       try {
-        const res= await getAllProducts();
+        const res = await getAllProducts();
         const data = res?.products || [];
         setProducts(data);  
         setCategories([...new Set(data.map((p) => p.category))]);
@@ -79,109 +82,110 @@ function OrderWizard({ onOrderCreated }) {
     };
     loadProducts();
   }, []);
+
   const handleSubmit = async () => {
-  let customerId = orderData.customer.id || null;
+    let customerId = orderData.customer.id || null;
     if (!customerId) {
-  try {
-    const customerRes = await createCustomer({
-      name: orderData.customer.name,
-      email: orderData.customer.email,
-      phoneNumber: orderData.customer.phone,
-      address: orderData.shipping.address,
-      city: orderData.shipping.city || "",
-      status: "active",
-      lat:orderData.shipping.lat,
-      lng:orderData.shipping.lng,
-    });
-    if (customerRes?.data?.errCode === 0) {
-      customerId = customerRes.data.customer?.id || customerRes.data.data?.id;
-    } else {
-      toast.error("Tạo khách hàng thất bại!");
-      return;
+      try {
+        const customerRes = await createCustomer({
+          name: orderData.customer.name,
+          email: orderData.customer.email,
+          phoneNumber: orderData.customer.phone,
+          address: orderData.shipping.address,
+          city: orderData.shipping.city || "",
+          status: "active",
+          lat: orderData.shipping.lat,
+          lng: orderData.shipping.lng,
+        });
+        if (customerRes?.data?.errCode === 0) {
+          customerId = customerRes.data.customer?.id || customerRes.data.data?.id;
+        } else {
+          toast.error("Tạo khách hàng thất bại!");
+          return;
+        }
+      } catch {
+        toast.error("Tạo khách hàng thất bại!");
+        return;
+      }
     }
-  } catch {
-    toast.error("Tạo khách hàng thất bại!");
-    return;
-  }
-  }
 
+    const subtotal = orderData.products.reduce(
+      (sum, item) =>
+        sum +
+        (parseInt(String(item.price).replace(/\D/g, "")) || 0) * item.quantity,
+      0
+    );
+    const shippingFee = 30000;
+    const total = subtotal + shippingFee;
+    const payload = {
+      customerId,
+      customerName: orderData.customer.name,
+      customerEmail: orderData.customer.email,
+      customerPhone: orderData.customer.phone,
+      shippingAddress: orderData.shipping.address,
+      shippingLat: orderData.shipping.lat,
+      shippingLng: orderData.shipping.lng,
+      paymentMethod: orderData.payment,
+      status: "pending",
+      total,
+      subtotal,
+      shippingFee,
+      items: orderData.products.map((p) => ({
+        productId: p.productId,
+        name: p.name,
+        price: Number(String(p.price).replace(/\D/g, "")),
+        quantity: p.quantity,
+      })),
+    };
 
-  const subtotal = orderData.products.reduce(
-    (sum, item) =>
-      sum +
-      (parseInt(String(item.price).replace(/\D/g, "")) || 0) * item.quantity,
-    0
-  );
-  const shippingFee = 30000;
-  const total = subtotal + shippingFee;
-  const payload = {
-  customerId,
-  customerName: orderData.customer.name,
-  customerEmail: orderData.customer.email,
-  customerPhone: orderData.customer.phone,
-  shippingAddress: orderData.shipping.address,
-  shippingLat: orderData.shipping.lat,
-  shippingLng: orderData.shipping.lng,
-
-  paymentMethod: orderData.payment,
-  status: "pending",
-  total,
-  subtotal,
-  shippingFee,
-  items: orderData.products.map((p) => ({
-    productId: p.productId,
-    name: p.name,
-    price: Number(String(p.price).replace(/\D/g, "")),
-    quantity: p.quantity,
-  })),
-  };
-  try {
-  await createOrder(payload);
-  toast.success("Đơn hàng đã được tạo thành công!");
-  setCurrentStep(1);
-    setOrderData({
-      products: [],
-      customer: { name: "", phone: "" , email: "" , address: "" },
-      shipping: { address: "", lat: null, lng: null },
-      payment: "cash",
-    });
-  if (onOrderCreated) onOrderCreated();
-  } catch {
-  toast.error("Tạo đơn hàng thất bại!");
-  }
+    try {
+      await createOrder(payload);
+      toast.success("Đơn hàng đã được tạo thành công!");
+      setCurrentStep(1);
+      setOrderData({
+        products: [],
+        customer: { name: "", phone: "" , email: "" , address: "" },
+        shipping: { address: "", lat: null, lng: null },
+        payment: "cash",
+      });
+      if (onOrderCreated) onOrderCreated();
+    } catch {
+      toast.error("Tạo đơn hàng thất bại!");
+    }
   };
 
   return (
-    <div className="bg-card shadow-card rounded-lg overflow-hidden">
-      <div className="p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-lg font-semibold text-textPrimary">
-            Tạo đơn hàng mới
-          </h3>
-          <div className="flex items-center">
-            {[1, 2, 3].map((step) => (
-              <React.Fragment key={step}>
-                <div
-                  className={`w-8 h-8 rounded-full ${
-                    currentStep >= step ? "gradient-bg" : "bg-border"
-                  } flex items-center justify-center ${
-                    currentStep >= step ? "text-white" : "text-textSecondary"
-                  } font-bold`}
-                >
-                  {step}
-                </div>
-                {step < 3 && (
-                  <div
-                    className={`h-1 w-12 ${
-                      currentStep > step ? "bg-primary" : "bg-border"
-                    }`}
-                  ></div>
+    <Card 
+      title="Khởi tạo đơn hàng mới" 
+      extra={
+        <div className="flex items-center space-x-1 sm:space-x-3 scale-75 sm:scale-100 origin-right transition-all">
+          {[1, 2, 3].map((step) => (
+            <React.Fragment key={step}>
+              <div
+                className={cn(
+                  "size-8 rounded-xl flex items-center justify-center font-black text-xs transition-all duration-500",
+                  currentStep >= step 
+                    ? "bg-primary text-white shadow-lg shadow-primary/30 scale-110" 
+                    : "bg-bg-subtle dark:bg-white/5 text-text-tertiary border border-border/40 dark:border-dark-border/40"
                 )}
-              </React.Fragment>
-            ))}
-          </div>
+              >
+                {step}
+              </div>
+              {step < 3 && (
+                <div
+                  className={cn(
+                    "h-0.5 w-6 sm:w-10 rounded-full transition-all duration-700",
+                    currentStep > step ? "bg-primary" : "bg-border/40 dark:bg-dark-border/40"
+                  )}
+                />
+              )}
+            </React.Fragment>
+          ))}
         </div>
-
+      }
+      className="shadow-soft-2xl border-none"
+    >
+      <div className="pt-2">
         {currentStep === 1 && (
           <OrderStep1
             products={products}
@@ -209,7 +213,7 @@ function OrderWizard({ onOrderCreated }) {
           />
         )}
       </div>
-    </div>
+    </Card>
   );
 }
 

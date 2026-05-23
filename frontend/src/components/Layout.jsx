@@ -22,7 +22,7 @@ const Layout = () => {
 
         {/* Sidebar */}
         <aside className={cn(
-          "fixed inset-y-0 left-0 z-[60] transition-all duration-500 ease-in-out lg:relative lg:translate-x-0 lg:flex lg:flex-shrink-0 w-64 bg-white/50 dark:bg-dark-card/50 backdrop-blur-xl border-r border-border/50 dark:border-white/5",
+          "fixed inset-y-0 left-0 z-[60] transition-all duration-500 ease-in-out lg:relative lg:translate-x-0 lg:flex lg:flex-shrink-0 w-64 bg-white/50 dark:bg-dark-card/50 backdrop-blur-xl border-r border-border/50 dark:border-dark-border/40",
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}>
           <Sidebar onClose={() => setIsSidebarOpen(false)} />

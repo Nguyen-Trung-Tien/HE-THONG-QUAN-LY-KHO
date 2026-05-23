@@ -31,10 +31,8 @@ import TwoFactorSetupModal from './Admin/TwoFactorSetupModal';
 import PinSetupModal from './Admin/PinSetupModal';
 import axiosInstance from '../API/utils/axiosInstance';
 import { login } from '../redux/slice/userSlice';
-import { useTranslation } from '../i18n/useTranslation';
 
 const Settings = () => {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [activeTab, setActiveTab] = useState('general');
@@ -58,7 +56,6 @@ const Settings = () => {
 
   const [settings, setSettings] = useState({
     systemName: currentUser?.systemName || "Smart WMS Pro",
-    language: currentUser?.preferredLanguage || "vi",
     theme: currentUser?.preferredTheme || "light",
     notifications: {
       email: currentUser?.notifEmail !== undefined ? currentUser.notifEmail : true,
@@ -115,9 +112,9 @@ const Settings = () => {
   };
 
   const tabs = [
-    { id: 'general', label: t('language') === 'Language' ? 'General' : 'Chung', icon: <FiSettings /> },
-    { id: 'notifications', label: t('notifications'), icon: <FiBell /> },
-    { id: 'security', label: t('security'), icon: <FiLock /> },
+    { id: 'general', label: 'Chung', icon: <FiSettings /> },
+    { id: 'notifications', label: 'Thông báo', icon: <FiBell /> },
+    { id: 'security', label: 'Bảo mật', icon: <FiLock /> },
     { id: 'database', label: 'Dữ liệu', icon: <FiDatabase /> },
   ];
 
@@ -129,7 +126,6 @@ const Settings = () => {
         notifEmail: settings.notifications.email,
         notifBrowser: settings.notifications.browser,
         notifStockAlert: settings.notifications.stockAlert,
-        preferredLanguage: settings.language,
         preferredTheme: settings.theme,
         systemName: settings.systemName,
       });
@@ -141,14 +137,13 @@ const Settings = () => {
           notifEmail: settings.notifications.email,
           notifBrowser: settings.notifications.browser,
           notifStockAlert: settings.notifications.stockAlert,
-          preferredLanguage: settings.language,
           preferredTheme: settings.theme,
           systemName: settings.systemName,
         };
         localStorage.setItem("user", JSON.stringify(updatedUser));
         dispatch(login(updatedUser));
         
-        toast.success(t('save_changes') + " thành công!");
+        toast.success("Lưu thay đổi thành công!");
       } else {
         toast.error(res.message || "Lỗi khi lưu cấu hình");
       }
@@ -211,7 +206,7 @@ const Settings = () => {
         newPassword: passwordData.newPassword,
       });
       if (res.errCode === 0) {
-        toast.success(t('change_password') + " thành công!");
+        toast.success("Đổi mật khẩu thành công!");
         setPasswordData({ oldPassword: "", newPassword: "", confirmPassword: "" });
       } else {
         toast.error(res.errMessage || "Lỗi đổi mật khẩu!");
@@ -275,7 +270,6 @@ const Settings = () => {
             notifEmail: data.notifEmail,
             notifBrowser: data.notifBrowser,
             notifStockAlert: data.notifStockAlert,
-            preferredLanguage: data.preferredLanguage,
             preferredTheme: data.preferredTheme,
             systemName: data.systemName
         };
@@ -304,10 +298,10 @@ const Settings = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <Badge variant="primary" className="mb-1">Hệ thống</Badge>
-          <h1 className="text-xl font-black text-text-primary dark:text-dark-text-primary tracking-tighter uppercase leading-none">
-            {t('settings')}
+          <h1 className="text-xl font-black text-text-primary tracking-tighter uppercase leading-none">
+            Cài đặt
           </h1>
-          <p className="text-[10px] text-text-secondary dark:text-dark-text-tertiary font-semibold uppercase tracking-wider mt-1 opacity-80">
+          <p className="text-[10px] text-text-secondary font-semibold uppercase tracking-wider mt-1 opacity-80">
             Smart Warehouse Management System
           </p>
         </div>
@@ -318,7 +312,7 @@ const Settings = () => {
           leftIcon={<FiArrowLeft />}
           className="rounded-2xl"
         >
-          {t('back')}
+          Quay lại
         </Button>
       </div>
 
@@ -333,7 +327,7 @@ const Settings = () => {
                 "w-full flex items-center space-x-3 px-5 py-3.5 rounded-2xl transition-all duration-300 group",
                 activeTab === tab.id
                   ? "bg-primary text-white shadow-lg shadow-primary/20 scale-[1.02]"
-                  : "bg-white dark:bg-dark-card text-text-tertiary dark:text-dark-text-tertiary hover:bg-primary/5 hover:text-primary border border-border/40 dark:border-white/5"
+                  : "bg-white dark:bg-dark-card text-text-tertiary hover:bg-primary/5 hover:text-primary border border-border/40 dark:border-dark-border/40"
               )}
             >
               <span className={cn("size-5 transition-transform group-hover:scale-110", activeTab === tab.id ? "text-white" : "text-primary/60")}>
@@ -346,76 +340,66 @@ const Settings = () => {
 
         {/* Content Area */}
         <div className="flex-1">
-          <Card className="shadow-soft-2xl border-white/40 dark:border-white/5">
+          <Card className="shadow-soft-2xl border-white/40 dark:border-dark-border/40">
             {activeTab === 'general' && (
               <div className="space-y-8 animate-in fade-in duration-500">
-                <div className="flex items-center space-x-3 pb-2 border-b border-border/40 dark:border-white/5">
+                <div className="flex items-center space-x-3 pb-2 border-b border-border/40 dark:border-dark-border/40">
                   <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                     <FiGlobe className="size-4" />
                   </div>
-                  <h3 className="text-sm font-black text-text-primary dark:text-dark-text-primary uppercase tracking-widest">{t('dashboard')}</h3>
+                  <h3 className="text-sm font-black text-text-primary uppercase tracking-widest">Tổng quan</h3>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <Input 
-                    label={t('system_name')} 
+                    label="Tên hệ thống" 
                     value={settings.systemName}
                     onChange={(e) => setSettings({...settings, systemName: e.target.value})}
                   />
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-text-tertiary dark:text-dark-text-tertiary ml-2 uppercase tracking-widest flex items-center space-x-1">
-                      <span>{t('language')}</span>
-                      <div className="w-1 h-1 rounded-full bg-primary/40" />
-                    </label>
-                    <select 
-                      className="w-full bg-bg-subtle/30 dark:bg-dark-bg/30 border border-border/50 dark:border-white/10 text-text-primary dark:text-dark-text-primary text-xs rounded-xl h-11 px-4 outline-none focus:bg-white dark:focus:bg-dark-card focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold shadow-inner-sm transition-all"
-                      value={settings.language}
-                      onChange={(e) => setSettings({...settings, language: e.target.value})}
-                    >
-                      <option value="vi">Tiếng Việt</option>
-                      <option value="en">English</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                   <label className="text-[10px] font-black text-text-tertiary dark:text-dark-text-tertiary ml-2 uppercase tracking-widest flex items-center space-x-1">
-                      <span>{t('theme')}</span>
+                  <div className="space-y-4">
+                   <label className="text-[10px] font-black text-text-tertiary ml-2 uppercase tracking-widest flex items-center space-x-1">
+                      <span>Giao diện</span>
                       <div className="w-1 h-1 rounded-full bg-primary/40" />
                     </label>
                     <div className="grid grid-cols-2 gap-4">
                        <button 
                         onClick={() => setSettings({...settings, theme: 'light'})}
                         className={cn(
-                          "flex items-center justify-center space-x-3 p-6 rounded-[1.5rem] border-2 transition-all group",
-                          settings.theme === 'light' ? "border-primary bg-primary/5 shadow-sm" : "border-border/40 dark:border-white/5 bg-white dark:bg-dark-card hover:border-primary/20"
+                          "flex items-center justify-center space-x-2.5 p-4 rounded-2xl border-2 transition-all duration-300 group relative overflow-hidden",
+                          settings.theme === 'light' 
+                            ? "border-primary bg-primary/5 shadow-soft-md scale-[1.02]" 
+                            : "border-border/40 dark:border-dark-border/40 bg-white dark:bg-dark-card hover:border-primary/30 hover:bg-bg-subtle dark:hover:bg-white/5"
                         )}
                        >
-                          <FiSun className={cn("size-6", settings.theme === 'light' ? "text-primary" : "text-text-tertiary dark:text-dark-text-tertiary")} />
-                          <span className={cn("font-black text-xs uppercase", settings.theme === 'light' ? "text-primary" : "text-text-tertiary dark:text-dark-text-tertiary")}>{t('light_mode')}</span>
+                          <FiSun className={cn("size-5 transition-all duration-500", settings.theme === 'light' ? "text-amber-500 rotate-0 scale-110" : "text-text-tertiary -rotate-45")} />
+                          <span className={cn("font-black text-[10px] uppercase tracking-widest transition-colors", settings.theme === 'light' ? "text-primary" : "text-text-tertiary")}>Chế độ sáng</span>
+                          {settings.theme === 'light' && <div className="absolute top-2 right-2 size-1.5 bg-primary rounded-full animate-pulse" />}
                        </button>
                        <button 
                         onClick={() => setSettings({...settings, theme: 'dark'})}
                         className={cn(
-                          "flex items-center justify-center space-x-3 p-6 rounded-[1.5rem] border-2 transition-all group",
-                          settings.theme === 'dark' ? "border-primary bg-primary/5 shadow-sm" : "border-border/40 dark:border-white/5 bg-white dark:bg-dark-card hover:border-primary/20"
+                          "flex items-center justify-center space-x-2.5 p-4 rounded-2xl border-2 transition-all duration-300 group relative overflow-hidden",
+                          settings.theme === 'dark' 
+                            ? "border-primary bg-primary/5 shadow-soft-md scale-[1.02]" 
+                            : "border-border/40 dark:border-dark-border/40 bg-white dark:bg-dark-card hover:border-primary/30 hover:bg-bg-subtle dark:hover:bg-white/5"
                         )}
                        >
-                          <FiMoon className={cn("size-6", settings.theme === 'dark' ? "text-primary" : "text-text-tertiary dark:text-dark-text-tertiary")} />
-                          <span className={cn("font-black text-xs uppercase", settings.theme === 'dark' ? "text-primary" : "text-text-tertiary dark:text-dark-text-tertiary")}>{t('dark_mode')}</span>
+                          <FiMoon className={cn("size-5 transition-all duration-500", settings.theme === 'dark' ? "text-blue-400 rotate-0 scale-110" : "text-text-tertiary 45deg")} />
+                          <span className={cn("font-black text-[10px] uppercase tracking-widest transition-colors", settings.theme === 'dark' ? "text-primary" : "text-text-tertiary")}>Chế độ tối</span>
+                          {settings.theme === 'dark' && <div className="absolute top-2 right-2 size-1.5 bg-primary rounded-full animate-pulse" />}
                        </button>
-                    </div>
+                    </div>                  </div>
                 </div>
               </div>
             )}
 
             {activeTab === 'notifications' && (
               <div className="space-y-8 animate-in fade-in duration-500">
-                <div className="flex items-center space-x-3 pb-2 border-b border-border/40 dark:border-white/5">
+                <div className="flex items-center space-x-3 pb-2 border-b border-border/40 dark:border-dark-border/40">
                   <div className="w-8 h-8 rounded-xl bg-success/10 flex items-center justify-center text-success">
                     <FiBell className="size-4" />
                   </div>
-                  <h3 className="text-sm font-black text-text-primary dark:text-dark-text-primary uppercase tracking-widest">{t('notifications')}</h3>
+                  <h3 className="text-sm font-black text-text-primary uppercase tracking-widest">Thông báo</h3>
                 </div>
 
                 <div className="space-y-4">
@@ -424,10 +408,10 @@ const Settings = () => {
                     { id: 'browser', label: 'Thông báo trình duyệt', desc: 'Hiển thị popup thông báo trực tiếp khi đang sử dụng.' },
                     { id: 'stockAlert', label: 'Cảnh báo tồn kho thấp', desc: 'Tự động gửi cảnh báo khi hàng hóa dưới mức tối thiểu.' },
                   ].map((item) => (
-                    <div key={item.id} className="flex items-center justify-between p-5 rounded-2xl bg-bg-subtle/20 dark:bg-white/[0.02] border border-border/30 dark:border-white/5 hover:border-primary/20 transition-all">
+                    <div key={item.id} className="flex items-center justify-between p-5 rounded-2xl bg-bg-subtle/20 dark:bg-white/[0.02] border border-border/30 dark:border-dark-border/40 hover:border-primary/20 transition-all">
                       <div>
-                        <h4 className="text-xs font-black text-text-primary dark:text-dark-text-primary uppercase tracking-tight mb-1">{item.label}</h4>
-                        <p className="text-[10px] text-text-tertiary dark:text-dark-text-tertiary font-medium">{item.desc}</p>
+                        <h4 className="text-xs font-black text-text-primary uppercase tracking-tight mb-1">{item.label}</h4>
+                        <p className="text-[10px] text-text-tertiary font-medium">{item.desc}</p>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">
                         <input 
@@ -449,15 +433,15 @@ const Settings = () => {
 
             {activeTab === 'security' && (
               <div className="space-y-8 animate-in fade-in duration-500">
-                <div className="flex items-center space-x-3 pb-2 border-b border-border/40 dark:border-white/5">
+                <div className="flex items-center space-x-3 pb-2 border-b border-border/40 dark:border-dark-border/40">
                   <div className="w-8 h-8 rounded-xl bg-error/10 flex items-center justify-center text-error">
                     <FiShield className="size-4" />
                   </div>
-                  <h3 className="text-sm font-black text-text-primary dark:text-dark-text-primary uppercase tracking-widest">{t('security')}</h3>
+                  <h3 className="text-sm font-black text-text-primary uppercase tracking-widest">Bảo mật</h3>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                   <div className="p-5 rounded-2xl bg-bg-subtle/40 dark:bg-white/[0.02] border border-border/40 dark:border-white/5 flex items-center justify-between group hover:border-primary/30 transition-all">
+                   <div className="p-5 rounded-2xl bg-bg-subtle/40 dark:bg-white/[0.02] border border-border/40 dark:border-dark-border/40 flex items-center justify-between group hover:border-primary/30 transition-all">
                       <div className="flex items-center space-x-4">
                          <div className={cn(
                             "w-10 h-10 rounded-xl flex items-center justify-center transition-all",
@@ -466,8 +450,8 @@ const Settings = () => {
                             <FiSmartphone size={18} />
                          </div>
                          <div>
-                            <h4 className="text-[11px] font-black uppercase tracking-tighter">{t('two_factor')}</h4>
-                            <p className="text-[9px] text-text-tertiary dark:text-dark-text-tertiary font-bold">{is2FAEnabled ? "Đã kích hoạt" : "Chưa kích hoạt"}</p>
+                            <h4 className="text-[11px] font-black uppercase tracking-tighter">Xác thực 2 lớp</h4>
+                            <p className="text-[9px] text-text-tertiary font-bold">{is2FAEnabled ? "Đã kích hoạt" : "Chưa kích hoạt"}</p>
                          </div>
                       </div>
                       <Button 
@@ -479,7 +463,7 @@ const Settings = () => {
                         {is2FAEnabled ? "Vô hiệu hóa" : "Kích hoạt"}
                       </Button>
                    </div>
-                   <div className="p-5 rounded-2xl bg-bg-subtle/40 dark:bg-white/[0.02] border border-border/40 dark:border-white/5 flex items-center justify-between group hover:border-primary/30 transition-all shadow-inner-sm">
+                   <div className="p-5 rounded-2xl bg-bg-subtle/40 dark:bg-white/[0.02] border border-border/40 dark:border-dark-border/40 flex items-center justify-between group hover:border-primary/30 transition-all shadow-inner-sm">
                       <div className="flex items-center space-x-4">
                          <div className={cn(
                             "w-10 h-10 rounded-xl flex items-center justify-center transition-all",
@@ -488,8 +472,8 @@ const Settings = () => {
                             <FiKey size={18} />
                          </div>
                          <div>
-                            <h4 className="text-[11px] font-black uppercase tracking-tighter">{t('security_pin')}</h4>
-                            <p className="text-[9px] text-text-tertiary dark:text-dark-text-tertiary font-bold">{isPinEnabled ? "Đã thiết lập" : "Chưa thiết lập"}</p>
+                            <h4 className="text-[11px] font-black uppercase tracking-tighter">Mã PIN bảo mật</h4>
+                            <p className="text-[9px] text-text-tertiary font-bold">{isPinEnabled ? "Đã thiết lập" : "Chưa thiết lập"}</p>
                          </div>
                       </div>
                       <Button 
@@ -506,7 +490,7 @@ const Settings = () => {
                 <div className="space-y-4 pt-4">
                    <div className="flex items-center space-x-2 ml-2 mb-2">
                       <FiLock className="text-primary size-3" />
-                      <h4 className="text-[10px] font-black text-text-tertiary dark:text-dark-text-tertiary uppercase tracking-[0.2em]">{t('change_password')}</h4>
+                      <h4 className="text-[10px] font-black text-text-tertiary uppercase tracking-[0.2em]">Thay đổi mật khẩu</h4>
                    </div>
                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <Input 
@@ -543,7 +527,7 @@ const Settings = () => {
                 </div>
 
                 <div className="space-y-4 pt-4">
-                   <h4 className="text-[10px] font-black text-text-tertiary dark:text-dark-text-tertiary uppercase tracking-[0.2em] ml-2">{t('recent_sessions')}</h4>
+                   <h4 className="text-[10px] font-black text-text-tertiary uppercase tracking-[0.2em] ml-2">Các phiên đăng nhập gần đây</h4>
                    <div className="space-y-2">
                       {sessions.length === 0 ? (
                         <div className="p-10 text-center text-text-tertiary opacity-30">
@@ -551,12 +535,12 @@ const Settings = () => {
                            <p className="text-[9px] font-black uppercase">Đang tải dữ liệu phiên...</p>
                         </div>
                       ) : sessions.map((session) => (
-                        <div key={session.id} className="flex items-center justify-between p-4 rounded-xl border border-border/30 dark:border-white/5 bg-white dark:bg-dark-card shadow-sm hover:shadow-md transition-shadow group">
+                        <div key={session.id} className="flex items-center justify-between p-4 rounded-xl border border-border/30 dark:border-dark-border/40 bg-white dark:bg-dark-card shadow-sm hover:shadow-md transition-shadow group">
                            <div className="flex items-center space-x-3">
                               <div className={cn("size-2 rounded-full", session.current ? "bg-success animate-pulse" : "bg-text-tertiary")} />
                               <div>
-                                 <p className="text-xs font-black text-text-primary dark:text-dark-text-primary uppercase tracking-tighter">{session.device}</p>
-                                 <p className="text-[9px] text-text-tertiary dark:text-dark-text-tertiary font-bold">{session.location} • {session.ipAddress} • {new Date(session.time).toLocaleString("vi-VN")}</p>
+                                 <p className="text-xs font-black text-text-primary uppercase tracking-tighter">{session.device}</p>
+                                 <p className="text-[9px] text-text-tertiary font-bold">{session.location} • {session.ipAddress} • {new Date(session.time).toLocaleString("vi-VN")}</p>
                               </div>
                            </div>
                            {!session.current && (
@@ -576,16 +560,16 @@ const Settings = () => {
 
             {activeTab === 'database' && (
               <div className="space-y-8 animate-in fade-in duration-500">
-                <div className="flex items-center space-x-3 pb-2 border-b border-border/40 dark:border-white/5">
+                <div className="flex items-center space-x-3 pb-2 border-b border-border/40 dark:border-dark-border/40">
                   <div className="w-8 h-8 rounded-xl bg-info/10 flex items-center justify-center text-info">
                     <FiDatabase className="size-4" />
                   </div>
-                  <h3 className="text-sm font-black text-text-primary dark:text-dark-text-primary uppercase tracking-widest">{t('database')}</h3>
+                  <h3 className="text-sm font-black text-text-primary uppercase tracking-widest">Dữ liệu</h3>
                 </div>
 
                 <div className={cn(
                     "p-6 rounded-2xl flex items-start space-x-4 border transition-all duration-500",
-                    dbStatus.loading ? "bg-bg-subtle/50 dark:bg-white/[0.02] border-border/40 dark:border-white/5" :
+                    dbStatus.loading ? "bg-bg-subtle/50 dark:bg-white/[0.02] border-border/40 dark:border-dark-border/40" :
                     dbStatus.success ? "bg-success/5 border-success/20" : "bg-error/5 border-error/20"
                 )}>
                   <div className={cn(
@@ -603,9 +587,9 @@ const Settings = () => {
                         {dbStatus.loading ? "Đang kiểm tra..." : dbStatus.message}
                     </h4>
                     {!dbStatus.loading && dbStatus.success && (
-                        <p className="text-[10px] text-text-secondary dark:text-dark-text-secondary font-medium leading-relaxed">
-                            Hệ thống: <span className="font-bold text-text-primary dark:text-dark-text-primary uppercase">{dbStatus.details?.dialect}</span> | 
-                            Database: <span className="font-bold text-text-primary dark:text-dark-text-primary uppercase">{dbStatus.details?.database}</span>
+                        <p className="text-[10px] text-text-secondary font-medium leading-relaxed">
+                            Hệ thống: <span className="font-bold text-text-primary uppercase">{dbStatus.details?.dialect}</span> | 
+                            Database: <span className="font-bold text-text-primary uppercase">{dbStatus.details?.database}</span>
                         </p>
                     )}
                   </div>
@@ -621,7 +605,7 @@ const Settings = () => {
                       </div>
                       <div className="text-center">
                         <p className="text-xs font-black uppercase tracking-tighter">Xuất toàn bộ SQL</p>
-                        <p className="text-[9px] text-text-tertiary dark:text-dark-text-tertiary font-bold mt-1">Tải xuống cấu trúc và dữ liệu (.sql)</p>
+                        <p className="text-[9px] text-text-tertiary font-bold mt-1">Tải xuống cấu trúc và dữ liệu (.sql)</p>
                       </div>
                    </button>
                    <button 
@@ -633,7 +617,7 @@ const Settings = () => {
                       </div>
                       <div className="text-center">
                         <p className="text-xs font-black uppercase tracking-tighter">Sao lưu tức thời</p>
-                        <p className="text-[9px] text-text-tertiary dark:text-dark-text-tertiary font-bold mt-1">Tạo điểm khôi phục JSON ngay bây giờ</p>
+                        <p className="text-[9px] text-text-tertiary font-bold mt-1">Tạo điểm khôi phục JSON ngay bây giờ</p>
                       </div>
                    </button>
                 </div>
@@ -641,14 +625,14 @@ const Settings = () => {
             )}
 
             {activeTab !== 'security' && activeTab !== 'database' && (
-              <div className="mt-10 pt-6 border-t border-border/40 dark:border-white/5 flex justify-end">
+              <div className="mt-10 pt-6 border-t border-border/40 dark:border-dark-border/40 flex justify-end">
                 <Button 
                   onClick={handleSave}
                   isLoading={loading}
                   className="h-12 px-10 shadow-primary/30"
                   leftIcon={<FiSave />}
                 >
-                  {t('save_changes')}
+                  Lưu thay đổi
                 </Button>
               </div>
             )}

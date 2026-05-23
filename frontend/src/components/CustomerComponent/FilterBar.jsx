@@ -1,21 +1,21 @@
 import React from "react";
-import { FiSearch, FiMapPin, FiActivity } from "react-icons/fi";
+import { FiSearch } from "react-icons/fi";
+import Input from "../common/Input";
 
 function FilterBar({
   search,
   onSearchChange,
 }) {
   return (
-    <div className="flex flex-col md:flex-row gap-3 mb-4">
+    <div className="flex flex-col md:flex-row gap-4 mb-6">
       {/* Search */}
-      <div className="flex items-center flex-1 border border-border rounded-lg px-3 focus-within:ring-2 focus-within:ring-primary/30 bg-card transition w-full md:w-96">
-        <FiSearch className="text-textSecondary mr-2" />
-        <input
-          type="text"
+      <div className="flex-1 max-w-lg">
+        <Input
           placeholder="Tìm theo tên, email hoặc SĐT..."
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="flex-1 p-2 bg-transparent text-textPrimary focus:outline-none"
+          className="h-11"
+          leftIcon={<FiSearch size={18} />}
         />
       </div> 
     </div>

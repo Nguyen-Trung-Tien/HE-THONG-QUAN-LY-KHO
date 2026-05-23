@@ -67,11 +67,22 @@ const createImportReceipt = async (data) => {
       }));
       await db.ImportDetails.bulkCreate(detailData, { transaction: t });
 
-      // Tăng stock cho từng sản phẩm
+      // Tăng stock cho từng sản phẩm và ghi log
       for (const item of details) {
         const stock = await db.Stock.findByPk(item.productId, { transaction: t });
         if (stock) {
+          const oldQuantity = stock.stock;
           await stock.increment("stock", { by: Number(item.quantity), transaction: t });
+          
+          await db.InventoryLog.create({
+            stockId: stock.id,
+            userId: receiptData.userId || null,
+            change_type: "IMPORT",
+            quantity: Number(item.quantity),
+            qtyBefore: oldQuantity,
+            qtyAfter: oldQuantity + Number(item.quantity),
+            note: `Nhập hàng từ phiếu #${receipt.id}`,
+          }, { transaction: t });
         }
       }
     }

@@ -16,6 +16,8 @@ import Badge from '../common/Badge';
 import Card from '../common/Card';
 import Modal from '../common/Modal';
 import ConfirmModal from '../common/ConfirmModal';
+import { FiPlus, FiSearch, FiEdit3, FiTrash2, FiUser } from "react-icons/fi";
+import { cn } from "../../utils/cn";
 
 export default function UsersComponent() {
   const [users, setUsers] = useState([]);
@@ -147,12 +149,12 @@ export default function UsersComponent() {
       key: 'name',
       render: (_, u) => (
         <div className="flex items-center">
-          <div className="size-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold mr-3">
+          <div className="size-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-black shadow-inner-sm mr-3">
             {u.firstName?.[0]}{u.lastName?.[0]}
           </div>
           <div>
-            <div className="text-sm font-bold text-textPrimary">{u.lastName} {u.firstName}</div>
-            <div className="text-xs text-textSecondary">{u.email}</div>
+            <div className="text-xs font-black text-text-primary uppercase tracking-tight">{u.lastName} {u.firstName}</div>
+            <div className="text-[10px] text-text-tertiary font-bold">{u.email}</div>
           </div>
         </div>
       )
@@ -160,19 +162,14 @@ export default function UsersComponent() {
     {
       title: 'Số điện thoại',
       key: 'phoneNumber',
-      render: (val) => val || "-"
+      render: (val) => <span className="text-xs font-bold text-text-secondary">{val || "-"}</span>
     },
     {
       title: 'Vai trò',
       key: 'role',
       render: (role) => (
-        <Badge variant={role === 'admin' ? 'error' : 'success'} size="sm">{role}</Badge>
+        <Badge variant={role === 'admin' ? 'error' : 'success'} size="sm" className="uppercase tracking-widest">{role}</Badge>
       )
-    },
-    {
-      title: 'Giới tính',
-      key: 'gender',
-      className: 'text-[11px]'
     },
     {
       title: 'Trạng thái',
@@ -186,35 +183,24 @@ export default function UsersComponent() {
       key: 'actions',
       className: 'text-right',
       render: (_, u) => (
-        <div className="flex justify-end gap-x-0.5 scale-90 origin-right">
+        <div className="flex justify-end gap-x-1 scale-90 origin-right">
           <Button 
-            variant="ghost" size="icon" className="text-primary hover:bg-primary/10 transition-all"
+            variant="ghost" size="icon" className="text-primary hover:bg-primary/10 transition-all rounded-xl"
             onClick={() => handleEdit(u)}
             title="Chỉnh sửa"
           >
-            <svg
-              className="size-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-              />
-            </svg>
+            <FiEdit3 className="size-4" />
           </Button>
           {u.role !== "admin" && (
             <Button 
-              variant="ghost" size="icon" className="text-error hover:bg-error/10 transition-colors"
+              variant="ghost" size="icon" className="text-error/60 hover:text-error hover:bg-error/10 transition-colors rounded-xl"
               onClick={() => {
                 setSelectedUser(u);
                 setIsDeleteModalOpen(true);
               }}
+              title="Xóa"
             >
-              <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+              <FiTrash2 className="size-4" />
             </Button>
           )}
         </div>
@@ -223,14 +209,14 @@ export default function UsersComponent() {
   ];
 
   return (
-    <div className="flex flex-col gap-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
+    <div className="flex flex-col gap-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500 pb-10">
       <div className="flex flex-col md:flex-row justify-between items-end gap-3">
         <div>
-          <Badge variant="primary" className="mb-1">Nhân sự</Badge>
-          <h1 className="text-xl font-semibold text-text-primary tracking-tighter">
+          <Badge variant="primary" className="mb-1 uppercase tracking-widest">Nhân sự</Badge>
+          <h1 className="heading-1">
             Quản Lý Nhân Viên
           </h1>
-          <p className="text-[10px] text-text-secondary font-semibold">Tài khoản và phân quyền người dùng</p>
+          <p className="subheading">Tài khoản và phân quyền người dùng</p>
         </div>
 
         <Button
@@ -245,21 +231,23 @@ export default function UsersComponent() {
             setIsEditing(false);
             setIsModalOpen(true);
           }}
-          leftIcon={<svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>}
+          className="rounded-xl shadow-primary/30 h-11 px-6"
+          leftIcon={<FiPlus />}
         >
           Thêm nhân viên
         </Button>
       </div>
 
-      <Card className="shadow-soft-xl border-border/50" noPadding>
-        <div className="p-4 flex flex-col md:flex-row gap-3 border-b border-border/40">
+      <Card className="shadow-soft-xl border-border/50 dark:border-dark-border/40" noPadding>
+        <div className="p-4 flex flex-col md:flex-row gap-3 border-b border-border/40 dark:border-dark-border/40">
           <div className="flex-1">
             <Input
               name="search"
               placeholder="Tìm kiếm theo tên hoặc email…"
               value={filters.search}
               onChange={handleFilterChange}
-              leftIcon={<svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>}
+              className="h-11"
+              leftIcon={<FiSearch />}
             />
           </div>
           <div className="flex gap-2">
@@ -267,22 +255,22 @@ export default function UsersComponent() {
               name="role"
               value={filters.role}
               onChange={handleFilterChange}
-              className="px-3 py-1.5 border border-border rounded-xl bg-white text-[11px] font-bold focus:ring-2 focus:ring-primary/10 outline-none transition-all"
+              className="px-4 py-2 border border-border/40 dark:border-dark-border/40 rounded-xl bg-white dark:bg-dark-card text-[11px] font-black uppercase tracking-widest text-text-primary focus:ring-4 focus:ring-primary/5 outline-none transition-all shadow-sm"
             >
-              <option value="All">Tất cả vai trò</option>
-              <option value="admin">Quản lý</option>
-              <option value="Kế toán">Kế toán</option>
-              <option value="Nhân viên">Nhân viên</option>
+              <option className="dark:bg-dark-card dark:text-text-primary" value="All">Tất cả vai trò</option>
+              <option className="dark:bg-dark-card dark:text-text-primary" value="admin">Quản lý</option>
+              <option className="dark:bg-dark-card dark:text-text-primary" value="Kế toán">Kế toán</option>
+              <option className="dark:bg-dark-card dark:text-text-primary" value="Nhân viên">Nhân viên</option>
             </select>
             <select
               name="status"
               value={filters.status}
               onChange={handleFilterChange}
-              className="px-3 py-1.5 border border-border rounded-xl bg-white text-[11px] font-bold focus:ring-2 focus:ring-primary/10 outline-none transition-all"
+              className="px-4 py-2 border border-border/40 dark:border-dark-border/40 rounded-xl bg-white dark:bg-dark-card text-[11px] font-black uppercase tracking-widest text-text-primary focus:ring-4 focus:ring-primary/5 outline-none transition-all shadow-sm"
             >
-              <option value="All">Tất cả trạng thái</option>
-              <option value="Hoạt động">Hoạt động</option>
-              <option value="Bị khóa">Bị khóa</option>
+              <option className="dark:bg-dark-card dark:text-text-primary" value="All">Tất cả trạng thái</option>
+              <option className="dark:bg-dark-card dark:text-text-primary" value="Hoạt động">Hoạt động</option>
+              <option className="dark:bg-dark-card dark:text-text-primary" value="Bị khóa">Bị khóa</option>
             </select>
           </div>
         </div>
@@ -295,7 +283,7 @@ export default function UsersComponent() {
           />
         </div>
 
-        <div className="p-4 border-t border-border/40 flex justify-center">
+        <div className="p-6 border-t border-border/40 dark:border-dark-border/40 flex justify-center">
           <Pagination 
             currentPage={currentPage} 
             totalPages={totalPages} 
@@ -311,34 +299,33 @@ export default function UsersComponent() {
         size="md"
         footer={
           <div className="flex justify-end gap-3 w-full">
-            <Button variant="ghost" onClick={() => setIsModalOpen(false)} className="h-11 px-6">Hủy</Button>
-            <Button variant="primary" onClick={handleSubmit} className="h-11 px-8 shadow-primary/30">
+            <Button variant="ghost" onClick={() => setIsModalOpen(false)} className="h-11 px-6 rounded-xl">Hủy</Button>
+            <Button variant="primary" onClick={handleSubmit} className="h-11 px-8 shadow-primary/30 rounded-xl">
               {isEditing ? "Lưu thay đổi" : "Tạo tài khoản"}
             </Button>
           </div>
         }
       >
-        <form onSubmit={handleSubmit} className="flex flex-col gap-y-6">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-y-6 p-2">
           <div className="grid grid-cols-2 gap-4">
-            <Input label="Họ" name="firstName" value={form.firstName} onChange={handleChange} required className="h-10" />
-            <Input label="Tên" name="lastName" value={form.lastName} onChange={handleChange} required className="h-10" />
+            <Input label="Họ" name="firstName" value={form.firstName} onChange={handleChange} required />
+            <Input label="Tên" name="lastName" value={form.lastName} onChange={handleChange} required />
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {!isEditing && (
-              <Input label="Email" type="email" name="email" value={form.email} onChange={handleChange} required className="h-10" />
+              <Input label="Email" type="email" name="email" value={form.email} onChange={handleChange} required />
             )}
             <Input 
               label={isEditing ? "Mật khẩu (để trống nếu không đổi)" : "Mật khẩu"} 
               type="password" name="password" value={form.password} onChange={handleChange} required={!isEditing} 
-              className="h-10"
               containerClassName={isEditing ? "col-span-2" : ""}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <Input label="Địa chỉ" name="address" value={form.address} onChange={handleChange} className="h-10" />
-            <Input label="Số điện thoại" name="phoneNumber" value={form.phoneNumber} onChange={handleChange} className="h-10" />
+            <Input label="Địa chỉ" name="address" value={form.address} onChange={handleChange} />
+            <Input label="Số điện thoại" name="phoneNumber" value={form.phoneNumber} onChange={handleChange} />
           </div>
 
           <div className="grid grid-cols-3 gap-4">
@@ -347,10 +334,10 @@ export default function UsersComponent() {
                 <span>Vai trò</span>
                 <div className="size-1 rounded-full bg-primary/40" />
               </label>
-              <select id="form-role" name="role" value={form.role} onChange={handleChange} className="w-full bg-bg-subtle/30 border border-border/50 text-text-primary text-xs rounded-xl h-10 px-4 outline-none focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold shadow-inner-sm transition-all duration-300">
-                <option value="admin">Quản lý</option>
-                <option value="Kế toán">Kế toán</option>
-                <option value="Nhân viên">Nhân viên</option>
+              <select id="form-role" name="role" value={form.role} onChange={handleChange} className="w-full bg-bg-subtle/30 dark:bg-dark-card border border-border/50 dark:border-dark-border/40 text-text-primary text-xs rounded-xl h-11 px-4 outline-none focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold shadow-inner-sm transition-all duration-300">
+                <option className="dark:bg-dark-card dark:text-text-primary" value="admin">Quản lý</option>
+                <option className="dark:bg-dark-card dark:text-text-primary" value="Kế toán">Kế toán</option>
+                <option className="dark:bg-dark-card dark:text-text-primary" value="Nhân viên">Nhân viên</option>
               </select>
             </div>
             <div className="flex flex-col gap-y-1.5">
@@ -358,10 +345,10 @@ export default function UsersComponent() {
                 <span>Giới tính</span>
                 <div className="size-1 rounded-full bg-primary/40" />
               </label>
-              <select id="form-gender" name="gender" value={form.gender} onChange={handleChange} className="w-full bg-bg-subtle/30 border border-border/50 text-text-primary text-xs rounded-xl h-10 px-4 outline-none focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold shadow-inner-sm transition-all duration-300">
-                <option value="Nam">Nam</option>
-                <option value="Nữ">Nữ</option>
-                <option value="Khác">Khác</option>
+              <select id="form-gender" name="gender" value={form.gender} onChange={handleChange} className="w-full bg-bg-subtle/30 dark:bg-dark-card border border-border/50 dark:border-dark-border/40 text-text-primary text-xs rounded-xl h-11 px-4 outline-none focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold shadow-inner-sm transition-all duration-300">
+                <option className="dark:bg-dark-card dark:text-text-primary" value="Nam">Nam</option>
+                <option className="dark:bg-dark-card dark:text-text-primary" value="Nữ">Nữ</option>
+                <option className="dark:bg-dark-card dark:text-text-primary" value="Khác">Khác</option>
               </select>
             </div>
             <div className="flex flex-col gap-y-1.5">
@@ -369,9 +356,9 @@ export default function UsersComponent() {
                 <span>Trạng thái</span>
                 <div className="size-1 rounded-full bg-primary/40" />
               </label>
-              <select id="form-status" name="status" value={form.status} onChange={handleChange} className="w-full bg-bg-subtle/30 border border-border/50 text-text-primary text-xs rounded-xl h-10 px-4 outline-none focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold shadow-inner-sm transition-all duration-300">
-                <option value="Hoạt động">Hoạt động</option>
-                <option value="Bị khóa">Bị khóa</option>
+              <select id="form-status" name="status" value={form.status} onChange={handleChange} className="w-full bg-bg-subtle/30 dark:bg-dark-card border border-border/50 dark:border-dark-border/40 text-text-primary text-xs rounded-xl h-11 px-4 outline-none focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold shadow-inner-sm transition-all duration-300">
+                <option className="dark:bg-dark-card dark:text-text-primary" value="Hoạt động">Hoạt động</option>
+                <option className="dark:bg-dark-card dark:text-text-primary" value="Bị khóa">Bị khóa</option>
               </select>
             </div>
           </div>
@@ -384,6 +371,7 @@ export default function UsersComponent() {
         onConfirm={handleDelete}
         title="Xác nhận xóa nhân viên"
         message={`Bạn có chắc muốn xóa nhân viên "${selectedUser?.lastName} ${selectedUser?.firstName}"? Hành động này không thể hoàn tác.`}
+        variant="danger"
       />
     </div>
   );

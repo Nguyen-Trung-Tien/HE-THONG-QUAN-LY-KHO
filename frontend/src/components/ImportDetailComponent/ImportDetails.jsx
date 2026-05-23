@@ -11,9 +11,10 @@ import Button from '../common/Button';
 import Table from '../common/Table';
 import Card from '../common/Card';
 import ConfirmModal from '../common/ConfirmModal';
-
 import Pagination from "../common/Pagination";
 import Input from "../common/Input";
+import Badge from "../common/Badge";
+import { FiSearch, FiPackage, FiClock } from "react-icons/fi";
 
 export default function ImportDetails() {
   const currentUser = useSelector((state) => state.user.currentUser);
@@ -81,27 +82,39 @@ export default function ImportDetails() {
     {
       title: 'Mã phiếu',
       key: 'importId',
-      className: 'w-24 text-center font-bold text-primary',
+      className: 'w-24 text-center font-black text-primary uppercase tracking-tighter',
+      render: (id) => <span>#{id}</span>
     },
     {
       title: 'Sản phẩm',
       key: 'StockProductData',
-      render: (data) => <span className="font-semibold text-textPrimary">{data?.name || "-"}</span>
+      render: (data) => (
+        <div className="flex items-center gap-x-2">
+           <div className="size-6 rounded-lg bg-primary/5 flex items-center justify-center text-primary/60">
+              <FiPackage size={14} />
+           </div>
+           <span className="font-bold text-text-primary uppercase tracking-tight">{data?.name || "-"}</span>
+        </div>
+      )
     },
     {
       title: 'Số lượng',
       key: 'quantity',
-      render: (qty, row) => <span className="font-medium">{qty} {row.StockProductData?.unit}</span>
+      render: (qty, row) => (
+        <span className="text-xs font-black text-text-primary tracking-tighter">
+          {qty} <span className="text-[10px] text-text-tertiary font-medium uppercase">{row.StockProductData?.unit}</span>
+        </span>
+      )
     },
     {
       title: 'Đơn giá',
       key: 'price',
-      render: (price) => <span>{Number(price).toLocaleString("vi-VN")} VND</span>
+      render: (price) => <span className="text-xs font-bold text-text-secondary">{Number(price).toLocaleString("vi-VN")}đ</span>
     },
     {
       title: 'Thành tiền',
       key: 'total',
-      render: (_, row) => <span className="font-bold text-primary">{(row.quantity * row.price).toLocaleString("vi-VN")} VND</span>
+      render: (_, row) => <span className="text-sm font-black text-primary tracking-tighter">{(row.quantity * row.price).toLocaleString("vi-VN")}đ</span>
     },
     {
       title: 'Thao tác',
@@ -126,34 +139,36 @@ export default function ImportDetails() {
         </div>
       )
     }
-  ], [currentUser, setSelectedId, setIsDeleteModalOpen]);
+  ], [currentUser]);
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-black text-text-primary tracking-tighter uppercase">
-            Chi tiết các lần nhập hàng
+          <Badge variant="primary" className="mb-1">Chi tiết</Badge>
+          <h2 className="text-xl font-black text-text-primary tracking-tighter uppercase leading-none">
+            Lịch sử chi tiết nhập hàng
           </h2>
         </div>
         <div className="w-full sm:w-80">
           <Input
-            placeholder="Tìm kiếm theo tên sản phẩm..."
+            placeholder="Tìm theo tên sản phẩm..."
             value={searchQuery}
             onChange={handleSearchChange}
-            leftIcon={<svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>}
+            className="h-11"
+            leftIcon={<FiSearch size={18} />}
           />
         </div>
       </div>
 
-      <Card noPadding>
+      <Card noPadding className="shadow-soft-xl overflow-hidden border-border/50 dark:border-dark-border/40">
         <Table 
           columns={columns} 
           data={details} 
           loading={loading} 
           emptyMessage="Không có dữ liệu chi tiết nào"
         />
-        <div className="px-6 pb-6">
+        <div className="p-6 border-t border-border/40 dark:border-dark-border/40 flex justify-center">
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}

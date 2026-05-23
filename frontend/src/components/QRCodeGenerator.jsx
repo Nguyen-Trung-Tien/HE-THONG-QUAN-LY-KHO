@@ -1,5 +1,6 @@
 import React, { useRef } from "react";
 import QRCode from "react-qr-code";
+import Button from "./common/Button";
 
 function QRCodeGenerator({ productData, onClose }) {
   const qrRef = useRef();
@@ -53,29 +54,31 @@ function QRCodeGenerator({ productData, onClose }) {
 
   return (
     <div className="flex flex-col items-center p-4">
-      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200" ref={qrRef}>
+      <div className="bg-white p-6 rounded-3xl shadow-soft-xl border border-border/40 dark:border-white/10" ref={qrRef}>
         <QRCode value={qrValue} size={200} />
       </div>
-      <div className="mt-4 text-center">
-        <p className="font-bold text-gray-800">{productData.name}</p>
-        <p className="text-sm text-gray-500">Mã: {productData.id}</p>
+      <div className="mt-6 text-center">
+        <p className="font-black text-text-primary uppercase tracking-tighter">{productData.name}</p>
+        <p className="text-[10px] font-bold text-text-tertiary uppercase tracking-widest mt-1">Mã SP: {productData.id}</p>
       </div>
-      <div className="mt-6 flex space-x-3 w-full justify-center">
-        <button
+      <div className="mt-8 flex gap-3 w-full justify-center">
+        <Button
           onClick={handlePrint}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center"
+          variant="primary"
+          size="sm"
+          className="rounded-xl"
+          leftIcon={<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>}
         >
-          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-          </svg>
           In nhãn QR
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={onClose}
-          className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
+          variant="secondary"
+          size="sm"
+          className="rounded-xl"
         >
           Đóng
-        </button>
+        </Button>
       </div>
     </div>
   );

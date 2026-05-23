@@ -53,53 +53,137 @@ const getExportReceiptById = async (id) => {
 
 const createExportReceipt = async (data) => {
   const { exportDetailData, ...receiptData } = data;
+  const t = await db.sequelize.transaction();
 
-  const receipt = await db.ExportReceipts.create(receiptData);
+  try {
+    const receipt = await db.ExportReceipts.create(receiptData, { transaction: t });
 
-  if (exportDetailData && exportDetailData.length > 0) {
-    for (const d of exportDetailData) {
-      await db.ExportDetails.create({
-        exportId: receipt.id,
-        productId: d.productId,
-        quantity: d.quantity,
-      });
+    if (exportDetailData && exportDetailData.length > 0) {
+      for (const d of exportDetailData) {
+        const stock = await db.Stock.findByPk(d.productId, { transaction: t });
+        if (!stock) throw new Error(`Stock with ID ${d.productId} not found`);
+        if (stock.stock < d.quantity) throw new Error(`Insufficient stock for product ${stock.name}`);
+
+        const oldQuantity = stock.stock;
+        await stock.decrement("stock", { by: d.quantity, transaction: t });
+
+        await db.ExportDetails.create({
+          exportId: receipt.id,
+          productId: d.productId,
+          quantity: d.quantity,
+        }, { transaction: t });
+
+        await db.InventoryLog.create({
+          stockId: stock.id,
+          userId: receiptData.userId || null,
+          change_type: "EXPORT",
+          quantity: -d.quantity,
+          qtyBefore: oldQuantity,
+          qtyAfter: oldQuantity - d.quantity,
+          note: `Xuất hàng từ phiếu #${receipt.id}`,
+        }, { transaction: t });
+      }
     }
-  }
 
-  return await getExportReceiptById(receipt.id);
+    await t.commit();
+    return await getExportReceiptById(receipt.id);
+  } catch (err) {
+    await t.rollback();
+    throw err;
+  }
 };
 
 const updateExportReceipt = async (id, data) => {
   const { exportDetailData, ...receiptData } = data;
+  const t = await db.sequelize.transaction();
 
-  const receipt = await db.ExportReceipts.findByPk(id);
-  if (!receipt) throw new Error("Export receipt not found");
+  try {
+    const receipt = await db.ExportReceipts.findByPk(id, { transaction: t });
+    if (!receipt) throw new Error("Export receipt not found");
 
-  await receipt.update(receiptData);
+    // 1. Revert old stock levels
+    const oldDetails = await db.ExportDetails.findAll({
+      where: { exportId: id },
+      transaction: t,
+    });
 
-  await db.ExportDetails.destroy({ where: { exportId: id } });
-
-  if (exportDetailData && exportDetailData.length > 0) {
-    for (const d of exportDetailData) {
-      await db.ExportDetails.create({
-        exportId: id,
-        productId: d.productId,
-        quantity: d.quantity,
-      });
+    for (const oldItem of oldDetails) {
+      const stock = await db.Stock.findByPk(oldItem.productId, { transaction: t });
+      if (stock) {
+        await stock.increment("stock", { by: Number(oldItem.quantity), transaction: t });
+      }
     }
-  }
 
-  return await getExportReceiptById(id);
+    // 2. Update receipt info
+    await receipt.update(receiptData, { transaction: t });
+
+    // 3. Replace details and apply new stock levels
+    await db.ExportDetails.destroy({ where: { exportId: id }, transaction: t });
+
+    if (exportDetailData && exportDetailData.length > 0) {
+      for (const d of exportDetailData) {
+        const stock = await db.Stock.findByPk(d.productId, { transaction: t });
+        if (!stock) throw new Error(`Stock with ID ${d.productId} not found`);
+        
+        const oldQuantity = stock.stock;
+        if (oldQuantity < d.quantity) throw new Error(`Insufficient stock for product ${stock.name}`);
+
+        await stock.decrement("stock", { by: d.quantity, transaction: t });
+
+        await db.ExportDetails.create({
+          exportId: id,
+          productId: d.productId,
+          quantity: d.quantity,
+        }, { transaction: t });
+
+        await db.InventoryLog.create({
+          stockId: stock.id,
+          userId: receiptData.userId || null,
+          change_type: "EXPORT",
+          quantity: -d.quantity,
+          qtyBefore: oldQuantity,
+          qtyAfter: oldQuantity - d.quantity,
+          note: `Cập nhật phiếu xuất #${id}`,
+        }, { transaction: t });
+      }
+    }
+
+    await t.commit();
+    return await getExportReceiptById(id);
+  } catch (err) {
+    await t.rollback();
+    throw err;
+  }
 };
 
 const deleteExportReceipt = async (id) => {
-  const receipt = await db.ExportReceipts.findByPk(id);
-  if (!receipt) throw new Error("Export receipt not found");
+  const t = await db.sequelize.transaction();
+  try {
+    const receipt = await db.ExportReceipts.findByPk(id, { transaction: t });
+    if (!receipt) throw new Error("Export receipt not found");
 
-  await db.ExportDetails.destroy({ where: { exportId: id } });
+    // Revert stock before deleting
+    const details = await db.ExportDetails.findAll({
+      where: { exportId: id },
+      transaction: t,
+    });
 
-  await receipt.destroy();
-  return true;
+    for (const item of details) {
+      const stock = await db.Stock.findByPk(item.productId, { transaction: t });
+      if (stock) {
+        await stock.increment("stock", { by: Number(item.quantity), transaction: t });
+      }
+    }
+
+    await db.ExportDetails.destroy({ where: { exportId: id }, transaction: t });
+    await receipt.destroy({ transaction: t });
+    
+    await t.commit();
+    return true;
+  } catch (err) {
+    await t.rollback();
+    throw err;
+  }
 };
 
 module.exports = {

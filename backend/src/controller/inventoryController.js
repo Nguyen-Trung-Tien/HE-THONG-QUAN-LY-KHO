@@ -141,4 +141,19 @@ module.exports = {
         .json({ message: "Lỗi server", error: err.message });
     }
   },
+
+  deleteLog: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const log = await db.InventoryLog.findByPk(id);
+      if (!log) return res.status(404).json({ message: "Không tìm thấy log" });
+
+      await log.destroy();
+      return res.json({ message: "Xóa log thành công" });
+    } catch (err) {
+      return res
+        .status(500)
+        .json({ message: "Lỗi server", error: err.message });
+    }
+  },
 };

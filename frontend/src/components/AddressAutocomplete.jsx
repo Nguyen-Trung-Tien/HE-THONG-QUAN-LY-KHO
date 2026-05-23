@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
+import { cn } from "../utils/cn";
+import { FiMapPin, FiLoader } from "react-icons/fi";
 
 function AddressAutocomplete({ value, onChange, onSelect }) {
   const [suggestions, setSuggestions] = useState([]);
@@ -60,29 +62,38 @@ function AddressAutocomplete({ value, onChange, onSelect }) {
   };
 
   return (
-    <div className="relative">
+    <div className="relative group">
+      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-text-tertiary group-focus-within:text-primary transition-colors z-10">
+         <FiMapPin />
+      </div>
+      
       <input
         value={value}
         onChange={handleChange}
-        placeholder="Nhập địa chỉ"
-        className="w-full px-3 py-2 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+        placeholder="Số nhà, tên đường, phường/xã…"
+        className="w-full pl-12 pr-12 py-3.5 bg-bg-subtle/30 dark:bg-dark-card/40 border border-border/50 dark:border-dark-border/60 text-text-primary text-xs rounded-2xl outline-none transition-all duration-300 focus:bg-white dark:focus:bg-dark-card focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold shadow-inner-sm"
       />
 
       {loading && (
-        <div className="absolute right-2 top-2 text-gray-500">...</div>
+        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-primary animate-spin">
+           <FiLoader size={16} />
+        </div>
       )}
 
       {!hasSelected && suggestions.length > 0 && (
-        <ul className="absolute z-10 w-full bg-white border rounded mt-1 max-h-60 overflow-auto shadow-lg">
-          {suggestions.map((s) => (
-            <li
-              key={s.place_id}
-              className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
-              onClick={() => handleSelect(s)}
-            >
-              {s.display_name}
-            </li>
-          ))}
+        <ul className="absolute z-[100] w-full bg-white dark:bg-dark-card border border-border/40 dark:border-dark-border/60 rounded-2xl mt-2 max-h-60 overflow-hidden shadow-soft-2xl animate-in fade-in zoom-in-95 duration-200">
+          <div className="overflow-y-auto max-h-60 custom-scrollbar divide-y divide-border/20 dark:divide-white/5">
+            {suggestions.map((s) => (
+              <li
+                key={s.place_id}
+                className="px-5 py-3.5 hover:bg-primary/5 dark:hover:bg-white/[0.03] text-text-primary cursor-pointer text-[11px] font-bold transition-colors flex items-start gap-x-3 group/item"
+                onClick={() => handleSelect(s)}
+              >
+                <FiMapPin className="mt-0.5 text-text-tertiary group-hover/item:text-primary transition-colors shrink-0" />
+                <span className="leading-relaxed">{s.display_name}</span>
+              </li>
+            ))}
+          </div>
         </ul>
       )}
     </div>

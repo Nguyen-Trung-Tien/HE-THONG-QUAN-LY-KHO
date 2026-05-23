@@ -154,10 +154,10 @@ const EditProduct = ({ productData, onSuccess }) => {
               id="edit-product-status"
               value={form.status}
               onChange={(e) => setForm(prev => ({ ...prev, status: e.target.value }))}
-              className="w-full bg-bg-subtle/30 border border-border/50 text-text-primary text-xs rounded-2xl h-11 px-4 outline-none transition-all duration-300 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold shadow-inner-sm"
+              className="w-full bg-bg-subtle/30 dark:bg-dark-card/40 border border-border/50 dark:border-dark-border/40 text-text-primary text-xs rounded-2xl h-11 px-4 outline-none transition-all duration-300 focus:bg-white dark:focus:bg-dark-card focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold shadow-inner-sm"
             >
-              <option value="Còn hàng">Còn hàng</option>
-              <option value="Hết hàng">Hết hàng</option>
+              <option value="Còn hàng" className="dark:bg-dark-card">Còn hàng</option>
+              <option value="Hết hàng" className="dark:bg-dark-card">Hết hàng</option>
             </select>
           </div>
 
@@ -170,11 +170,11 @@ const EditProduct = ({ productData, onSuccess }) => {
               id="edit-product-supplier"
               value={form.supplierId}
               onChange={(e) => setForm(prev => ({ ...prev, supplierId: e.target.value }))}
-              className="w-full bg-bg-subtle/30 border border-border/50 text-text-primary text-xs rounded-2xl h-11 px-4 outline-none transition-all duration-300 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold shadow-inner-sm"
+              className="w-full bg-bg-subtle/30 dark:bg-dark-card/40 border border-border/50 dark:border-dark-border/40 text-text-primary text-xs rounded-2xl h-11 px-4 outline-none transition-all duration-300 focus:bg-white dark:focus:bg-dark-card focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold shadow-inner-sm"
             >
-              <option value="">-- Chọn nhà cung cấp --</option>
+              <option value="" className="dark:bg-dark-card">-- Chọn nhà cung cấp --</option>
               {suppliers.map((s) => (
-                <option key={s.id} value={s.id}>{s.name}</option>
+                <option key={s.id} value={s.id} className="dark:bg-dark-card">{s.name}</option>
               ))}
             </select>
           </div>
@@ -189,7 +189,7 @@ const EditProduct = ({ productData, onSuccess }) => {
               value={form.description}
               onChange={(e) => setForm(prev => ({ ...prev, description: e.target.value }))}
               rows="2"
-              className="w-full bg-bg-subtle/30 border border-border/50 text-text-primary text-xs rounded-2xl py-3 px-4 outline-none transition-all duration-300 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold shadow-inner-sm resize-none"
+              className="w-full bg-bg-subtle/30 dark:bg-dark-card/40 border border-border/50 dark:border-dark-border/40 text-text-primary text-xs rounded-2xl py-3 px-4 outline-none transition-all duration-300 focus:bg-white dark:focus:bg-dark-card focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold shadow-inner-sm resize-none"
               placeholder="Nhập ghi chú sản phẩm…"
             />
           </div>

@@ -1,6 +1,6 @@
 {
   "name": "backend",
-  "version": "3.0.0",
+  "version": "3.5.0",
   "description": "Xay dung he thong thong tin quan ly",
   "main": "service.js",
   "scripts": {

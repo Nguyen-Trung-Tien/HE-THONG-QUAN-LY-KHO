@@ -10,7 +10,6 @@ import {
   FiMail,
   FiPhone,
   FiShield,
-  FiSave,
   FiMapPin,
   FiSettings,
   FiCamera,
@@ -22,6 +21,8 @@ import {
   FiArrowUpRight,
   FiArrowDownLeft,
   FiArrowLeft,
+  FiInfo,
+  FiSave
 } from "react-icons/fi";
 import { arrayBufferToString } from "../utils/arrayBufferToString";
 import { cn } from "../utils/cn";
@@ -69,10 +70,12 @@ const Profile = () => {
       if (res.errCode === 0 && res.users.length > 0) {
         const data = res.users[0];
         let avatarBase64 = "";
-        if (data.image?.data?.length > 0) {
-          avatarBase64 = arrayBufferToString(data.image.data);
-        } else if (typeof data.image === 'string') {
+        
+        // Handle image data (could be string or Buffer from legacy BLOB)
+        if (typeof data.image === 'string') {
           avatarBase64 = data.image;
+        } else if (data.image?.data?.length > 0) {
+          avatarBase64 = arrayBufferToString(data.image.data);
         }
 
         const userData = {
@@ -110,11 +113,10 @@ const Profile = () => {
     if (e) e.preventDefault();
     setLoading(true);
     try {
-      // Gửi dữ liệu cập nhật lên server
       const res = await UpdateDetailUser(user);
       if (res.errCode === 0) {
         toast.success("Cập nhật thông tin thành công!");
-        await fetchUser(); // Tải lại dữ liệu mới nhất
+        await fetchUser();
       } else {
         toast.error(res.message || "Lỗi cập nhật!");
       }
@@ -223,8 +225,8 @@ const Profile = () => {
   return (
     <div className="flex flex-col gap-y-8 animate-in fade-in duration-700 pb-10">
       {/* Header Banner */}
-      <div className="relative h-64 w-full rounded-[3rem] overflow-hidden shadow-soft-2xl border border-white/20">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary-light to-accent opacity-90" />
+      <div className="relative h-64 w-full rounded-[3rem] overflow-hidden shadow-soft-2xl border border-white/20 dark:border-white/10">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary-light to-accent opacity-90 dark:opacity-80" />
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20" />
         
         {/* Back Button */}
@@ -242,7 +244,7 @@ const Profile = () => {
 
         <div className="absolute bottom-8 left-10 flex items-end gap-x-6">
           <div className="relative group">
-            <div className="size-32 rounded-[2.5rem] overflow-hidden border-4 border-white shadow-2xl bg-bg-subtle relative transition-transform duration-500 group-hover:scale-105">
+            <div className="size-32 rounded-[2.5rem] overflow-hidden border-4 border-white dark:border-dark-border shadow-2xl bg-bg-subtle dark:bg-dark-card relative transition-transform duration-500 group-hover:scale-105">
               {avatarPreview ? (
                 <img src={avatarPreview} alt="avatar" className="size-full object-cover" />
               ) : (
@@ -273,7 +275,6 @@ const Profile = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Col: Quick Actions */}
         <div className="flex flex-col gap-y-6">
           <Card title="Trung tâm điều khiển" className="shadow-soft-xl">
             <div className="flex flex-col gap-y-2">
@@ -284,7 +285,7 @@ const Profile = () => {
                     if (item.path) navigate(item.path);
                     if (item.action) item.action();
                   }}
-                  className="w-full flex items-center justify-between p-4 rounded-2xl hover:bg-bg-subtle transition-all group"
+                  className="w-full flex items-center justify-between p-4 rounded-2xl hover:bg-bg-subtle dark:hover:bg-white/[0.03] transition-all group text-left"
                 >
                   <div className="flex items-center gap-x-3">
                     <span className={cn("size-5", item.color)}>{item.icon}</span>
@@ -298,15 +299,15 @@ const Profile = () => {
             </div>
           </Card>
 
-          <div className="bg-gradient-to-br from-primary/10 to-accent/5 p-8 rounded-[2.5rem] border border-primary/10 relative overflow-hidden group shadow-soft-lg">
+          <div className="bg-gradient-to-br from-primary/10 to-accent/5 p-8 rounded-[2.5rem] border border-primary/10 dark:border-primary/5 relative overflow-hidden group shadow-soft-lg">
             <div className="absolute top-0 right-0 size-24 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2" />
             <h4 className="text-xs font-black text-primary uppercase tracking-[0.2em] mb-4">Thống kê cá nhân</h4>
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-white p-4 rounded-2xl border border-primary/10 shadow-sm">
+              <div className="bg-white dark:bg-dark-card p-4 rounded-2xl border border-primary/10 dark:border-dark-border/40 shadow-sm">
                 <p className="text-[9px] font-black text-text-tertiary uppercase mb-1">Phiếu đã lập</p>
                 <p className="text-xl font-black text-text-primary">128</p>
               </div>
-              <div className="bg-white p-4 rounded-2xl border border-primary/10 shadow-sm">
+              <div className="bg-white dark:bg-dark-card p-4 rounded-2xl border border-primary/10 dark:border-dark-border/40 shadow-sm">
                 <p className="text-[9px] font-black text-text-tertiary uppercase mb-1">Đơn hàng xử lý</p>
                 <p className="text-xl font-black text-text-primary">42</p>
               </div>
@@ -314,7 +315,6 @@ const Profile = () => {
           </div>
         </div>
 
-        {/* Right Col: Edit Form */}
         <div className="lg:col-span-2">
           <Card title="Cập nhật hồ sơ" extra={<FiUser className="text-primary" />}>
             <form onSubmit={handleSubmit} className="flex flex-col gap-y-8">
@@ -338,30 +338,43 @@ const Profile = () => {
                   placeholder="09xx xxx xxx"
                 />
                 <Input
-                  label="Email (Không thể thay đổi)"
+                  label="Email (Hệ thống)"
                   value={user.email}
                   disabled
                   placeholder="example@gmail.com"
-                  className="bg-bg-subtle/50 opacity-70"
+                  leftIcon={<FiMail />}
                 />
               </div>
 
-              <Input
-                label="Địa chỉ cư trú"
-                value={user.address}
-                onChange={(e) => setUser(prev => ({ ...prev, address: e.target.value }))}
-                placeholder="Nhập địa chỉ chi tiết…"
-              />
+              <div className="flex flex-col gap-y-1.5">
+                <label className="text-[10px] font-black text-text-tertiary ml-2 uppercase tracking-widest flex items-center space-x-1">
+                  <span>Địa chỉ cư trú hiện tại</span>
+                  <div className="w-1 h-1 rounded-full bg-primary/40" />
+                </label>
+                <div className="relative group">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-text-tertiary group-focus-within:text-primary transition-colors">
+                    <FiMapPin />
+                  </div>
+                  <textarea
+                    value={user.address}
+                    onChange={(e) => setUser(prev => ({ ...prev, address: e.target.value }))}
+                    rows="3"
+                    className="w-full pl-12 pr-5 py-3.5 bg-bg-subtle/30 dark:bg-dark-card/40 border border-border/50 dark:border-dark-border/60 text-text-primary text-xs rounded-2xl outline-none transition-all duration-300 focus:bg-white dark:focus:bg-dark-card focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold shadow-inner-sm resize-none"
+                    placeholder="Nhập địa chỉ chi tiết…"
+                  />
+                </div>
+              </div>
 
-              <div className="flex items-center justify-between pt-6 border-t border-border/40">
+              <div className="flex items-center justify-between pt-6 border-t border-border/40 dark:border-dark-border/40">
                 <div className="flex items-center text-text-tertiary">
-                   <FiShield className="mr-2" />
-                   <span className="text-[10px] font-bold uppercase italic">* Dữ liệu được bảo mật bởi WMS Pro</span>
+                   <FiShield className="mr-2 text-success" />
+                   <span className="text-[10px] font-bold uppercase italic">* Dữ liệu được bảo mật toàn diện</span>
                 </div>
                 <Button
                   type="submit"
                   isLoading={loading}
-                  className="h-12 px-10 shadow-primary/30"
+                  className="h-12 px-10 shadow-primary/30 rounded-2xl"
+                  leftIcon={<FiSave />}
                 >
                   {loading ? "Đang lưu..." : "Lưu thay đổi"}
                 </Button>
@@ -384,21 +397,21 @@ const Profile = () => {
       <Modal
         isOpen={showPasswordModal}
         onClose={() => setShowPasswordModal(false)}
-        title="Đổi mật khẩu"
+        title="Bảo mật tài khoản"
         size="sm"
       >
         <form onSubmit={handleChangePassword} className="flex flex-col gap-y-6 p-2">
           <div className="flex flex-col items-center mb-6">
-            <div className="size-16 rounded-3xl bg-primary/10 flex items-center justify-center text-primary mb-3">
+            <div className="size-16 rounded-3xl bg-primary/10 flex items-center justify-center text-primary mb-3 shadow-inner-sm">
               <FiLock size={32} />
             </div>
-            <p className="text-[10px] font-black text-text-tertiary uppercase tracking-widest text-center">
-              Nhập mật khẩu cũ và mới để cập nhật bảo mật tài khoản
+            <p className="text-[10px] font-black text-text-tertiary uppercase tracking-widest text-center max-w-[200px]">
+              Vui lòng nhập mật khẩu hiện tại để xác minh danh tính
             </p>
           </div>
           
           <Input
-            label="Mật khẩu cũ"
+            label="Mật khẩu hiện tại"
             type="password"
             required
             value={passwordData.oldPassword}
@@ -424,7 +437,7 @@ const Profile = () => {
           
           <div className="flex gap-3 pt-4">
             <Button
-              variant="outline"
+              variant="secondary"
               type="button"
               className="flex-1 h-12 rounded-2xl"
               onClick={() => setShowPasswordModal(false)}
@@ -445,15 +458,15 @@ const Profile = () => {
       <Modal
         isOpen={showActivityModal}
         onClose={() => setShowActivityModal(false)}
-        title="Lịch sử hoạt động cá nhân"
+        title="Lịch sử hoạt động"
         size="md"
       >
         <div className="flex flex-col gap-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
           {activityLogs.length > 0 ? (
             activityLogs.map((log) => (
-              <div key={log.id || log.createdAt} className="flex items-start gap-x-4 p-4 rounded-2xl bg-bg-subtle/30 border border-border/40 hover:border-primary/20 transition-all group">
+              <div key={log.id || log.createdAt} className="flex items-start gap-x-4 p-4 rounded-2xl bg-bg-subtle/30 dark:bg-white/[0.02] border border-border/40 dark:border-dark-border/40 hover:bg-white dark:hover:bg-dark-card transition-all group">
                 <div className={cn(
-                  "size-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm",
+                  "size-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm transition-transform group-hover:scale-110",
                   log.change_type === "IMPORT" ? "bg-success/10 text-success" : 
                   log.change_type === "EXPORT" ? "bg-error/10 text-error" : "bg-info/10 text-info"
                 )}>
@@ -463,14 +476,14 @@ const Profile = () => {
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-start mb-1">
                     <h4 className="text-xs font-black text-text-primary uppercase tracking-tight truncate">
-                      {log.stock?.product?.name || "Sản phẩm không tên"}
+                      {log.stock?.product?.name || "Sản phẩm hệ thống"}
                     </h4>
-                    <span className="text-[10px] font-bold text-text-tertiary whitespace-nowrap">
-                      {new Date(log.createdAt).toLocaleString('vi-VN')}
+                    <span className="text-[10px] font-bold text-text-tertiary whitespace-nowrap bg-bg-subtle dark:bg-white/5 px-2 py-0.5 rounded-lg">
+                      {new Date(log.createdAt).toLocaleDateString('vi-VN')}
                     </span>
                   </div>
                   <div className="flex items-center gap-x-2">
-                    <Badge variant={log.change_type === "IMPORT" ? "success" : log.change_type === "EXPORT" ? "error" : "info"} className="text-[9px] px-2 py-0.5">
+                    <Badge variant={log.change_type === "IMPORT" ? "success" : log.change_type === "EXPORT" ? "error" : "info"} size="sm">
                       {log.change_type}
                     </Badge>
                     <span className="text-[11px] font-bold text-text-secondary">
@@ -479,18 +492,13 @@ const Profile = () => {
                       </span>
                     </span>
                   </div>
-                  {log.note && (
-                    <p className="mt-2 text-[10px] text-text-tertiary italic leading-relaxed">
-                      " {log.note} "
-                    </p>
-                  )}
                 </div>
               </div>
             ))
           ) : (
-            <div className="text-center py-12 opacity-50">
-              <FiPackage size={48} className="mx-auto mb-4 text-text-tertiary" />
-              <p className="text-xs font-black uppercase tracking-widest">Chưa có lịch sử hoạt động</p>
+            <div className="text-center py-12 opacity-30">
+              <FiPackage size={48} className="mx-auto mb-4" />
+              <p className="text-xs font-black uppercase tracking-widest">Không có lịch sử hoạt động</p>
             </div>
           )}
         </div>

@@ -7,8 +7,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#ffffff" />
     <title>Hệ Thống Quản Lý Kho Hàng</title>
+    <style>
+      /* Prevent theme flash */
+      html.dark {
+        background-color: #020617;
+        color-scheme: dark;
+      }
+      html.dark body {
+        background-color: #020617;
+      }
+    </style>
+    <script>
+      (function() {
+        try {
+          const userStr = localStorage.getItem('user');
+          if (userStr) {
+            const user = JSON.parse(userStr);
+            if (user.preferredTheme === 'dark') {
+              document.documentElement.classList.add('dark');
+            }
+          } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            // Default to system preference if no user setting
+            document.documentElement.classList.add('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
-  <body class="bg-bg-light font-inter">
+  <body class="bg-bg-light dark:bg-dark-bg font-inter">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
     <script>

@@ -14,13 +14,16 @@ import ReceiptTable from "./ReceiptTable";
 import ReceiptFormModal from "./ReceiptFormModal";
 
 // Common Components
-import Button from '../common/Button';
-import Input from '../common/Input';
-import Card from '../common/Card';
-import ConfirmModal from '../common/ConfirmModal';
+import Button from "../common/Button";
+import Input from "../common/Input";
+import Card from "../common/Card";
+import ConfirmModal from "../common/ConfirmModal";
 import Pagination from "../common/Pagination";
 import ExportExcel from "../common/ExportExcel";
 import ExportPDF from "../common/ExportPDF";
+import Badge from "../common/Badge";
+import { FiPlus, FiSearch, FiFileText } from "react-icons/fi";
+import { cn } from "../../utils/cn";
 
 const CURRENCY_UNIT = "VND";
 
@@ -39,7 +42,7 @@ export default function ImportReceipt() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const itemsPerPage = 10;
-  
+
   const [receiptFormData, setReceiptFormData] = useState({
     id: null,
     supplierData: null,
@@ -58,27 +61,30 @@ export default function ImportReceipt() {
     if (location.state?.openForm) {
       setShowReceiptForm(true);
     }
-  }, [location]); // Depend on location instead of location.state if location comes from useLocation()
+  }, [location]);
 
-  const fetchReceipts = useCallback(async (page = currentPage, search = searchQuery) => {
-    setLoading(true);
-    try {
-      const res = await getAllImportReceipts({
-        page,
-        limit: itemsPerPage,
-        search,
-      });
-      if (res.success) {
-        setReceipts(res.receipts || []);
-        setTotalPages(res.totalPages || 1);
-        setCurrentPage(res.currentPage || 1);
+  const fetchReceipts = useCallback(
+    async (page = currentPage, search = searchQuery) => {
+      setLoading(true);
+      try {
+        const res = await getAllImportReceipts({
+          page,
+          limit: itemsPerPage,
+          search,
+        });
+        if (res.success) {
+          setReceipts(res.receipts || []);
+          setTotalPages(res.totalPages || 1);
+          setCurrentPage(res.currentPage || 1);
+        }
+      } catch {
+        toast.error("Lỗi khi tải dữ liệu phiếu nhập");
+      } finally {
+        setLoading(false);
       }
-    } catch {
-      toast.error("Lỗi khi tải dữ liệu phiếu nhập");
-    } finally {
-      setLoading(false);
-    }
-  }, [currentPage, searchQuery, itemsPerPage]);
+    },
+    [currentPage, searchQuery, itemsPerPage],
+  );
 
   const fetchStockProducts = useCallback(async () => {
     try {
@@ -188,11 +194,15 @@ export default function ImportReceipt() {
 
   const handleFormChange = (field, value) => {
     if (field === "userId") value = value ? Number(value) : null;
-    
+
     if (field === "supplierData") {
       setReceiptFormData((prev) => {
         const updatedDetails = prev.details.map((d) => {
-          if (value && d.StockProductData?.supplierId && d.StockProductData.supplierId !== value.id) {
+          if (
+            value &&
+            d.StockProductData?.supplierId &&
+            d.StockProductData.supplierId !== value.id
+          ) {
             return {
               ...d,
               productId: "",
@@ -206,7 +216,7 @@ export default function ImportReceipt() {
       });
       return;
     }
-    setReceiptFormData(prev => ({ ...prev, [field]: value }));
+    setReceiptFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleDetailChange = (index, fieldOrObject, value) => {
@@ -219,13 +229,20 @@ export default function ImportReceipt() {
       } else {
         updatedDetail[fieldOrObject] = value;
       }
-      
+
       let newSupplierData = prev.supplierData;
       const productId = updatedDetail.productId;
       if (productId) {
-        const product = updatedDetail.StockProductData || productOptions.find(p => p.id === productId);
-        if (product?.supplierId && (!newSupplierData || newSupplierData.id !== product.supplierId)) {
-          const autoSupplier = supplierOptions.find(s => s.id === product.supplierId);
+        const product =
+          updatedDetail.StockProductData ||
+          productOptions.find((p) => p.id === productId);
+        if (
+          product?.supplierId &&
+          (!newSupplierData || newSupplierData.id !== product.supplierId)
+        ) {
+          const autoSupplier = supplierOptions.find(
+            (s) => s.id === product.supplierId,
+          );
           if (autoSupplier) {
             newSupplierData = autoSupplier;
           }
@@ -261,7 +278,8 @@ export default function ImportReceipt() {
     if (e) e.preventDefault();
     setFormLoading(true);
 
-    const { supplierData, import_date, userId, details, note } = receiptFormData;
+    const { supplierData, import_date, userId, details, note } =
+      receiptFormData;
 
     // Validation
     if (!supplierData?.id) {
@@ -280,9 +298,13 @@ export default function ImportReceipt() {
       return;
     }
 
-    const invalidDetail = details.find(d => !d.productId || !d.quantity || Number(d.quantity) <= 0);
+    const invalidDetail = details.find(
+      (d) => !d.productId || !d.quantity || Number(d.quantity) <= 0,
+    );
     if (invalidDetail) {
-      toast.error("Vui lòng kiểm tra lại thông tin các mặt hàng (Mã SP, Số lượng > 0)");
+      toast.info(
+        "Vui lòng kiểm tra lại thông tin các mặt hàng (Mã SP, Số lượng > 0)",
+      );
       setFormLoading(false);
       return;
     }
@@ -300,7 +322,9 @@ export default function ImportReceipt() {
     };
 
     if (!payload.userId) {
-      toast.error("Không tìm thấy thông tin người lập phiếu. Vui lòng đăng nhập lại.");
+      toast.error(
+        "Không tìm thấy thông tin người lập phiếu. Vui lòng đăng nhập lại.",
+      );
       setFormLoading(false);
       return;
     }
@@ -317,7 +341,8 @@ export default function ImportReceipt() {
       fetchReceipts();
     } catch (err) {
       console.error("Submit Error:", err);
-      const errorMsg = err.response?.data?.error || err.message || "Lỗi không xác định";
+      const errorMsg =
+        err.response?.data?.error || err.message || "Lỗi không xác định";
       toast.error(`Lỗi khi lưu phiếu nhập: ${errorMsg}`);
     } finally {
       setFormLoading(false);
@@ -330,25 +355,27 @@ export default function ImportReceipt() {
       .toLocaleString("vi-VN")} ${CURRENCY_UNIT}`;
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500 pb-10">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h2 className="text-xl font-black text-text-primary tracking-tighter uppercase">
-            Danh sách phiếu nhập
+          <Badge variant="primary" className="mb-1 uppercase tracking-widest">Nghiệp vụ</Badge>
+          <h2 className="text-xl font-black text-text-primary tracking-tighter uppercase leading-none">
+            Phiếu Nhập Kho
           </h2>
+          <p className="text-[10px] text-text-tertiary font-bold uppercase tracking-widest mt-1">Quản lý dòng hàng hóa nhập vào hệ thống</p>
         </div>
-        <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex flex-wrap gap-2 scale-90 sm:scale-100 origin-right relative z-50">
           <ExportPDF
             data={receipts}
             allData={receipts}
             fileName="Danh_sach_phieu_nhap"
             title="Danh sách phiếu nhập kho"
             columns={[
-              { key: 'id', header: 'Ma phieu' },
-              { key: 'import_date', header: 'Ngay nhap' },
-              { key: 'supplierData.name', header: 'Nha cung cap' },
-              { key: 'userData.email', header: 'Nguoi lap' },
-              { key: 'note', header: 'Ghi chu' },
+              { key: "id", header: "Ma phieu" },
+              { key: "import_date", header: "Ngay nhap" },
+              { key: "supplierData.name", header: "Nha cung cap" },
+              { key: "userData.email", header: "Nguoi lap" },
+              { key: "note", header: "Ghi chu" },
             ]}
           />
           <ExportExcel
@@ -357,46 +384,59 @@ export default function ImportReceipt() {
             fileName="Danh_sach_phieu_nhap"
             sheetName="PhieuNhap"
             columns={[
-              { key: 'id', header: 'Mã phiếu' },
-              { key: 'import_date', header: 'Ngày nhập' },
-              { key: 'supplierData.name', header: 'Nhà cung cấp' },
-              { key: 'userData.email', header: 'Người lập' },
-              { key: 'note', header: 'Ghi chú' },
+              { key: "id", header: "Mã phiếu" },
+              { key: "import_date", header: "Ngày nhập" },
+              { key: "supplierData.name", header: "Nhà cung cấp" },
+              { key: "userData.email", header: "Người lập" },
+              { key: "note", header: "Ghi chú" },
             ]}
           />
-          <div className="w-full sm:w-80">
-            <Input
-              placeholder="Tìm kiếm phiếu nhập..."
-              value={searchQuery}
-              onChange={handleSearchChange}
-              leftIcon={<svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>}
-            />
-          </div>
           <Button
             onClick={() => openReceiptForm()}
             variant="primary"
-            leftIcon={<svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>}
+            className="rounded-xl shadow-primary/30 h-10 px-6"
+            leftIcon={<FiPlus className="size-4" />}
           >
             Tạo phiếu mới
           </Button>
         </div>
       </div>
 
-      <Card noPadding>
-        <ReceiptTable
-          receipts={receipts}
-          handleEdit={openReceiptForm}
-          handleDelete={(id) => {
-            if (currentUser.role !== "admin") {
-              toast.warning("Chỉ Admin mới có quyền xóa!");
-              return;
-            }
-            setSelectedReceiptId(id);
-            setIsDeleteModalOpen(true);
-          }}
-          loading={loading}
-        />
-        <div className="px-6 pb-6">
+      <Card noPadding className="shadow-soft-xl border-border/50 dark:border-dark-border/40">
+        <div className="p-4 flex flex-col md:flex-row justify-between items-center gap-3 border-b border-border/40 dark:border-dark-border/40">
+           <div className="hidden md:block">
+              <Badge variant="neutral" size="sm" className="bg-bg-subtle/50 dark:bg-dark-card/40 uppercase font-black tracking-widest">
+                 Tổng cộng: {receipts.length} phiếu
+              </Badge>
+           </div>
+          <div className="w-full md:w-80">
+            <Input
+              placeholder="Tìm kiếm phiếu nhập..."
+              value={searchQuery}
+              onChange={handleSearchChange}
+              className="h-10"
+              leftIcon={<FiSearch size={18} />}
+            />
+          </div>
+        </div>
+
+        <div className="overflow-hidden">
+          <ReceiptTable
+            receipts={receipts}
+            handleEdit={openReceiptForm}
+            handleDelete={(id) => {
+              if (currentUser.role !== "admin") {
+                toast.warning("Chỉ Admin mới có quyền xóa!");
+                return;
+              }
+              setSelectedReceiptId(id);
+              setIsDeleteModalOpen(true);
+            }}
+            loading={loading}
+          />
+        </div>
+
+        <div className="p-6 border-t border-border/40 dark:border-dark-border/40 flex justify-center">
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
@@ -410,7 +450,9 @@ export default function ImportReceipt() {
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleReceiptDelete}
         title="Xác nhận xóa phiếu nhập"
-        message="Bạn có chắc chắn muốn xóa phiếu nhập này? Tất cả chi tiết liên quan cũng sẽ bị xóa."
+        message="Hành động này sẽ xóa vĩnh viễn phiếu nhập và toàn bộ dữ liệu chi tiết liên quan. Bạn có chắc chắn muốn tiếp tục?"
+        confirmText="Xác nhận xóa"
+        variant="danger"
       />
 
       <ReceiptFormModal
@@ -429,7 +471,8 @@ export default function ImportReceipt() {
             ? productOptions.filter(
                 (p) =>
                   !p.supplierId ||
-                  String(p.supplierId) === String(receiptFormData.supplierData.id)
+                  String(p.supplierId) ===
+                    String(receiptFormData.supplierData.id),
               )
             : productOptions
         }

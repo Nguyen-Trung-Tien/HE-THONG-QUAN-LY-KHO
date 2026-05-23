@@ -1,7 +1,12 @@
 import React, { useState, useEffect, useCallback } from "react";
 import AddressAutocomplete from "../AddressAutocomplete";
 import { fetchAllCustomers } from "../../API/customer/customerApi";
-import { FiX } from "react-icons/fi";
+import { FiX, FiSearch, FiRefreshCw, FiArrowLeft } from "react-icons/fi";
+import Modal from "../common/Modal";
+import Button from "../common/Button";
+import Input from "../common/Input";
+import { cn } from "../../utils/cn";
+
 function OrderStep2({ orderData, setOrderData, setCurrentStep }) {
   const [customerOption, setCustomerOption] = useState("new");
   const [customers, setCustomers] = useState([]);
@@ -93,26 +98,26 @@ function OrderStep2({ orderData, setOrderData, setCurrentStep }) {
     <div>
       <div className="grid grid-cols-1 gap-6 mb-6">
         <div>
-          <h4 className="text-md font-semibold text-textPrimary mb-4">
+          <h4 className="text-md font-black text-text-primary uppercase tracking-tight mb-4">
             Thông tin khách hàng
           </h4>
 
-          <div className="flex mb-4 border-b border-gray-200">
+          <div className="flex mb-4 border-b border-border/40 dark:border-dark-border/40">
             <button
-              className={`px-4 py-2 font-medium text-sm ${
+              className={`px-4 py-2 font-black text-[10px] uppercase tracking-widest transition-all ${
                 customerOption === "new"
                   ? "border-b-2 border-primary text-primary"
-                  : "text-gray-500"
+                  : "text-text-tertiary hover:text-text-primary"
               }`}
               onClick={() => setCustomerOption("new")}
             >
               Khách hàng mới
             </button>
             <button
-              className={`px-4 py-2 font-medium text-sm ${
+              className={`px-4 py-2 font-black text-[10px] uppercase tracking-widest transition-all ${
                 customerOption === "existing"
                   ? "border-b-2 border-primary text-primary"
-                  : "text-gray-500"
+                  : "text-text-tertiary hover:text-text-primary"
               }`}
               onClick={() => setCustomerOption("existing")}
             >
@@ -123,7 +128,7 @@ function OrderStep2({ orderData, setOrderData, setCurrentStep }) {
           {customerOption === "existing" ? (
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-textSecondary mb-1">
+                <label className="block text-[10px] font-black text-text-tertiary uppercase tracking-widest mb-2 ml-2">
                   Chọn khách hàng
                 </label>
                 <div className="relative">
@@ -133,14 +138,14 @@ function OrderStep2({ orderData, setOrderData, setCurrentStep }) {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     onFocus={() => setShowCustomerModal(true)}
-                    className="w-full px-3 py-2 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                    className="w-full px-5 py-3.5 rounded-2xl border border-border/50 dark:border-dark-border/60 bg-bg-subtle/30 dark:bg-dark-card text-text-primary dark:text-text-primary text-xs outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold"
                   />
                   <button
                     onClick={() => setShowCustomerModal(true)}
-                    className="absolute inset-y-0 right-0 px-3 flex items-center bg-gray-100 rounded-r-lg border-l border-gray-200"
+                    className="absolute inset-y-0 right-0 px-4 flex items-center bg-bg-subtle/50 dark:bg-white/5 rounded-r-2xl border-l border-border/40 dark:border-dark-border/40 text-text-tertiary"
                   >
                     <svg
-                      className="w-5 h-5 text-gray-500"
+                      className="w-5 h-5"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -148,19 +153,19 @@ function OrderStep2({ orderData, setOrderData, setCurrentStep }) {
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        strokeWidth="2"
+                        strokeWidth="2.5"
                         d="M19 9l-7 7-7-7"
                       />
                     </svg>
                   </button>
                 </div>
                 {orderData.customer.id && orderData.customer.name && (
-                  <div className="mt-2 p-2 bg-gray-50 rounded border border-gray-200">
-                    <p className="font-medium">{orderData.customer.name}</p>
-                    <p className="text-sm text-gray-600">
+                  <div className="mt-3 p-4 bg-bg-subtle/40 dark:bg-white/[0.01] rounded-2xl border border-primary/20 dark:border-primary/10 shadow-inner-sm">
+                    <p className="text-xs font-black text-primary uppercase tracking-tight">{orderData.customer.name}</p>
+                    <p className="text-[10px] text-text-secondary font-bold mt-1">
                       {orderData.customer.phone}
                     </p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-[10px] text-text-secondary font-bold">
                       {orderData.customer.email}
                     </p>
                   </div>
@@ -169,56 +174,40 @@ function OrderStep2({ orderData, setOrderData, setCurrentStep }) {
             </div>
           ) : (
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-textSecondary mb-1">
-                  Tên khách hàng *
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={orderData.customer.name}
-                  onChange={handleCustomerChange}
-                  required
-                  className="w-full px-3 py-2 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-textSecondary mb-1">
-                  Email khách hàng *
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={orderData.customer.email}
-                  onChange={handleCustomerChange}
-                  required
-                  className="w-full px-3 py-2 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-textSecondary mb-1">
-                  Số điện thoại *
-                </label>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={orderData.customer.phone}
-                  onChange={handleCustomerChange}
-                  required
-                  className="w-full px-3 py-2 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-                />
-              </div>
+              <Input
+                label="Tên khách hàng *"
+                name="name"
+                value={orderData.customer.name}
+                onChange={handleCustomerChange}
+                placeholder="Nguyễn Văn A"
+              />
+              <Input
+                label="Email khách hàng *"
+                type="email"
+                name="email"
+                value={orderData.customer.email}
+                onChange={handleCustomerChange}
+                placeholder="example@gmail.com"
+              />
+              <Input
+                label="Số điện thoại *"
+                type="tel"
+                name="phone"
+                value={orderData.customer.phone}
+                onChange={handleCustomerChange}
+                placeholder="09xx xxx xxx"
+              />
             </div>
           )}
         </div>
 
         <div>
-          <h4 className="text-md font-semibold text-textPrimary mb-4">
+          <h4 className="text-md font-black text-text-primary uppercase tracking-tight mb-4">
             Địa chỉ giao hàng
           </h4>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-textSecondary mb-1">
+              <label className="block text-[10px] font-black text-text-tertiary uppercase tracking-widest mb-2 ml-2">
                 Địa chỉ giao hàng *
               </label>
               <AddressAutocomplete
@@ -243,105 +232,93 @@ function OrderStep2({ orderData, setOrderData, setCurrentStep }) {
       </div>
 
       {showCustomerModal && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50"
-          onClick={() => setShowCustomerModal(false)}
+        <Modal
+          isOpen={showCustomerModal}
+          onClose={() => setShowCustomerModal(false)}
+          title="Chọn khách hàng"
+          size="md"
         >
-          <div
-            className="bg-white rounded-lg shadow-lg max-w-md w-full max-h-[80vh] flex flex-col overflow-hidden animate-fadeIn"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex justify-between items-center p-4 border-b flex-shrink-0">
-              <h3 className="text-lg font-semibold">Chọn khách hàng</h3>
-              <button
-                onClick={() => setShowCustomerModal(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <FiX size={24} />
-              </button>
-            </div>
-
-            <div className="p-4 overflow-y-auto flex-1">
-              <div className="mb-4 flex gap-2">
+            <div className="space-y-6">
+              <div className="flex gap-2">
                 <div className="relative flex-1">
-                  <input
-                    type="text"
+                  <Input
                     placeholder="Tìm theo tên hoặc số điện thoại..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                    className="h-11"
                   />
                   {searchTerm && (
                     <button
                       onClick={() => setSearchTerm("")}
-                      className="absolute right-2 top-2 text-gray-400 hover:text-gray-600"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-error transition-colors"
                     >
                       <FiX size={18} />
                     </button>
                   )}
                 </div>
-                <button
+                <Button
                   onClick={fetchCustomers}
-                  className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition whitespace-nowrap"
+                  className="h-11 px-6 rounded-2xl"
+                  isLoading={isLoadingCustomers}
                 >
                   Tìm kiếm
-                </button>
+                </Button>
               </div>
 
               {isLoadingCustomers ? (
-                <div className="text-center py-8">Đang tải...</div>
+                <div className="text-center py-12 opacity-30">
+                   <FiRefreshCw className="animate-spin size-8 mx-auto mb-2" />
+                   <p className="text-[10px] font-black uppercase tracking-widest">Đang tải...</p>
+                </div>
               ) : customers.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  {searchTerm
-                    ? "Không tìm thấy khách hàng"
-                    : "Nhập thông tin để tìm kiếm"}
+                <div className="text-center py-12 opacity-30">
+                  <FiSearch className="size-8 mx-auto mb-2" />
+                  <p className="text-[10px] font-black uppercase tracking-widest">
+                    {searchTerm ? "Không tìm thấy khách hàng" : "Nhập thông tin để tìm kiếm"}
+                  </p>
                 </div>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-2 max-h-[40vh] overflow-y-auto custom-scrollbar pr-2">
                   {customers.map((customer) => (
                     <div
                       key={customer.id}
-                      className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
+                      className="p-4 rounded-xl border border-border/40 dark:border-dark-border/40 bg-bg-subtle/20 dark:bg-white/[0.01] hover:bg-primary/5 hover:border-primary/20 transition-all cursor-pointer group"
                       onClick={() => handleSelectExistingCustomer(customer)}
                     >
-                      <p className="font-medium">{customer.name}</p>
-                      <p className="text-sm text-gray-600">
-                        {customer.phoneNumber}
-                      </p>
-                      <p className="text-sm text-gray-600">{customer.email}</p>
+                      <p className="text-xs font-black text-text-primary uppercase tracking-tight group-hover:text-primary transition-colors">{customer.name}</p>
+                      <div className="flex items-center gap-x-3 mt-1 text-[10px] text-text-tertiary font-bold">
+                        <span>{customer.phoneNumber}</span>
+                        <div className="size-1 rounded-full bg-border" />
+                        <span>{customer.email}</span>
+                      </div>
                     </div>
                   ))}
                 </div>
               )}
             </div>
-          </div>
-        </div>
+        </Modal>
       )}
 
-      <div className="flex justify-between">
-        <button
+      <div className="flex justify-between pt-8 border-t border-border/40 dark:border-dark-border/40">
+        <Button
+          variant="secondary"
           onClick={() => setCurrentStep(1)}
-          className="px-6 py-2 border border-border bg-white text-textPrimary rounded-lg font-semibold hover:bg-gray-50 transition-colors shadow-sm"
+          leftIcon={<FiArrowLeft />}
+          className="rounded-2xl h-12"
         >
           Quay lại
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={() => setCurrentStep(3)}
           disabled={
             !orderData.customer.name ||
             !orderData.customer.phone ||
             !orderData.shipping.address
           }
-          className={`px-6 py-2 gradient-bg text-white rounded-lg font-semibold hover:opacity-90 transition-opacity shadow-sm ${
-            !orderData.customer.name ||
-            !orderData.customer.phone ||
-            !orderData.shipping.address
-              ? "opacity-50 cursor-not-allowed"
-              : ""
-          }`}
+          className="rounded-2xl h-12 px-10"
         >
           Bước tiếp theo
-        </button>
+        </Button>
       </div>
     </div>
   );

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import * as XLSX from "xlsx";
 import { FiDownload, FiChevronDown } from "react-icons/fi";
 import Button from "./Button";
+import { cn } from "../../utils/cn";
 
 /**
  * Reusable ExportExcel component
@@ -56,36 +57,36 @@ const ExportExcel = ({
   };
 
   return (
-    <div className="relative inline-block text-left">
+    <div className="relative inline-block text-left z-[60]">
       <div className="flex">
         <Button
-          variant="outline"
+          variant="secondary"
           size="md"
           onClick={() => handleExport(data)}
           leftIcon={<FiDownload className="stroke-[3px]" />}
-          className="bg-white hover:bg-success/5 hover:text-success hover:border-success/30 rounded-l-xl border-r-0"
+          className="bg-white dark:bg-dark-card hover:bg-success/5 dark:hover:bg-success/10 hover:text-success hover:border-success/30 rounded-l-xl border-r-0 h-10 px-4 transition-all"
         >
           Xuất Excel
         </Button>
         <button
           onClick={() => setShowOptions(!showOptions)}
-          className="px-2 border border-border/60 border-l-0 rounded-r-xl hover:bg-bg-subtle transition-all text-text-tertiary"
+          className="px-2 border border-border/60 dark:border-dark-border/60 border-l-0 rounded-r-xl hover:bg-bg-subtle dark:hover:bg-white/5 transition-all text-text-tertiary h-10"
         >
-          <FiChevronDown />
+          <FiChevronDown className={cn("transition-transform duration-300", showOptions && "rotate-180")} />
         </button>
       </div>
 
       {showOptions && (
         <>
           <div 
-            className="fixed inset-0 z-10" 
+            className="fixed inset-0 z-[90]" 
             onClick={() => setShowOptions(false)}
           />
-          <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-white shadow-soft-2xl border border-border/40 z-20 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+          <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-white dark:bg-dark-card shadow-soft-2xl border border-border/40 dark:border-dark-border/60 z-[100] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="p-2 space-y-1">
               <button
                 onClick={() => handleExport(data, "_trang_hien_tai")}
-                className="w-full text-left px-4 py-2.5 text-[10px] font-black text-text-primary uppercase tracking-widest hover:bg-success/5 hover:text-success rounded-xl transition-all flex items-center"
+                className="w-full text-left px-4 py-2.5 text-[10px] font-black text-text-primary uppercase tracking-widest hover:bg-success/5 dark:hover:bg-white/5 hover:text-success rounded-xl transition-all flex items-center"
               >
                 <div className="w-1.5 h-1.5 rounded-full bg-success/40 mr-2.5" />
                 Trang hiện tại ({data.length})
@@ -93,7 +94,7 @@ const ExportExcel = ({
               {allData && allData.length > 0 && (
                 <button
                   onClick={() => handleExport(allData, "_tat_ca")}
-                  className="w-full text-left px-4 py-2.5 text-[10px] font-black text-text-primary uppercase tracking-widest hover:bg-success/5 hover:text-success rounded-xl transition-all flex items-center"
+                  className="w-full text-left px-4 py-2.5 text-[10px] font-black text-text-primary uppercase tracking-widest hover:bg-success/5 dark:hover:bg-white/5 hover:text-success rounded-xl transition-all flex items-center"
                 >
                   <div className="w-1.5 h-1.5 rounded-full bg-success/60 mr-2.5" />
                   Tất cả các trang ({allData.length})

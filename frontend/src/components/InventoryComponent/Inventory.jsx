@@ -21,6 +21,7 @@ import ConfirmModal from '../common/ConfirmModal';
 import ExportExcel from '../common/ExportExcel';
 import ExportPDF from '../common/ExportPDF';
 import { cn } from "../../utils/cn";
+import { FiPlus, FiSearch, FiRefreshCw } from "react-icons/fi";
 
 function Inventory() {
   const [activeTab, setActiveTab] = useState("all");
@@ -105,24 +106,25 @@ function Inventory() {
       key: 'name',
       render: (name, row) => (
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0">
+          <div className="w-10 h-10 rounded-lg bg-bg-subtle dark:bg-white/5 overflow-hidden flex-shrink-0">
              {row.image ? (
                <img src={row.image} alt={name} className="w-full h-full object-cover" />
              ) : (
-               <div className="w-full h-full flex items-center justify-center text-textSecondary">
+               <div className="w-full h-full flex items-center justify-center text-text-tertiary">
                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                  </svg>
                </div>
              )}
           </div>
-          <span className="font-semibold text-textPrimary">{name}</span>
+          <span className="font-bold text-text-primary uppercase tracking-tight">{name}</span>
         </div>
       )
     },
     {
       title: 'Danh mục',
       key: 'category',
+      render: (cat) => <Badge variant="neutral" size="sm">{cat || 'N/A'}</Badge>
     },
     {
       title: 'Trạng thái',
@@ -197,14 +199,14 @@ function Inventory() {
   ];
 
   return (
-    <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
+    <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500 pb-10">
       <div className="flex flex-col md:flex-row justify-between items-end gap-3">
         <div>
-          <Badge variant="primary" className="mb-1">Hàng hóa</Badge>
-          <h1 className="text-xl font-black text-text-primary tracking-tighter">
+          <Badge variant="primary" className="mb-1 uppercase tracking-widest">Hàng hóa</Badge>
+          <h1 className="heading-1">
             Quản Lý Tồn Kho
           </h1>
-          <p className="text-[10px] text-text-secondary font-semibold">Mức độ hàng hóa và vị trí lưu kho</p>
+          <p className="subheading">Mức độ hàng hóa và vị trí lưu kho hệ thống</p>
         </div>
         
         <div className="flex flex-wrap gap-2">
@@ -242,25 +244,26 @@ function Inventory() {
             variant="primary" 
             size="md"
             onClick={() => setIsCreateModalOpen(true)}
-            leftIcon={<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>}
+            leftIcon={<FiPlus />}
+            className="rounded-xl shadow-primary/30"
           >
             Thêm sản phẩm
           </Button>
         </div>
       </div>
 
-      <Card className="shadow-soft-xl border-border/50" noPadding>
-        <div className="p-4 flex flex-col md:flex-row justify-between items-center gap-3 border-b border-border/40">
-          <div className="flex bg-bg-subtle p-0.5 rounded-lg w-full md:w-auto overflow-x-auto border border-border/50">
+      <Card className="shadow-soft-xl border-border/50 dark:border-dark-border/40" noPadding>
+        <div className="p-4 flex flex-col md:flex-row justify-between items-center gap-3 border-b border-border/40 dark:border-dark-border/40">
+          <div className="flex bg-bg-subtle dark:bg-white/5 p-1 rounded-2xl w-full md:w-auto overflow-x-auto border border-border/40 dark:border-dark-border/40 backdrop-blur-sm">
             {["all", "Còn hàng", "Hết hàng"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => { setActiveTab(tab); setPage(1); }}
                 className={cn(
-                  "px-4 py-1 text-[10px] font-black rounded-md transition-all whitespace-nowrap",
+                  "px-6 py-2 text-[10px] font-black rounded-xl transition-all whitespace-nowrap uppercase tracking-widest",
                   activeTab === tab
-                    ? "bg-white text-primary shadow-sm"
-                    : "text-text-secondary hover:text-text-primary"
+                    ? "bg-white dark:bg-dark-card text-primary shadow-soft-md scale-[1.05]"
+                    : "text-text-tertiary hover:text-text-primary"
                 )}
               >
                 {tab === "all" ? "Tất cả" : tab}
@@ -273,7 +276,8 @@ function Inventory() {
               placeholder="Tìm sản phẩm..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              leftIcon={<svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>}
+              className="h-11"
+              leftIcon={<FiSearch size={16} />}
             />
           </div>
         </div>
@@ -286,8 +290,8 @@ function Inventory() {
           />
         </div>
 
-        <div className="p-4 flex flex-col sm:flex-row justify-between items-center border-t border-border/40 gap-3">
-          <div className="text-[10px] font-bold text-text-tertiary uppercase tracking-wider bg-bg-subtle px-2.5 py-1 rounded-full">
+        <div className="p-4 flex flex-col sm:flex-row justify-between items-center border-t border-border/40 dark:border-dark-border/40 gap-3">
+          <div className="text-[10px] font-black text-text-tertiary uppercase tracking-wider bg-bg-subtle/50 dark:bg-white/5 px-4 py-2 rounded-xl border border-border/40 dark:border-dark-border/40">
             Hiển thị <span className="text-primary">{currentItems.length}</span> / {filteredItems.length} sản phẩm
           </div>
           <Pagination 
@@ -364,4 +368,3 @@ function Inventory() {
 }
 
 export default Inventory;
-

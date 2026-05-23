@@ -19,6 +19,8 @@ import Modal from '../common/Modal';
 import ConfirmModal from '../common/ConfirmModal';
 import ExportExcel from '../common/ExportExcel';
 import ExportPDF from '../common/ExportPDF';
+import { FiPlus, FiSearch, FiEdit3, FiTrash2, FiMapPin, FiPhone, FiInfo, FiArrowLeft } from "react-icons/fi";
+import { cn } from "../../utils/cn";
 
 function SuppliersPage() {
   const currentUser = useSelector((state) => state.user.currentUser);
@@ -118,29 +120,34 @@ function SuppliersPage() {
 
   const columns = [
     {
-      title: 'Mã',
-      key: 'id',
-      className: 'w-16 text-center font-bold text-primary',
-    },
-    {
       title: 'Nhà cung cấp',
       key: 'name',
-      render: (name) => <span className="font-bold text-textPrimary">{name}</span>
+      render: (name) => (
+        <div className="flex flex-col">
+           <span className="font-black text-text-primary uppercase tracking-tight line-clamp-1">{name}</span>
+           <span className="text-[9px] font-black text-primary/60 uppercase tracking-widest mt-0.5">Supplier Partner</span>
+        </div>
+      )
     },
     {
-      title: 'Số điện thoại',
+      title: 'Liên hệ',
       key: 'phoneNumber',
-      render: (phone) => <span className="text-textSecondary font-medium">{phone || "-"}</span>
+      render: (phone) => (
+        <div className="flex items-center gap-x-2 text-text-secondary">
+          <FiPhone size={12} className="text-success/60" />
+          <span className="text-xs font-bold">{phone || "-"}</span>
+        </div>
+      )
     },
     {
       title: 'Địa chỉ',
       key: 'address',
-      render: (address) => <div className="max-w-xs truncate text-[11px] text-textSecondary" title={address}>{address || "-"}</div>
-    },
-    {
-      title: 'Mô tả',
-      key: 'description',
-      render: (desc) => <div className="max-w-xs truncate italic text-text-tertiary text-[11px]">{desc || "-"}</div>
+      render: (address) => (
+        <div className="flex items-center gap-x-2 text-text-secondary max-w-[200px]" title={address}>
+          <FiMapPin size={12} className="text-error/60 shrink-0" />
+          <span className="text-[11px] font-medium truncate italic">{address || "-"}</span>
+        </div>
+      )
     },
     {
       title: 'Thao tác',
@@ -149,30 +156,18 @@ function SuppliersPage() {
       render: (_, supplier) => (
         <div className="flex justify-end gap-x-1 scale-90 origin-right">
           <Button 
-            variant="ghost" size="icon" className="text-primary hover:bg-primary/10"
+            variant="ghost" size="icon" className="text-primary hover:bg-primary/10 rounded-xl"
             onClick={() => handleEdit(supplier)}
             title="Sửa"
           >
-            <svg
-              className="size-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-              />
-            </svg>
+            <FiEdit3 className="size-4" />
           </Button>
           <Button 
-            variant="ghost" size="icon" className="text-error hover:bg-error/10"
+            variant="ghost" size="icon" className="text-error/60 hover:text-error hover:bg-error/10 rounded-xl"
             onClick={() => confirmDelete(supplier)}
             title="Xóa"
           >
-            <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+            <FiTrash2 className="size-4" />
           </Button>
         </div>
       )
@@ -180,17 +175,17 @@ function SuppliersPage() {
   ];
 
   return (
-    <div className="flex flex-col gap-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
+    <div className="flex flex-col gap-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500 pb-10">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-3">
         <div>
-          <Badge variant="primary" className="mb-1">Đối tác</Badge>
-          <h1 className="text-xl font-semibold text-text-primary tracking-tighter">
-            NHÀ CUNG CẤP
+          <Badge variant="primary" className="mb-1 uppercase tracking-widest">Đối tác</Badge>
+          <h1 className="heading-1">
+            Nhà Cung Cấp
           </h1>
-          <p className="text-[10px] text-text-secondary font-semibold">Đối tác và nguồn cung hàng hóa</p>
+          <p className="subheading">Đối tác và nguồn cung hàng hóa hệ thống</p>
         </div>
         
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 scale-90 sm:scale-100 origin-right">
           <ExportPDF
             data={suppliers}
             allData={suppliers}
@@ -201,7 +196,6 @@ function SuppliersPage() {
               { key: 'name', header: 'Ten nha cung cap' },
               { key: 'phoneNumber', header: 'So dien thoai' },
               { key: 'address', header: 'Dia chi' },
-              { key: 'description', header: 'Mo ta' },
             ]}
           />
           <ExportExcel
@@ -214,7 +208,6 @@ function SuppliersPage() {
               { key: 'name', header: 'Tên nhà cung cấp' },
               { key: 'phoneNumber', header: 'Số điện thoại' },
               { key: 'address', header: 'Địa chỉ' },
-              { key: 'description', header: 'Mô tả' },
             ]}
           />
           <Button 
@@ -225,24 +218,31 @@ function SuppliersPage() {
               setIsEditing(false);
               setIsModalOpen(true);
             }}
-            leftIcon={<svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>}
+            leftIcon={<FiPlus className="size-4" />}
+            className="rounded-xl shadow-primary/30 h-10 px-6"
           >
             Thêm đối tác
           </Button>
         </div>
       </div>
 
-      <Card className="shadow-soft-xl border-border/50" noPadding>
-        <div className="p-4 flex justify-end border-b border-border/40">
-          <div className="w-full md:w-64">
+      <Card className="shadow-soft-xl border-border/50 dark:border-dark-border/40" noPadding>
+        <div className="p-4 flex flex-col md:flex-row justify-between items-center gap-3 border-b border-border/40 dark:border-dark-border/40">
+           <div className="hidden md:block">
+              <Badge variant="neutral" size="sm" className="bg-bg-subtle/50 dark:bg-white/5 uppercase font-black tracking-widest">
+                 Tổng cộng: {suppliers.length} NCC
+              </Badge>
+           </div>
+          <div className="w-full md:w-80">
             <Input
-              placeholder="Tìm nhà cung cấp…"
+              placeholder="Tìm theo tên hoặc SĐT…"
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
-                setCurrentPage(1);
+                setCurrentPage(Page => 1);
               }}
-              leftIcon={<svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>}
+              className="h-10"
+              leftIcon={<FiSearch size={18} />}
             />
           </div>
         </div>
@@ -252,11 +252,11 @@ function SuppliersPage() {
             columns={columns} 
             data={suppliers} 
             loading={loading} 
-            emptyMessage="Không có nhà cung cấp nào."
+            emptyMessage="Không tìm thấy nhà cung cấp nào"
           />
         </div>
 
-        <div className="p-4 border-t border-border/40 flex justify-center">
+        <div className="p-6 border-t border-border/40 dark:border-dark-border/40 flex justify-center">
           <Pagination 
             currentPage={currentPage} 
             totalPages={totalPages} 
@@ -268,53 +268,64 @@ function SuppliersPage() {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={isEditing ? "Cập nhật đối tác" : "Thêm đối tác cung ứng mới"}
+        title={isEditing ? "Cập nhật đối tác" : "Thêm đối tác cung ứng"}
         size="md"
         footer={
           <div className="flex justify-end gap-3 w-full">
-            <Button variant="ghost" onClick={() => setIsModalOpen(false)} className="h-11 px-6">Hủy</Button>
-            <Button variant="primary" onClick={handleSubmit} className="h-11 px-8 shadow-primary/30">
-              {isEditing ? "Lưu thay đổi" : "Thêm đối tác"}
+            <Button variant="ghost" onClick={() => setIsModalOpen(false)} className="h-11 px-6 rounded-xl">Hủy</Button>
+            <Button variant="primary" onClick={handleSubmit} className="h-11 px-8 shadow-primary/30 rounded-xl">
+              {isEditing ? "Lưu thay đổi" : "Kích hoạt đối tác"}
             </Button>
           </div>
         }
       >
-        <form className="flex flex-col gap-y-6" onSubmit={handleSubmit}>
+        <form className="flex flex-col gap-y-6 p-2" onSubmit={handleSubmit}>
+          <div className="flex flex-col items-center mb-4">
+             <div className="size-16 rounded-3xl bg-primary/10 flex items-center justify-center text-primary mb-3">
+                <FiPlus size={32} />
+             </div>
+             <p className="text-[10px] font-black text-text-tertiary uppercase tracking-[0.2em] text-center">
+                Vui lòng cung cấp đầy đủ thông tin pháp lý của đối tác cung ứng
+             </p>
+          </div>
+
           <Input
             label="Tên nhà cung cấp"
             value={form.name}
             onChange={(e) => setForm(prev => ({ ...prev, name: e.target.value }))}
             required
             placeholder="Ví dụ: Công ty TNHH MTV…"
-            className="h-10"
+            className="h-12"
           />
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input
               label="Số điện thoại"
               value={form.phoneNumber}
               onChange={(e) => setForm(prev => ({ ...prev, phoneNumber: e.target.value }))}
               placeholder="09xx xxx xxx"
-              className="h-10"
+              className="h-12"
+              leftIcon={<FiPhone />}
             />
             <Input
               label="Địa chỉ trụ sở"
               value={form.address}
               onChange={(e) => setForm(prev => ({ ...prev, address: e.target.value }))}
               placeholder="Thành phố, Tỉnh…"
-              className="h-10"
+              className="h-12"
+              leftIcon={<FiMapPin />}
             />
           </div>
           <div className="flex flex-col gap-y-1.5">
             <label 
               htmlFor="supplier-description"
-              className="text-[10px] font-semibold text-text-tertiary ml-2 uppercase tracking-widest flex items-center gap-x-1"
+              className="text-[10px] font-black text-text-tertiary ml-2 uppercase tracking-widest flex items-center gap-x-1"
             >
-              <span>Thông tin mô tả</span>
-              <div className="size-1 rounded-full bg-primary/40" />
+              <FiInfo className="text-primary/40" />
+              <span>Ghi chú hệ thống</span>
             </label>
             <textarea
               id="supplier-description"
-              className="w-full bg-bg-subtle/30 border border-border/50 text-text-primary text-xs rounded-xl py-3 px-4 outline-none focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold shadow-inner-sm transition-all duration-300 min-h-[100px] resize-none"
+              className="w-full bg-bg-subtle/30 dark:bg-white/[0.02] border border-border/50 dark:border-dark-border/40 text-text-primary text-xs rounded-2xl py-3.5 px-5 outline-none focus:bg-white dark:focus:bg-dark-card focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold shadow-inner-sm transition-all duration-300 min-h-[120px] resize-none"
               value={form.description}
               onChange={(e) => setForm(prev => ({ ...prev, description: e.target.value }))}
               placeholder="Thông tin thêm về sản phẩm cung cấp, chính sách chiết khấu…"
@@ -327,8 +338,10 @@ function SuppliersPage() {
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleDelete}
-        title="Xác nhận xóa nhà cung cấp"
-        message={`Bạn có chắc muốn xóa nhà cung cấp "${selectedSupplier?.name}"? Hành động này không thể hoàn tác.`}
+        title="Xác nhận xóa"
+        message={`Hành động này sẽ xóa vĩnh viễn nhà cung cấp "${selectedSupplier?.name}" khỏi hệ thống. Các dữ liệu liên quan có thể bị ảnh hưởng.`}
+        confirmText="Xác nhận xóa"
+        variant="danger"
       />
     </div>
   );

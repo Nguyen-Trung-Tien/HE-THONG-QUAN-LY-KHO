@@ -97,3 +97,13 @@ export const fetchDeadstockReport = async (months = 3) => {
         throw error.response?.data || new Error("Không thể lấy báo cáo hàng tồn kho lâu ngày");
     }
 };
+
+export const fetchInventoryStructure = async () => {
+  try {
+    const response = await axiosInstance.get(`/statistics/inventory-structure`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching inventory structure:", error);
+    throw error.response?.data || new Error("Không thể lấy cơ cấu hàng hóa");
+  }
+};

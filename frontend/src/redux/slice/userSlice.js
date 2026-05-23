@@ -57,16 +57,5 @@ const userSlice = createSlice({
   },
 });
 
-export const loadUserFromStorage = () => {
-  try {
-    const userData = localStorage.getItem("user");
-    if (userData) {
-      return JSON.parse(userData);
-    }
-  } catch (e) {
-    console.error("Failed to load user from localStorage", e);
-  }
-  return null;
-};
 export const { login, resetUser } = userSlice.actions;
 export default userSlice.reducer;

@@ -1,5 +1,9 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { getInventoryLogs } from "../../API/inventory/inventoryAPI";
+import Badge from "../common/Badge";
+import Card from "../common/Card";
+import { FiRefreshCw, FiClock, FiActivity } from "react-icons/fi";
+import { cn } from "../../utils/cn";
 
 function AuditLogs() {
   const [logs, setLogs] = useState([]);
@@ -22,93 +26,105 @@ function AuditLogs() {
     fetchLogs();
   }, [fetchLogs]);
 
-  const getTypeLabel = (type) => {
-    switch (type) {
-      case "IMPORT":
-      case "import":
-        return <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">Nhập kho</span>;
-      case "EXPORT":
-      case "export":
-        return <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">Xuất kho</span>;
-      case "ADJUST":
-        return <span className="px-2 py-1 bg-orange-100 text-orange-800 rounded-full text-xs font-medium">Điều chỉnh</span>;
-      case "create":
-        return <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">Tạo mới</span>;
-      case "update":
-        return <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">Cập nhật</span>;
-      case "delete":
-        return <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs font-medium">Xóa</span>;
-      default:
-        return <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs font-medium">{type}</span>;
+  const getTypeBadge = (type) => {
+    const t = (type || "").toUpperCase();
+    switch (t) {
+      case "IMPORT": return <Badge variant="success" size="sm">Nhập kho</Badge>;
+      case "EXPORT": return <Badge variant="error" size="sm">Xuất kho</Badge>;
+      case "ADJUST": return <Badge variant="warning" size="sm">Điều chỉnh</Badge>;
+      case "CREATE": return <Badge variant="info" size="sm">Tạo mới</Badge>;
+      case "UPDATE": return <Badge variant="primary" size="sm">Cập nhật</Badge>;
+      default: return <Badge variant="neutral" size="sm">{type}</Badge>;
     }
   };
 
   return (
-    <div className="bg-card shadow-card rounded-lg overflow-hidden mt-8">
-      <div className="p-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-          <h2 className="text-xl font-bold text-textPrimary">Lịch sử hoạt động (Audit Logs)</h2>
-          <div className="flex space-x-2">
+    <Card 
+      title="Lịch sử hoạt động hệ thống" 
+      extra={
+        <div className="flex items-center space-x-3 scale-90 sm:scale-100">
             <select
-              className="border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+              className="bg-bg-subtle dark:bg-white/5 border border-border/40 dark:border-dark-border/40 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all shadow-inner-sm"
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
             >
-              <option value="">Tất cả thao tác</option>
-              <option value="IMPORT">Nhập kho</option>
-              <option value="EXPORT">Xuất kho</option>
-              <option value="ADJUST">Điều chỉnh</option>
+              <option value="" className="dark:bg-dark-card">Tất cả thao tác</option>
+              <option value="IMPORT" className="dark:bg-dark-card">Nhập kho</option>
+              <option value="EXPORT" className="dark:bg-dark-card">Xuất kho</option>
+              <option value="ADJUST" className="dark:bg-dark-card">Điều chỉnh</option>
             </select>
             <button
               onClick={fetchLogs}
-              className="px-3 py-2 bg-gray-100 text-textSecondary rounded-lg hover:bg-gray-200 transition-colors"
+              className="p-2.5 bg-bg-subtle dark:bg-white/5 text-text-tertiary hover:text-primary rounded-xl border border-border/40 dark:border-dark-border/40 transition-all active:scale-90"
+              title="Làm mới"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
+              <FiRefreshCw className={cn(loading && "animate-spin")} size={16} />
             </button>
-          </div>
         </div>
-
+      }
+      className="mt-8 shadow-soft-xl"
+      noPadding
+    >
+      <div className="p-0">
         {loading ? (
-          <div className="text-center py-8 text-textSecondary">Đang tải lịch sử...</div>
+          <div className="flex flex-col items-center justify-center py-20 opacity-30">
+            <FiRefreshCw className="animate-spin size-10 mb-4" />
+            <p className="text-xs font-black uppercase tracking-widest">Đang tải lịch sử hoạt động...</p>
+          </div>
         ) : logs.length === 0 ? (
-          <div className="text-center py-8 text-textSecondary">Không có dữ liệu lịch sử hoạt động.</div>
+          <div className="flex flex-col items-center justify-center py-20 opacity-30">
+            <FiActivity size={64} className="mb-4" />
+            <p className="text-xs font-black uppercase tracking-widest">Không có dữ liệu lịch sử</p>
+          </div>
         ) : (
-          <div className="overflow-x-auto rounded-lg border border-border">
-            <table className="min-w-full divide-y divide-border">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-textSecondary uppercase">Thời gian</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-textSecondary uppercase">Thao tác</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-textSecondary uppercase">Mã SP</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-textSecondary uppercase">Số lượng thay đổi</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-textSecondary uppercase">Người thực hiện</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-textSecondary uppercase">Ghi chú</th>
+          <div className="overflow-x-auto custom-scrollbar">
+            <table className="min-w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-gradient-to-r from-bg-subtle/50 dark:from-white/[0.01] to-white dark:to-dark-card">
+                  {["Thời gian", "Thao tác", "Mã SP", "Số lượng", "Người thực hiện", "Ghi chú"].map((h, i) => (
+                    <th key={i} className="px-8 py-5 text-[10px] font-black text-text-tertiary uppercase tracking-widest border-b border-border/30 dark:border-dark-border/40">
+                      {h}
+                    </th>
+                  ))}
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-border">
+              <tbody className="divide-y divide-border/20 dark:divide-dark-border/40">
                 {logs.map((log) => (
-                  <tr key={log.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
-                      {new Date(log.createdAt).toLocaleString("vi-VN")}
+                  <tr key={log.id} className="group hover:bg-primary/[0.02] dark:hover:bg-white/[0.01] transition-all duration-300">
+                    <td className="px-8 py-6 whitespace-nowrap">
+                       <div className="flex items-center space-x-2 text-text-tertiary">
+                          <FiClock size={12} />
+                          <span className="text-[11px] font-bold">{new Date(log.createdAt).toLocaleString("vi-VN")}</span>
+                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {getTypeLabel(log.change_type)}
+                    <td className="px-8 py-6 whitespace-nowrap">
+                      {getTypeBadge(log.change_type)}
                     </td>
-                    <td className="px-6 py-4 text-sm font-medium">
-                      {log.stock?.productId || log.stockId}
+                    <td className="px-8 py-6">
+                      <span className="text-xs font-black text-text-primary uppercase tracking-tighter">
+                        {log.stock?.productId || log.stockId}
+                      </span>
                     </td>
-                    <td className="px-6 py-4 text-sm">
-                      <span className={log.quantity > 0 ? "text-green-600 font-bold" : log.quantity < 0 ? "text-red-600 font-bold" : "text-gray-600"}>
+                    <td className="px-8 py-6">
+                      <span className={cn(
+                        "text-sm font-black tracking-tighter",
+                        log.quantity > 0 ? "text-success" : log.quantity < 0 ? "text-error" : "text-text-tertiary"
+                      )}>
                         {log.quantity > 0 ? `+${log.quantity}` : log.quantity}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
-                      ID: {log.userId || "Hệ thống"}
+                    <td className="px-8 py-6">
+                      <div className="flex items-center space-x-2">
+                        <div className="size-6 rounded-full bg-bg-subtle dark:bg-white/5 flex items-center justify-center border border-border/40">
+                           <span className="text-[8px] font-black text-text-tertiary uppercase">US</span>
+                        </div>
+                        <span className="text-[11px] font-bold text-text-secondary">ID: {log.userId || "Hệ thống"}</span>
+                      </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate" title={log.note}>
-                      {log.note || "-"}
+                    <td className="px-8 py-6 max-w-xs truncate">
+                      <p className="text-[11px] font-medium text-text-tertiary italic leading-relaxed" title={log.note}>
+                        {log.note || "N/A"}
+                      </p>
                     </td>
                   </tr>
                 ))}
@@ -117,7 +133,7 @@ function AuditLogs() {
           </div>
         )}
       </div>
-    </div>
+    </Card>
   );
 }
 

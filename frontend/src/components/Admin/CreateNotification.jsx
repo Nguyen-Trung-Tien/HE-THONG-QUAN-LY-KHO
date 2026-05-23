@@ -75,12 +75,12 @@ const CreateNotification = ({ onClose, onSuccess }) => {
                   name="type"
                   value={formData.type}
                   onChange={handleChange}
-                  className="w-full bg-bg-subtle/30 border border-border/50 text-text-primary text-xs rounded-2xl h-12 px-4 outline-none focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold shadow-inner-sm transition-all appearance-none"
+                  className="w-full bg-bg-subtle/30 dark:bg-dark-card border border-border/50 dark:border-dark-border/40 text-text-primary text-xs rounded-2xl h-12 px-4 outline-none focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold shadow-inner-sm transition-all appearance-none"
                 >
-                  <option value="info">Thông tin (Info)</option>
-                  <option value="alert">Cảnh báo (Alert)</option>
-                  <option value="stock">Kho hàng (Stock)</option>
-                  <option value="order">Đơn hàng (Order)</option>
+                  <option className="dark:bg-dark-card dark:text-text-primary" value="info">Thông tin (Info)</option>
+                  <option className="dark:bg-dark-card dark:text-text-primary" value="alert">Cảnh báo (Alert)</option>
+                  <option className="dark:bg-dark-card dark:text-text-primary" value="stock">Kho hàng (Stock)</option>
+                  <option className="dark:bg-dark-card dark:text-text-primary" value="order">Đơn hàng (Order)</option>
                 </select>
                 <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-text-tertiary">
                   {formData.type === 'info' && <FiInfo />}
@@ -121,7 +121,7 @@ const CreateNotification = ({ onClose, onSuccess }) => {
               onChange={handleChange}
               rows="4"
               placeholder="Nhập nội dung thông báo..."
-              className="w-full bg-bg-subtle/30 border border-border/50 text-text-primary text-xs rounded-2xl p-5 outline-none transition-all duration-300 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 placeholder:text-text-tertiary/60 font-bold shadow-inner-sm"
+              className="w-full bg-bg-subtle/30 dark:bg-dark-card border border-border/50 dark:border-dark-border/40 text-text-primary text-xs rounded-2xl p-5 outline-none transition-all duration-300 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 placeholder:text-text-tertiary/60 font-bold shadow-inner-sm"
             ></textarea>
           </div>
 

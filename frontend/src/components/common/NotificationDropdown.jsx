@@ -48,9 +48,9 @@ const NotificationDropdown = ({ isOpen, onClose, notifications, onMarkAsRead, on
   return (
     <>
       <div className="fixed inset-0 z-40" onClick={() => { setViewingNoti(null); onClose(); }} />
-      <div className="absolute right-0 mt-3 w-80 sm:w-96 rounded-3xl shadow-soft-2xl bg-white dark:bg-dark-card border border-border/50 dark:border-white/5 z-50 overflow-hidden animate-in slide-in-from-top-2 duration-300">
+      <div className="absolute right-0 mt-3 w-80 sm:w-96 rounded-3xl shadow-soft-2xl bg-white dark:bg-dark-card border border-border/50 dark:border-dark-border/40 z-50 overflow-hidden animate-in slide-in-from-top-2 duration-300">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-border/50 dark:border-white/5 bg-gradient-to-r from-bg-subtle/50 dark:from-white/[0.02] to-white dark:to-dark-card flex items-center justify-between">
+        <div className="px-6 py-4 border-b border-border/50 dark:border-dark-border/40 bg-gradient-to-r from-bg-subtle/50 dark:from-white/[0.02] to-white dark:to-dark-card flex items-center justify-between">
           <div className="flex items-center space-x-2">
             {viewingNoti ? (
               <button 
@@ -125,8 +125,8 @@ const NotificationDropdown = ({ isOpen, onClose, notifications, onMarkAsRead, on
                   </div>
                </div>
                
-               <div className="p-4 rounded-2xl bg-bg-subtle/50 dark:bg-white/[0.02] border border-border/30 dark:border-white/5">
-                  <p className="text-xs text-text-secondary dark:text-dark-text-secondary font-semibold leading-relaxed whitespace-pre-wrap">
+               <div className="p-4 rounded-2xl bg-bg-subtle/50 dark:bg-white/[0.02] border border-border/30 dark:border-dark-border/40">
+                  <p className="text-xs text-text-secondary font-semibold leading-relaxed whitespace-pre-wrap">
                     {viewingNoti.message}
                   </p>
                </div>
@@ -146,7 +146,7 @@ const NotificationDropdown = ({ isOpen, onClose, notifications, onMarkAsRead, on
               <p className="text-xs font-black uppercase tracking-widest">Không có thông báo mới</p>
             </div>
           ) : (
-            <div className="divide-y divide-border/30 dark:divide-white/5">
+            <div className="divide-y divide-border/30 dark:divide-dark-border/40">
               {notifications.map((notification) => (
                 <div 
                   key={notification.id}
@@ -214,10 +214,10 @@ const NotificationDropdown = ({ isOpen, onClose, notifications, onMarkAsRead, on
 
         {/* Footer */}
         {!viewingNoti && (
-          <div className="p-3 border-t border-border/50 dark:border-white/5 bg-bg-subtle/20 dark:bg-white/[0.02] text-center">
+          <div className="p-3 border-t border-border/50 dark:border-dark-border/40 bg-bg-subtle/20 dark:bg-white/[0.02] text-center">
             <button 
               onClick={handleViewAll}
-              className="text-[10px] font-black text-text-tertiary dark:text-dark-text-tertiary uppercase tracking-widest hover:text-primary transition-colors"
+              className="text-[10px] font-black text-text-tertiary uppercase tracking-widest hover:text-primary transition-colors"
             >
               Xem tất cả thông báo
             </button>
@@ -229,3 +229,5 @@ const NotificationDropdown = ({ isOpen, onClose, notifications, onMarkAsRead, on
 };
 
 export default NotificationDropdown;
+
+

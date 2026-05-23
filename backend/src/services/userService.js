@@ -50,7 +50,6 @@ const handleLoginUser = async (email, password) => {
         "notifEmail",
         "notifBrowser",
         "notifStockAlert",
-        "preferredLanguage",
         "preferredTheme",
         "systemName",
       ],
@@ -159,6 +158,8 @@ const UpdateUserData = (data) => {
         user.phoneNumber = data.phoneNumber;
         if (data.avatarBase64) {
           user.image = data.avatarBase64;
+        } else if (data.image) {
+          user.image = data.image;
         }
 
         await user.save();

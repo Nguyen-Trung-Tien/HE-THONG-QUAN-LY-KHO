@@ -15,9 +15,9 @@ const Button = ({
 }) => {
   const variants = {
     primary: 'bg-primary text-white shadow-xl shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 active:translate-y-0',
-    secondary: 'bg-white text-text-primary border border-border/60 hover:bg-bg-subtle shadow-sm active:scale-95',
+    secondary: 'bg-white dark:bg-dark-card text-text-primary border border-border/60 dark:border-dark-border/60 hover:bg-bg-subtle dark:hover:bg-white/5 shadow-sm active:scale-95',
     outline: 'bg-transparent text-primary border-2 border-primary/20 hover:border-primary hover:bg-primary/5 active:scale-95',
-    ghost: 'bg-transparent text-text-secondary hover:bg-bg-subtle hover:text-text-primary active:scale-95',
+    ghost: 'bg-transparent text-text-secondary hover:bg-bg-subtle dark:hover:bg-white/5 hover:text-text-primary active:scale-95',
     danger: 'bg-error text-white shadow-xl shadow-error/20 hover:shadow-error/40 hover:-translate-y-0.5 active:translate-y-0',
     success: 'bg-success text-white shadow-xl shadow-success/20 hover:shadow-success/40 hover:-translate-y-0.5 active:translate-y-0',
     info: 'bg-info text-white shadow-xl shadow-info/20 hover:shadow-info/40 hover:-translate-y-0.5 active:translate-y-0',

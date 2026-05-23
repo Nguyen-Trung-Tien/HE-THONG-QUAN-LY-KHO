@@ -6,6 +6,7 @@ import {
 } from "../../API/orders/ordersApi";
 import { updateShipperStatus } from "../../API/shipper/shipperApi";
 import OrderDetail from "./OrderDetail";
+import { FiClock, FiCalendar } from "react-icons/fi";
 import { toast } from "react-toastify";
 import ConfirmModal from "../common/ConfirmModal";
 
@@ -129,7 +130,7 @@ const OrderStatus = ({ orders, loading, onOrderChanged }) => {
   const renderShipperInfo = (order) => {
     if (!order.shipperId || !order.shipper) return null;
     return (
-      <div className="mt-2 p-2 bg-bg-subtle rounded-lg border border-border/40">
+      <div className="mt-2 p-2 bg-bg-subtle dark:bg-white/5 rounded-lg border border-border/40 dark:border-dark-border/40 transition-colors">
         <div className="flex items-center text-[11px] font-bold">
           <span className="text-text-tertiary mr-2 uppercase tracking-tighter">Shipper:</span>
           <span className="text-primary mr-2">{order.shipper.name}</span>
@@ -144,13 +145,13 @@ const OrderStatus = ({ orders, loading, onOrderChanged }) => {
     return (
       <>
         {order.status === "pending" && (
-          <Button size="sm" onClick={() => handleFindShipper(order)} className="text-[11px]">Tìm shipper</Button>
+          <Button size="sm" onClick={() => handleFindShipper(order)} className="text-[11px] rounded-xl h-9 px-4">Tìm shipper</Button>
         )}
         {order.status === "shipping" && (
-          <Button size="sm" variant="success" onClick={() => handleConfirmDelivery(order)} className="text-[11px]">Xác nhận giao</Button>
+          <Button size="sm" variant="success" onClick={() => handleConfirmDelivery(order)} className="text-[11px] rounded-xl h-9 px-4">Xác nhận giao</Button>
         )}
         {canCancel && (
-          <Button size="sm" variant="danger" onClick={() => { setOrderToCancel(order); setIsDeleteModalOpen(true); }} className="text-[11px]">Hủy đơn</Button>
+          <Button size="sm" variant="danger" onClick={() => { setOrderToCancel(order); setIsDeleteModalOpen(true); }} className="text-[11px] rounded-xl h-9 px-4">Hủy đơn</Button>
         )}
       </>
     );
@@ -167,9 +168,9 @@ const OrderStatus = ({ orders, loading, onOrderChanged }) => {
               const isCompleted = index <= currentIndex;
               return (
                 <React.Fragment key={step}>
-                  <div className={cn("w-3 h-3 rounded-full border-2", isCompleted ? "bg-primary border-primary" : "bg-white border-border")}></div>
+                  <div className={cn("w-3 h-3 rounded-full border-2 transition-all duration-500", isCompleted ? "bg-primary border-primary shadow-sm shadow-primary/30" : "bg-white dark:bg-dark-card border-border dark:border-dark-border")}></div>
                   {index < steps.length - 1 && (
-                    <div className={cn("w-0.5 h-8 my-0.5", isCompleted ? "bg-primary" : "bg-border")}></div>
+                    <div className={cn("w-0.5 h-8 my-0.5 transition-all duration-500", isCompleted ? "bg-primary" : "bg-border dark:bg-dark-border/60")}></div>
                   )}
                 </React.Fragment>
               );
@@ -181,10 +182,10 @@ const OrderStatus = ({ orders, loading, onOrderChanged }) => {
               const isActive = steps.indexOf(step) <= currentIndex;
               return (
                 <div key={step} className="h-8 flex flex-col justify-center">
-                  <h5 className={cn("text-[11px] font-black leading-tight tracking-tight", isActive ? "text-primary" : "text-text-tertiary")}>
+                  <h5 className={cn("text-[11px] font-black leading-tight tracking-tight uppercase transition-colors", isActive ? "text-primary" : "text-text-tertiary")}>
                     {stepInfo.text || step}
                   </h5>
-                  <p className="text-[10px] text-text-tertiary truncate">{stepInfo.description}</p>
+                  <p className="text-[10px] text-text-tertiary font-bold truncate opacity-70 italic">{stepInfo.description}</p>
                 </div>
               );
             })}
@@ -203,16 +204,18 @@ const OrderStatus = ({ orders, loading, onOrderChanged }) => {
     <Card 
       title="Tiến trình đơn hàng"
       noPadding
-      className="shadow-soft-xl border-border/50"
+      className="shadow-soft-xl border-border/50 dark:border-dark-border/40"
       extra={
-        <div className="flex bg-bg-subtle p-0.5 rounded-lg border border-border/50 scale-90">
+        <div className="flex bg-bg-subtle dark:bg-white/5 p-1 rounded-2xl border border-border/40 dark:border-dark-border/40 backdrop-blur-sm scale-90 origin-right transition-all">
             {["all", ...STATUS_FLOW].map((status) => (
               <button
                 key={status}
                 onClick={() => setFilter(status)}
                 className={cn(
-                  "px-3 py-1 text-[10px] font-black rounded-md transition-all whitespace-nowrap",
-                  filter === status ? "bg-white text-primary shadow-sm" : "text-text-secondary hover:text-text-primary"
+                  "px-4 py-2 text-[10px] font-black rounded-xl transition-all duration-300 whitespace-nowrap uppercase tracking-widest",
+                  filter === status 
+                    ? "bg-white dark:bg-dark-card text-primary shadow-soft-md scale-[1.05]" 
+                    : "text-text-tertiary hover:text-text-primary"
                 )}
               >
                 {status === "all" ? "Tất cả" : ORDER_STATUS[status]?.text || status}
@@ -221,36 +224,48 @@ const OrderStatus = ({ orders, loading, onOrderChanged }) => {
         </div>
       }
     >
-      <div className="p-5">
+      <div className="p-8">
         {loading ? (
-          <div className="text-center py-8 text-[11px] font-bold text-text-tertiary uppercase tracking-widest animate-pulse">Đang tải dữ liệu...</div>
+          <div className="flex flex-col items-center justify-center py-20 opacity-30">
+            <div className="animate-spin size-10 border-4 border-primary border-t-transparent rounded-full mb-4" />
+            <p className="text-xs font-black uppercase tracking-widest">Đang cập nhật tiến trình...</p>
+          </div>
         ) : filteredOrders.length === 0 ? (
-          <div className="text-center py-8 text-[11px] font-bold text-text-tertiary uppercase tracking-widest">Không có đơn hàng xử lý</div>
+          <div className="flex flex-col items-center justify-center py-20 opacity-30 text-center">
+             <FiClock size={64} className="mb-4" />
+             <p className="text-xs font-black uppercase tracking-widest">Hiện tại không có đơn hàng cần xử lý</p>
+          </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {filteredOrders.map((order) => {
               const statusInfo = ORDER_STATUS[order.status] || { variant: "neutral", text: "Không xác định", description: "" };
               return (
-                <div key={order.id} className="bg-white rounded-xl border border-border/50 p-4 hover:shadow-lg transition-all duration-300">
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <div className="flex items-center space-x-2">
-                        <h4 className="text-xs font-black text-text-primary tracking-tighter">#{order.orderNumber}</h4>
-                        <Badge variant={statusInfo.variant} size="sm">{statusInfo.text}</Badge>
+                <div key={order.id} className="bg-white dark:bg-dark-card rounded-[2.5rem] border border-border/50 dark:border-dark-border/40 p-6 hover:shadow-soft-2xl transition-all duration-500 group relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl group-hover:scale-150 transition-transform duration-700" />
+                  
+                  <div className="flex justify-between items-start mb-6 relative z-10">
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-x-3">
+                        <h4 className="text-sm font-black text-text-primary uppercase tracking-tighter">#{order.orderNumber}</h4>
+                        <Badge variant={statusInfo.variant} size="sm" className="uppercase tracking-widest">{statusInfo.text}</Badge>
                       </div>
-                      <p className="text-[10px] text-text-tertiary font-bold mt-1 uppercase">{new Date(order.createdAt).toLocaleDateString("vi-VN")}</p>
+                      <div className="flex items-center text-[10px] text-text-tertiary font-bold uppercase tracking-wider">
+                         <FiCalendar className="mr-1.5 text-primary/60" /> {new Date(order.createdAt).toLocaleString("vi-VN")}
+                      </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs font-black text-primary">{order.total?.toLocaleString()}đ</p>
-                      <p className="text-[10px] text-text-tertiary font-medium">{order.items?.length || 0} món</p>
+                      <p className="text-lg font-black text-primary tracking-tighter leading-none">{order.total?.toLocaleString()}đ</p>
+                      <p className="text-[9px] font-black text-text-tertiary uppercase tracking-widest mt-1.5 italic">{order.items?.length || 0} sản phẩm</p>
                     </div>
                   </div>
-                  <div className="bg-bg-subtle/50 rounded-lg p-3 border border-border/30">
+
+                  <div className="bg-bg-subtle/30 dark:bg-white/[0.01] rounded-3xl p-5 border border-border/30 dark:border-dark-border/30 relative z-10 transition-colors">
                      {renderTimeline(order)}
                      {renderShipperInfo(order)}
                   </div>
-                  <div className="flex justify-end space-x-2 mt-4 pt-3 border-t border-border/30">
-                    <Button variant="ghost" size="sm" className="text-[11px]" onClick={() => setSelectedOrder(order)}>Chi tiết</Button>
+
+                  <div className="flex justify-end items-center gap-x-2 mt-6 pt-5 border-t border-border/30 dark:border-dark-border/30 relative z-10">
+                    <Button variant="ghost" size="sm" className="text-[10px] font-black uppercase tracking-widest h-9 px-5 rounded-xl" onClick={() => setSelectedOrder(order)}>Chi tiết</Button>
                     {renderActionButtons(order)}
                   </div>
                 </div>

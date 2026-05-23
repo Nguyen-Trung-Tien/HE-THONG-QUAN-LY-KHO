@@ -2,6 +2,9 @@ import React, { useState, useEffect, useMemo } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import Badge from "../common/Badge";
+import Card from "../common/Card";
+import { cn } from "../../utils/cn";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -76,7 +79,7 @@ function ShipperMap({ shippers = [], focusId }) {
   }, [shippers, focusId, validShippers]);
 
   const createCustomIcon = (status) => {
-    const color = status === "delivering" ? "#FFD700" : "#00BFFF";
+    const color = status === "delivering" ? "#FFD700" : "#38BDF8";
     return L.divIcon({
       className: "custom-icon",
       html: `<div style="background-color: ${color}; width: 16px; height: 16px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.5);"></div>`,
@@ -92,47 +95,38 @@ function ShipperMap({ shippers = [], focusId }) {
   ).length;
 
   return (
-    <div className="bg-card shadow-card rounded-lg overflow-hidden mb-6">
+    <Card className="overflow-hidden mb-6" noPadding>
       <div className="p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold text-textPrimary">
-            Vị trí Shipper
-          </h3>
-          <div className="flex gap-x-2">
-            <button
-              onClick={() => setFilter("all")}
-              className={`px-3 py-1 text-sm rounded-md ${
-                filter === "all"
-                  ? "gradient-bg text-white"
-                  : "bg-gray-100 text-textSecondary"
-              } hover:opacity-90 transition-opacity`}
-            >
-              Tất cả ({shippers.length})
-            </button>
-            <button
-              onClick={() => setFilter("available")}
-              className={`px-3 py-1 text-sm rounded-md ${
-                filter === "available"
-                  ? "gradient-bg text-white"
-                  : "bg-gray-100 text-textSecondary"
-              } hover:opacity-90 transition-opacity`}
-            >
-              Sẵn sàng ({availableCount})
-            </button>
-            <button
-              onClick={() => setFilter("delivering")}
-              className={`px-3 py-1 text-sm rounded-md ${
-                filter === "delivering"
-                  ? "gradient-bg text-white"
-                  : "bg-gray-100 text-textSecondary"
-              } hover:opacity-90 transition-opacity`}
-            >
-              Đang giao ({deliveringCount})
-            </button>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <div>
+            <Badge variant="primary" className="mb-1">Vận chuyển</Badge>
+            <h3 className="text-xl font-black text-text-primary uppercase tracking-tighter">
+              Bản đồ Shipper
+            </h3>
+          </div>
+          <div className="flex bg-bg-subtle dark:bg-white/5 p-1 rounded-2xl border border-border/40 dark:border-dark-border/40 backdrop-blur-sm">
+            {[
+              { id: 'all', label: 'Tất cả', count: shippers.length },
+              { id: 'available', label: 'Sẵn sàng', count: availableCount },
+              { id: 'delivering', label: 'Đang giao', count: deliveringCount },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setFilter(tab.id)}
+                className={cn(
+                  "px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300",
+                  filter === tab.id
+                    ? "bg-white dark:bg-dark-card text-primary shadow-soft-md scale-[1.05]"
+                    : "text-text-tertiary hover:text-text-primary"
+                )}
+              >
+                {tab.label} ({tab.count})
+              </button>
+            ))}
           </div>
         </div>
 
-        <div className="relative h-80 bg-gray-100 rounded-lg overflow-hidden mb-4">
+        <div className="relative h-80 bg-bg-subtle/30 dark:bg-white/[0.02] rounded-[2rem] overflow-hidden mb-6 border border-border/40 dark:border-dark-border/40 shadow-inner-lg">
           <MapContainer
             center={mapCenter}
             zoom={13}
@@ -152,11 +146,10 @@ function ShipperMap({ shippers = [], focusId }) {
                 icon={createCustomIcon(shipper.status)}
               >
                 <Popup>
-                  <div>
-                    <strong>{shipper.name}</strong>
-                    <p>SĐT: {shipper.phoneNumber}</p>
-                    <p>Trạng thái: {shipper.status === "delivering" ? "Đang giao" : "Sẵn sàng"}</p>
-                    <p>Địa chỉ: {shipper.address}</p>
+                  <div className="p-1 text-text-primary">
+                    <strong className="text-xs uppercase font-black">{shipper.name}</strong>
+                    <p className="text-[10px] mt-1 font-bold">SĐT: {shipper.phoneNumber}</p>
+                    <p className="text-[10px] font-bold italic opacity-70">Địa chỉ: {shipper.address}</p>
                   </div>
                 </Popup>
               </Marker>
@@ -164,22 +157,22 @@ function ShipperMap({ shippers = [], focusId }) {
           </MapContainer>
         </div>
 
-        <div className="bg-white rounded-md p-2 shadow-sm flex justify-center gap-x-6">
+        <div className="bg-bg-subtle/50 dark:bg-white/5 rounded-2xl p-4 border border-border/40 dark:border-dark-border/40 flex flex-wrap justify-center gap-6">
           <div className="flex items-center gap-x-2">
-            <div className="size-3 bg-primary rounded-full"></div>
-            <span className="text-xs text-textSecondary">
-              Sẵn sàng ({availableCount})
+            <div className="size-2 rounded-full bg-primary shadow-sm shadow-primary/20"></div>
+            <span className="text-[10px] font-black text-text-tertiary uppercase tracking-widest">
+              Sẵn sàng: <span className="text-text-primary">{availableCount}</span>
             </span>
           </div>
           <div className="flex items-center gap-x-2">
-            <div className="size-3 bg-accent rounded-full"></div>
-            <span className="text-xs text-textSecondary">
-              Đang giao ({deliveringCount})
+            <div className="size-2 rounded-full bg-accent shadow-sm shadow-accent/20"></div>
+            <span className="text-[10px] font-black text-text-tertiary uppercase tracking-widest">
+              Đang giao: <span className="text-text-primary">{deliveringCount}</span>
             </span>
           </div>
         </div>
       </div>
-    </div>
+    </Card>
   );
 }
 

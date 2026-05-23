@@ -326,7 +326,7 @@ const revokeSession = async (req, res) => {
 const handleUpdatePreferences = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { notifEmail, notifBrowser, notifStockAlert, preferredLanguage, preferredTheme, systemName } = req.body;
+    const { notifEmail, notifBrowser, notifStockAlert, preferredTheme, systemName } = req.body;
 
     const user = await db.User.findByPk(userId);
     if (!user) {
@@ -337,7 +337,6 @@ const handleUpdatePreferences = async (req, res) => {
       notifEmail,
       notifBrowser,
       notifStockAlert,
-      preferredLanguage,
       preferredTheme,
       systemName,
     });

@@ -55,17 +55,17 @@ const SignUp = () => {
   };
 
   return (
-    <div className="bg-bg-light/50 min-h-screen flex items-center justify-center px-4 relative overflow-hidden">
+    <div className="bg-bg-light/50 dark:bg-dark-bg min-h-screen flex items-center justify-center px-4 relative overflow-hidden transition-colors duration-500">
       {/* Background Decorative Elements */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none -z-10">
-        <div className="absolute top-[-10%] left-[-5%] w-[60%] h-[60%] bg-primary/10 rounded-full blur-[120px] animate-pulse"></div>
+        <div className="absolute top-[-10%] right-[-5%] w-[60%] h-[60%] bg-primary/10 dark:bg-primary/20 rounded-full blur-[120px] animate-pulse"></div>
         <div
-          className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-accent/10 rounded-full blur-[100px] animate-pulse"
+          className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-accent/10 dark:bg-accent/20 rounded-full blur-[100px] animate-pulse"
           style={{ animationDelay: "2s" }}
         ></div>
       </div>
 
-      <div className="w-full max-w-md bg-white/70 backdrop-blur-2xl shadow-soft-xl rounded-[2.5rem] p-10 border border-white/40 relative z-10 animate-in fade-in zoom-in-95 duration-700">
+      <div className="w-full max-w-md bg-white/70 dark:bg-dark-card/70 backdrop-blur-2xl shadow-soft-xl rounded-[2.5rem] p-10 border border-white/40 dark:border-dark-border/40 relative z-10 animate-in fade-in zoom-in-95 duration-700">
         <div className="flex flex-col items-center mb-10">
           <div className="size-20 bg-primary rounded-[2rem] flex items-center justify-center shadow-2xl shadow-primary/40 mb-6 transform -rotate-6 hover:rotate-0 transition-transform duration-500">
             <svg
